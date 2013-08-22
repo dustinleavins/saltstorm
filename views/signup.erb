@@ -1,0 +1,59 @@
+<%
+# Saltstorm - 'Fun-Money' Betting on the Web
+# Copyright (C) 2013  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+
+<div class='container'>
+  <div class='page-header'>
+    <h1><%= @site_name %></h1>
+    <p><%= @site_description %></p>
+  </div>
+  <form action='/signup' method='post' name='signupForm'>
+    <div class='form-group' ng-class='{"has-error": signupForm.email.$invalid}'>
+      <p>
+        <label for='email'>E-Mail Address</label>
+        <input type='text' name='email' autocapitalize='off' class='form-control'
+               ng-model='email'
+               required />
+      </p>
+    </div>
+
+    <div class='form-group' ng-class='{"has-error": signupForm.password.$invalid}'>
+      <p>
+        <label for='password'>Password</label>
+        <input type='password' name='password' autocapitalize='off' class='form-control'
+               ng-model='password'
+               required />
+      </p>
+    </div>
+
+    <div class='form-group' ng-class='{"has-error": signupForm.confirm_password.$invalid}'>
+      <p>
+        <label for='confirm_password'>Confirm Password</label>
+        <input type='password' name='confirm_password' autocapitalize='off' class='form-control'
+               ng-model='confirmPassword'
+               required />
+      </p>
+    </div>
+
+    <div class='form-group' ng-class='{"has-error": signupForm.display_name.$invalid}'>
+      <p>
+        <label for='display_name'>Name to display</label>
+        <input type='text' name='display_name' autocapitalize='off' class='form-control'
+               ng-model='displayName'
+               required />
+      </p>
+    </div>
+
+    <p>
+      <button type="submit" class="btn btn-default">Signup</button>
+    </p>
+  </form>
+
+  <footer>
+    <p>This site is powered by Sandstorm &copy; 2013 Dustin Leavins</p>
+    <p>Site might use <a href='http://glyphicons.com/'>Glyphicons</a></p>
+  </footer>
+</div>

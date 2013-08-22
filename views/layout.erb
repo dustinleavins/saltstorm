@@ -1,0 +1,23 @@
+<%
+# Saltstorm - 'Fun-Money' Betting on the Web
+# Copyright (C) 2013  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+
+<!DOCTYPE html>
+<html lang='en' ng-app>
+  <head>
+    <meta charset="utf-8">
+    <title><%= @site_name %></title>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js'></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src='/js/app.js'></script>
+  </head>
+  <body>
+  <%= yield %>
+  </body>
+</html>

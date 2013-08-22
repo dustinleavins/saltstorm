@@ -1,0 +1,60 @@
+<%
+# Saltstorm - 'Fun-Money' Betting on the Web
+# Copyright (C) 2013  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+
+<div class='container' ng-controller='FakeBetController'>
+  <div class='page-header'>
+    <h1><%= @site_name %></h1>
+    <p>You are logged-in as {{ account.displayName }} - <a href='/logout'>Logout</a></p>
+  </div>
+  <div class='row' style='padding-bottom:80px;'>
+    <div class='col-md-3'>
+      <p>{{ match.participantA.name }}</p>
+      <ul ng-show='match.bettors.a.length > 0'>
+        <li ng-repeat='bettor in match.bettors.a'>{{bettor}}</li>
+      </ul>
+      <p>{{ match.participantB.name }}</p>
+      <ul ng-show='match.bettors.b.length > 0'>
+        <li ng-repeat='bettor in match.bettors.b'>{{ bettor }}</li>
+      </ul>
+    </div>
+    <div class='col-md-6'>
+      <%= @video_link %>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-md-4' style='text-align: right;'>
+      <p>{{ match.participantA.name }} - {{ match.participantA.amount | currency: "☺" }}</p>
+      <p></p>
+      <p><button type='button' class='btn btn-default' ng-click='submitBet("a")'>Bet</button></p>
+    </div>
+    <div class='col-md-4' style='text-align: center;'>
+      <form name='betForm'>
+        <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
+          <p>
+          <input type='number'
+                 class='form-control'
+                 name='amount'
+                 min='1'
+                 placeholder='Bet amount'
+                 required
+                 ng-model='betAmount' />
+          </p>
+        </div>
+        <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
+      </form>
+      <p ng-show='betUpdateFailed'>Could not update bet</p>
+      <p ng-show='bettingThisRound'>You are betting this round!</p>
+      <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
+      <p>Odds: {{ match.odds }}</p>
+    </div>
+    <div class='col-md-4'>
+      <p>{{ match.participantB.name }} - {{ match.participantB.amount | currency: "☺" }}</p>
+      <p><button type='button' class='btn btn-default' ng-click='submitBet("b")'>Bet</button></p>
+
+    </div>
+  </div>
+</div>
