@@ -1,4 +1,4 @@
-# Saltstorm - 'Fun-Money' Betting on the Web
+# Saltstorm - Fun-Money Betting on the Web
 # Copyright (C) 2013  Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
