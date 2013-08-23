@@ -408,11 +408,7 @@ describe 'Main App' do
     end
 
     # Check match data
-    match_data_after_payout = nil
-
-    File.open('public/generated/match_data.json', 'r') do |f|
-      match_data_after_payout = JSON.parse(f.readlines.join)
-    end
+    match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
 
     match_data_after_payout['status'].should == 'closed'
 
