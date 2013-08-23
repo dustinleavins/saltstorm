@@ -1,6 +1,5 @@
 db/*
-public/generated
-config/database.yml
-config/site.yml
-config/secret_token.yml
+config/*.yml
 tmp/*
+log/*
+
