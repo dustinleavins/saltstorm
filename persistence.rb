@@ -30,6 +30,11 @@ module Persistence
       FileUtils.mkdir environment_dir
     end
 
+    # Initialize match_data
+    if (!File.exist?(MatchStatusPersistence.match_data_file))
+      MatchStatusPersistence.get_from_file()
+    end
+
   end
 
   # Persists current match status.
