@@ -77,7 +77,6 @@ describe 'Main App' do
 
   end
 
-
   it "allows users to signup" do
     user_info = FactoryGirl.attributes_for(:user)
     post '/signup', {
@@ -94,6 +93,11 @@ describe 'Main App' do
     # Try a route requiring login
     get '/api/account'
     last_response.should be_ok
+
+    # Check to see if starting balance == 400
+    new_user = User.first(email:user_info[:email].downcase)
+    new_user.should_not == nil
+    new_user.balance.should == 400
   end
 
   it "should not allow /api/account access to anon users" do

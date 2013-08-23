@@ -41,7 +41,7 @@ class RootApp < Sinatra::Base
     @password = params[:password]
     @confirm_password = params[:confirm_password]
     @display_name = params[:display_name]
-    @balance = 10
+    @balance = app_settings['user_signup_balance']
 
     return erb :signup if User.where(email: @email).count > 0
     return erb :signup if User.where(display_name: @display_name).count > 0
@@ -289,7 +289,7 @@ class RootApp < Sinatra::Base
             elsif user.balance > bet.amount
               user.balance -= bet.amount
             else # user lost all of their money
-              user.balance = BigDecimal.new(10)
+              user.balance = app_settings['base_bailout_balance']
             end
 
             user.save
