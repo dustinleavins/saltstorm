@@ -1,0 +1,13 @@
+development:
+  adapter: sqlite
+  database: 'db/dev.db'
+test:
+  adapter: sqlite
+  database: 'db/test.db'
+production: 
+    adapter: postgres
+    database: database
+    host: localhost
+    username: postgres
+    password: postgres
+

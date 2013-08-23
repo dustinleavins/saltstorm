@@ -1,0 +1,18 @@
+development:
+  main_video_html: "<a href='#'>Video Link</a>"
+  site_name: 'Saltstorm'
+  site_description: >
+      Saltstorm is an open-source 'play money' betting site
+      inspired by <a href='http://www.saltybet.com'>Salty Bet</a>.
+test:
+  main_video_html: 'main_video_html'
+  site_name: 'Saltstorm - TESTING'
+  site_description: 'Test Site'
+
+production:
+main_video_html: "<a href='#'>Video Link</a>"
+  site_name: 'Saltstorm'
+  site_description: >
+      Saltstorm is an open-source 'play money' betting site
+      inspired by <a href='http://www.saltybet.com'>Salty Bet</a>.
+
