@@ -10,7 +10,7 @@
     <h1><%= @site_name %></h1>
     <p>You are logged-in as {{ account.displayName }} - <a href='/logout'>Logout</a></p>
   </div>
-  <div class='row' style='padding-bottom:80px;'>
+  <div class='row main-video'>
     <div class='col-md-3'>
       <p>{{ match.participantA.name }}</p>
       <ul ng-show='match.bettors.a.length > 0'>
@@ -26,12 +26,12 @@
     </div>
   </div>
   <div class='row'>
-    <div class='col-md-4' style='text-align: right;'>
+    <div class='col-md-3 bet-a'>
       <p>{{ match.participantA.name }} - {{ match.participantA.amount | currency: "☺" }}</p>
       <p></p>
       <p><button type='button' class='btn btn-default' ng-click='submitBet("a")'>Bet</button></p>
     </div>
-    <div class='col-md-4' style='text-align: center;'>
+    <div class='col-md-6 bet-info'>
       <form name='betForm'>
         <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
           <p>
@@ -51,7 +51,7 @@
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
       <p>Odds: {{ match.odds }}</p>
     </div>
-    <div class='col-md-4'>
+    <div class='col-md-3 bet-b'>
       <p>{{ match.participantB.name }} - {{ match.participantB.amount | currency: "☺" }}</p>
       <p><button type='button' class='btn btn-default' ng-click='submitBet("b")'>Bet</button></p>
 

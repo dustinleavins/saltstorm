@@ -1,0 +1,59 @@
+body {
+  background-color: #B88888;
+  color: #222222;
+  font-family: "Gill Sans", Tahoma;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Palatino Linotype", "Times New Roman";
+}
+
+a {
+  color: #2A6496;
+}
+
+.btn {
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.btn-default {
+  background-image: linear-gradient(to bottom, #E0E0E0 50%, #D8D8D8 50%);
+  background-image: -webkit-linear-gradient(bottom, #E0E0E0 50%, #D8D8D8 50%);
+  color: #000000;
+}
+
+.form-control {
+  background-color: #E0E0E0;
+  color: #222222;
+  border-radius: 8px;
+}
+
+.bet-a {
+  color: #000000;
+  text-align: right;
+  background-color: #FFA500;
+  border-style: solid;
+  border-color: #000000;
+  border-width: 2px;
+  border-radius: 8px;
+}
+
+.bet-b {
+  color: #000000;
+  background-color: #8888FF;
+  border-style: solid;
+  border-color: #000000;
+  border-width: 2px;
+  border-radius: 8px;
+
+}
+
+.bet-info {
+  text-align: center;
+}
+
+.main-video {
+  padding-bottom:80px;
+}
+
