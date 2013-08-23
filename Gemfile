@@ -15,3 +15,7 @@ group :pg do
   gem "pg"
 end
 
+group :thin do
+  gem "thin"
+end
+
