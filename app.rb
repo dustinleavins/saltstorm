@@ -60,7 +60,6 @@ class RootApp < Sinatra::Base
     return redirect to('/main')
   end
 
-  # TODO: remove
   post '/login' do
     @email = params[:email]
     @password = params[:password]
@@ -83,29 +82,6 @@ class RootApp < Sinatra::Base
 
     session[:uid] = user.id
     return redirect to('/main')
-  end
-
-  post '/api/login' do
-    request.body.rewind
-    login_info = JSON.parse(request.body.read)
-
-    @email = login_info['email']
-    @password = login_info['password']
-
-    if (@email.nil? || @password.nil?)
-      return [500, "{ error: 'invalid login'}"]
-    end
-
-    user = User.first(email: @email.downcase)
-    password_hash = User.generate_password_digest(@password, user.password_salt)
-
-    if !user || (password_hash != user.password_hash)
-      return [500, "{ error: 'invalid login'}"]
-    end
-
-    session[:uid] = user.id
-    return 'ok'
-
   end
 
   get '/logout' do
