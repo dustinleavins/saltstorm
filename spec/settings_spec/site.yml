@@ -1,0 +1,14 @@
+normal:
+  main_video_html: 'video'
+  site_name: 'name'
+  site_description: 'description'
+merge:
+  user_signup_balance: 2525
+  base_bailout_balance: 20
+  main_video_html: 'video_merge'
+  site_name: 'name_merge'
+  site_description: 'description_merge'
+common:
+  user_signup_balance: 400
+  base_bailout_balance: 10
+

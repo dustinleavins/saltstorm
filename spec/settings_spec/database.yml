@@ -1,0 +1,4 @@
+normal:
+  adapter: sqlite
+  database: 'db/dev.db'
+

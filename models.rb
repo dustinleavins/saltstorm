@@ -9,6 +9,7 @@ require 'set'
 require 'bundler/setup'
 require 'sequel'
 require 'yaml'
+require './settings.rb'
 
 # Sequel models for Saltstorm
 module Models
@@ -16,7 +17,8 @@ module Models
   # This if block ensures that this file can be required from both app.rb
   # and the 'sequel' command-line utility.
   if (ENV['RACK_ENV'])
-    Sequel.connect(YAML::load_file('config/database.yml')[ENV['RACK_ENV']])
+    #Sequel.connect(YAML::load_file('config/database.yml')[ENV['RACK_ENV']])
+    Sequel.connect(Settings::db(ENV['RACK_ENV']))
   end
 
   # A very simple regular expression for e-mail addresses.

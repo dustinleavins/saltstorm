@@ -9,14 +9,16 @@ require 'rubygems'
 require 'sinatra/base'
 require './models.rb'
 require './persistence.rb'
+require './settings.rb'
 include Models
 
 class RootApp < Sinatra::Base
-  app_settings = YAML::load_file('config/site.yml')[settings.environment.to_s]
+
+  app_settings = Settings::site(settings.environment.to_s)
   set :static_cache_control, [:private]
 
   enable :sessions
-  set :session_secret, YAML::load_file('config/secret_token.yml')['token']
+  set :session_secret, Settings::secret_token
   
   before do
       cache_control :private
