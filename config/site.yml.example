@@ -1,19 +1,14 @@
-development:
-  user_signup_balance: 400
-  base_bailout_balance: 10
-  main_video_html: "<a href='#'>Video Link</a>"
-  site_name: 'Saltstorm'
-  site_description: >
-      Saltstorm is an open-source 'play money' betting site
-      inspired by <a href='http://www.saltybet.com'>Salty Bet</a>.
-test:
-  user_signup_balance: 400
-  base_bailout_balance: 10
-  main_video_html: 'main_video_html'
-  site_name: 'Saltstorm - TESTING'
-  site_description: 'Test Site'
+# You don't have to include environment-specific settings. You can include them,
+# and they will override any settings found in 'common'
+#
+# You also do not have to include blank entries for each of your environments.
+#test:
+#    main_video_html: 'main_video_html'
+#    site_name: 'Saltstorm - TESTING'
+#    site_description: 'Test Site'
 
-production:
+
+common:
   user_signup_balance: 400
   base_bailout_balance: 10
   main_video_html: "<a href='#'>Video Link</a>"
