@@ -1,0 +1,7 @@
+normal:
+  user_signup_balance: 400
+  base_bailout_balance: 10
+  main_video_html: 'video'
+  site_name: 'name'
+  site_description: 'description'
+

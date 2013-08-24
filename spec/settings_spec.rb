@@ -20,6 +20,24 @@ describe 'Settings Module' do
     expect(settings['site_description']).to eq('description_merge')
   end
 
+  it "does not require common site config settings" do
+    settings = Settings::site('normal', path: 'spec/settings_spec/site_nocommon.yml')
+    expect(settings['main_video_html']).to eq('video')
+    expect(settings['site_name']).to eq('name')
+    expect(settings['site_description']).to eq('description')
+    expect(settings['user_signup_balance']).to eq(400)
+    expect(settings['base_bailout_balance']).to eq(10)
+  end
+
+  it "does not require environment site config settings" do
+    settings = Settings::site('normal', path: 'spec/settings_spec/site_noenvironment.yml')
+    expect(settings['main_video_html']).to eq('video')
+    expect(settings['site_name']).to eq('name')
+    expect(settings['site_description']).to eq('description')
+    expect(settings['user_signup_balance']).to eq(400)
+    expect(settings['base_bailout_balance']).to eq(10)
+  end
+
   it "successfully loads db config" do
     settings = Settings::db('normal', path: 'spec/settings_spec/database.yml')
     expect(settings.nil?).to be_false

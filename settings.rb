@@ -19,7 +19,13 @@ module Settings
     environment_settings = yaml_file[environment]
     common_settings = yaml_file['common']
 
-    return common_settings.merge(environment_settings)
+    if (environment_settings.nil?)
+      return common_settings
+    elsif (common_settings.nil?)
+      return environment_settings
+    else
+      return common_settings.merge(environment_settings)
+    end
   end
 
   def self.db(environment, options={})
