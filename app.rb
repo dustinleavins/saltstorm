@@ -19,6 +19,17 @@ class RootApp < Sinatra::Base
 
   enable :sessions
   set :session_secret, Settings::secret_token
+
+  helpers do
+    def titleize(page_title='')
+      if page_title.nil? or page_title.empty?
+        return @site_name
+      else
+        return "#{@site_name} - #{page_title}"
+      end
+
+    end
+  end
   
   before do
       cache_control :private

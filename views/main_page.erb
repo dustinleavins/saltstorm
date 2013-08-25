@@ -4,10 +4,9 @@
 #
 # Full license can be found in 'LICENSE.txt'
 %>
-
-<div class='container' ng-controller='FakeBetController'>
+<div ng-controller='FakeBetController'>
   <div class='page-header'>
-    <h1><%= @site_name %></h1>
+    <h1><%= titleize() %></h1>
     <p>You are logged-in as {{ account.displayName }} - <a href='/logout'>Logout</a></p>
   </div>
   <div class='row main-video'>
@@ -26,12 +25,18 @@
     </div>
   </div>
   <div class='row'>
-    <div class='col-md-3 bet-a'>
-      <p>{{ match.participantA.name }} - {{ match.participantA.amount | currency: "☺" }}</p>
-      <p></p>
-      <p><button type='button' class='btn btn-default' ng-click='submitBet("a")'>Bet</button></p>
+    <div class='col-md-4 bet-a'>
+      <div class='row'>
+        <div class='col-md-6 participant-a'>
+          <p>{{ match.participantA.name }}</p>
+          <p>{{ match.participantA.amount | currency: "☺" }}</p>
+        </div>
+        <div class='col-md-6'>
+          <p class='pull-right'><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+        </div>
+      </div>
     </div>
-    <div class='col-md-6 bet-info'>
+    <div class='col-md-4 bet-info'>
       <form name='betForm'>
         <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
           <p>
@@ -51,10 +56,16 @@
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
       <p>Odds: {{ match.odds }}</p>
     </div>
-    <div class='col-md-3 bet-b'>
-      <p>{{ match.participantB.name }} - {{ match.participantB.amount | currency: "☺" }}</p>
-      <p><button type='button' class='btn btn-default' ng-click='submitBet("b")'>Bet</button></p>
-
+    <div class='col-md-4 bet-b'>
+      <div class='row'>
+        <div class='col-md-6'>
+          <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+        </div>
+        <div class='col-md-6 participant-b'>
+          <p>{{ match.participantB.name }}</p>
+          <p>{{ match.participantB.amount | currency: "☺" }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -23,6 +23,7 @@ a {
   color: #000000;
 }
 
+
 .form-control {
   background-color: #E0E0E0;
   color: #222222;
@@ -31,12 +32,12 @@ a {
 
 .bet-a {
   color: #000000;
-  text-align: right;
   background-color: #FFA500;
   border-style: solid;
   border-color: #000000;
   border-width: 2px;
   border-radius: 8px;
+  padding-top: 10px;
 }
 
 .bet-b {
@@ -46,7 +47,28 @@ a {
   border-color: #000000;
   border-width: 2px;
   border-radius: 8px;
+  padding-top: 10px;
+}
 
+.btn-bet-a {
+  background-color: #FFA500;
+  border-color: #000000;
+  border-width: 3px;
+  color: #000000;
+}
+
+.btn-bet-b {
+  background-color: #8888FF;
+  border-color: #000000;
+  border-width: 3px;
+  color: #000000;
+}
+
+.participant-a {
+}
+
+.participant-b {
+  text-align: right;
 }
 
 .bet-info {
