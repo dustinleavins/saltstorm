@@ -179,17 +179,18 @@ class RootApp < Sinatra::Base
   
     request.body.rewind
     submitted_bid = JSON.parse(request.body.read)
-    bid_amount = submitted_bid['amount'].to_i
+    bid_amount = submitted_bid['amount']
 
-    if (!['a','b'].include?(submitted_bid['forParticipant']) ||
-        bid_amount <= 0)
-      return [500, "{ error: 'Invalid request'}"]
+    if ((bid_amount < 1) || (bid_amount.floor != bid_amount))
+      return [500, "{error: 'amount must be a positive integer'}"]
+    elsif (!['a','b'].include?(submitted_bid['forParticipant']))
+      return [500, "{ error: 'invalid request'}"]
     end
 
     user = User.first(id: session[:uid])
 
     if bid_amount > user.balance
-      return [500, "{ error: 'Insufficient funds'}"]
+      return [500, "{ error: 'insufficient funds'}"]
     end
 
     existing_bet = Bet.first(user_id: user.id)
@@ -198,7 +199,7 @@ class RootApp < Sinatra::Base
     end
 
     Bet.create(user_id: user.id,
-        amount: bid_amount,
+        amount: bid_amount.to_i,
         for_participant: submitted_bid['forParticipant'])
 
     return [200, "{message: 'ok'}"]

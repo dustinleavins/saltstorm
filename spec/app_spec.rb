@@ -268,7 +268,6 @@ describe 'Main App' do
 
   # This an alternate 'simulate match' test that includes additional
   # tests for the following:
-  # - 'Reject bids <= 0' functionality
   # - 'Change bet' functionality
   # - 'Cannot bet after betting closes' functionality
   it "allows people to bet their fake money - test #2" do
@@ -327,23 +326,7 @@ describe 'Main App' do
     }.to_json
 
     loser_browser.last_response.should be_ok
-
-    # Invalid bid - winner attempts to bid 0 on B
-    winner_browser.post '/api/bet', {
-      'forParticipant' => 'b',
-      'amount' => 0
-    }.to_json
-
-    winner_browser.last_response.should_not be_ok
-
-    # Invalid bid - winner attempts to bid -500 on B
-    winner_browser.post '/api/bet', {
-      'forParticipant' => 'b',
-      'amount' => -500
-    }.to_json
-
-    winner_browser.last_response.should_not be_ok
-
+    
     # Bid - winner will bet 500 on B
     winner_browser.post '/api/bet', {
       'forParticipant' => 'b',
@@ -895,6 +878,116 @@ describe 'Main App' do
     User.first(email: user.email).balance.to_i.should == 2525
 
     Bet.count.should == 0
+  end
+
+  it "does not allow non-positive integer bet amounts" do
+    # Reset match data
+    Persistence::MatchStatusPersistence.save_file({
+      :status => 'closed',
+      :winner => '',
+      :participantA => { :name => '', :amount => 0},
+      :participantB => { :name => '', :amount => 0},
+      :odds => '',
+    })
+
+    Persistence::MatchStatusPersistence.close_bids
+
+    Bet.count.should == 0
+
+    # Create users
+    admin = FactoryGirl.create(:admin)
+    user = FactoryGirl.create(:user, balance: 50)
+
+    user_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
+
+    # User login
+    post '/login', {
+      email: admin.email,
+      password: admin.password
+    }
+
+    user_browser.post '/login', {
+      email: user.email,
+      password: user.password
+    }
+
+    # Open bidding
+    put '/api/current_match', {
+      :status => 'open',
+      :winner => '',
+      :participantA => { :name => 'A', :amount => 0},
+      :participantB => { :name => 'B', :amount => 0},
+      :odds => '',
+    }.to_json
+
+    last_response.should be_ok
+
+    # Invalid Bet: zero
+    user_browser.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => 0
+    }.to_json
+
+    user_browser.last_response.should_not be_ok
+    user_browser.last_response.body.should include('amount must be a positive integer')
+
+    # Invalid Bet: negative integer
+    user_browser.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => -1
+    }.to_json
+
+    user_browser.last_response.should_not be_ok
+    user_browser.last_response.body.should include('amount must be a positive integer')
+
+    # Invalid Bet: negative float
+    user_browser.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => -1.00001
+    }.to_json
+
+    user_browser.last_response.should_not be_ok
+    user_browser.last_response.body.should include('amount must be a positive integer')
+
+    # Invalid Bet: positive float
+    user_browser.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => 1.00001
+    }.to_json
+
+    user_browser.last_response.should_not be_ok
+    user_browser.last_response.body.should include('amount must be a positive integer')
+
+    # Invalid Bet: over account balance
+    user_browser.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => 51
+    }.to_json
+
+    user_browser.last_response.should_not be_ok
+    user_browser.last_response.body.should include('insufficient funds')
+
+    # Invalid Bet: invalid forParticipantValue
+    user_browser.post '/api/bet', {
+      'forParticipant' => 'c',
+      :amount => 50
+    }.to_json
+
+    user_browser.last_response.should_not be_ok
+    user_browser.last_response.body.should include('invalid request')
+
+    # Cancel bidding
+    put '/api/current_match', {
+      :status => 'closed',
+      :winner => '',
+      :participantA => { :name => 'A', :amount => 0},
+      :participantB => { :name => 'B', :amount => 0},
+      :odds => '',
+    }.to_json
+
+    last_response.should be_ok
+
+    User.first(email: user.email).balance.to_i.should == 50
   end
 
 end
