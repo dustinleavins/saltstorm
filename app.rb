@@ -27,9 +27,30 @@ class RootApp < Sinatra::Base
       else
         return "#{@site_name} - #{page_title}"
       end
+    end
 
+    def authenticate(email, password)
+      if (email.nil? || password.nil?)
+        return nil
+      end
+
+      user = User.first(email: email.downcase)
+
+      if user.nil?
+        return nil
+      end
+
+      password_hash = User.generate_password_digest(password, user.password_salt)
+
+      if (password_hash != user.password_hash)
+        return nil
+      end
+
+      session[:uid] = user.id
+      return 'ok'
     end
   end
+
   
   before do
       cache_control :private
@@ -74,27 +95,32 @@ class RootApp < Sinatra::Base
   end
 
   post '/login' do
-    @email = params[:email]
-    @password = params[:password]
+    #@email = params[:email]
+    #@password = params[:password]
 
-    if (@email.nil? || @password.nil?)
+    #if (@email.nil? || @password.nil?)
+    #  return redirect '/login', 303
+    #end
+
+    #user = User.first(email: @email.downcase)
+
+    #if user.nil?
+    #  return redirect '/login', 303
+    #end
+
+    #password_hash = User.generate_password_digest(@password, user.password_salt)
+
+    #if (password_hash != user.password_hash)
+    #  return redirect '/login', 303
+    #end
+
+    #session[:uid] = user.id
+    #return redirect to('/main')
+    if (authenticate(params[:email], params[:password]))
+      return redirect to('/main')
+    else
       return redirect '/login', 303
     end
-
-    user = User.first(email: @email.downcase)
-
-    if user.nil?
-      return redirect '/login', 303
-    end
-
-    password_hash = User.generate_password_digest(@password, user.password_salt)
-
-    if (password_hash != user.password_hash)
-      return redirect '/login', 303
-    end
-
-    session[:uid] = user.id
-    return redirect to('/main')
   end
 
   get '/logout' do
@@ -109,6 +135,18 @@ class RootApp < Sinatra::Base
 
     @video_link = app_settings['main_video_html']
     return erb :main_page
+  end
+
+  post '/api/login' do
+    content_type :json
+
+    request.body.rewind
+    auth_info = JSON.parse(request.body.read)
+    if (authenticate(auth_info['email'], auth_info['password']))
+      return 'ok'.to_json
+    else
+      return [500, '{error: "invalid login"}']
+    end
   end
 
   get '/api/account' do
