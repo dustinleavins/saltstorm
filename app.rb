@@ -2,6 +2,7 @@
 # Copyright (C) 2013  Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
+require 'uri'
 require 'yaml'
 require 'json'
 require 'bigdecimal'
@@ -97,6 +98,84 @@ class RootApp < Sinatra::Base
 
     session[:uid] = user.id 
     return redirect to('/main')
+  end
+
+  get '/request_password_reset' do
+    return erb :request_password_reset
+  end
+
+  post '/request_password_reset' do
+    @email = params[:email].downcase
+    user = User.first(email: @email)
+
+    if user.nil?
+      # This behavior might change in the future.
+      # For now, just act like invalid requests went through.
+      return erb :request_password_reset_success
+    end
+
+    reset_request = PasswordResetRequest.create(email: @email)
+
+    # At this point, 'URI' is an object with type URI::Parser
+    # Object.const_get("URI") is a workaround to access the real URI module
+    reset_url = "http://#{app_settings['domain']}/reset_password?" +
+      Object.const_get("URI")::encode_www_form([["email", user.email], ["code", reset_request.code]])
+
+    EmailJob.create(to: @email,
+                    subject: "#{app_settings['domain']} - Password Reset",
+                    body: reset_url)
+
+    @display_name = user.display_name
+    return erb :request_password_reset_success
+  end
+
+  get '/reset_password' do
+   @email = params[:email]
+   @code = params[:code]
+
+   if (@email.nil? || @code.nil?)
+     return redirect to('/request_password_reset')
+   else
+     return erb :reset_password
+   end
+ end
+
+  post '/reset_password' do
+    @email = params[:email].downcase
+    @code = params[:code]
+    @new_password = params[:password]
+    @confirm_new_password = params[:confirm_password]
+
+    if (@email.empty? || @code.nil? ||
+        @new_password.nil? || @new_password != @confirm_new_password)
+      # Something's wrong; it's likely an invalid password
+      return erb :reset_password
+    end
+
+    reset_request = PasswordResetRequest.first(email: @email, code: @code)
+    if (reset_request.nil?)
+      # TODO: Return a better error code
+      return 404
+    end
+
+    user = User.first(email: @email)
+    if (user.nil?)
+      return 404
+    end
+
+    # Update password
+    user.password = @new_password
+    user.save()
+
+    # Senc e-mail notification later
+    EmailJob.create(to: @email,
+                    subject: "#{app_settings['domain']} - Password Reset Successful",
+                    body: "#{user.display_name}, your password was successfully reset")
+
+    # Delete requests for reset
+    PasswordResetRequest.where(email: @email).delete()
+
+    return erb :reset_password_success
   end
 
   post '/login' do

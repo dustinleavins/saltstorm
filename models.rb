@@ -36,8 +36,10 @@ module Models
     end
 
     def before_validation
-      self.password_salt ||= User.generate_salt
-      self.password_hash ||= User.generate_password_digest(@password, self.password_salt)
+      if(!self.password.nil?)
+        self.password_salt = User.generate_salt
+        self.password_hash = User.generate_password_digest(@password, self.password_salt)
+      end
     end
     
     def validate
@@ -124,4 +126,18 @@ module Models
       validates_format Models.email_regex, :to
     end
   end
+
+  class PasswordResetRequest < Sequel::Model
+    plugin :validation_helpers
+    def validate
+      super
+      validates_presence [:email, :code]
+      validates_format Models.email_regex, :email
+    end
+
+    def before_validation
+      self.code ||= SecureRandom.urlsafe_base64
+    end
+  end
 end
+

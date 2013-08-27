@@ -3,6 +3,7 @@ Thread.abort_on_exception=true
 
 require 'yaml'
 require 'json'
+require 'uri'
 require 'rspec'
 require 'rack/test'
 require 'sequel'
@@ -91,6 +92,61 @@ describe 'Main App' do
     new_user = User.first(email:user_info[:email].downcase)
     new_user.should_not == nil
     new_user.balance.should == 400
+  end
+
+  it "has a working 'request password reset' page" do
+    get '/request_password_reset'
+    last_response.should be_ok
+  end
+
+  it "allows users to reset password" do
+    user = FactoryGirl.create(:user)
+    new_password = "password5"
+    user.password.should_not == nil
+    new_password.should_not == user.password
+
+    # Request Reset
+    post '/request_password_reset', {
+      email: user.email
+    }
+
+    last_response.should be_ok
+    EmailJob.where(to: user.email.downcase).count.should == 1
+    PasswordResetRequest.count(email: user.email.downcase).should == 1
+    code = PasswordResetRequest.first(email: user.email.downcase).code
+
+    # GET reset page
+    reset_password_url = "/reset_password?" + URI.encode_www_form([["email", user.email], ["code", code]])
+    get reset_password_url
+    last_response.should be_ok
+
+    # Reset
+    post '/reset_password', {
+      email: user.email,
+      code: code,
+      password: new_password,
+      confirm_password: new_password
+    }
+
+    last_response.should be_ok
+    updated_user = User.first(email: user.email)
+    updated_user.password_hash.should_not == user.password_hash
+    updated_user.password_salt.should_not == user.password_salt
+
+    # Sign-in
+    post '/login', {
+      email: updated_user.email,
+      password: 'password5'
+    }
+
+    last_response.should be_redirect
+
+    # Try a route requiring login
+    get '/api/account'
+    last_response.should be_ok
+
+    EmailJob.where(to: user.email.downcase).count.should == 2
+    PasswordResetRequest.count(email: user.email.downcase).should == 0
   end
 
   it "should not allow /api/account access to anon users" do

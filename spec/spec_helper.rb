@@ -8,6 +8,7 @@ RSpec.configure do |c|
     Models::User.where().delete()
     Models::Bet.where().delete()
     Models::EmailJob.where().delete()
+    Models::PasswordResetRequest.where().delete()
     FileUtils.rm(['tmp/test/match_data.json', 'tmp/test/match_open'],
                  force: true)
   end
