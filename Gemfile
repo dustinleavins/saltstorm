@@ -5,6 +5,7 @@ gem "highline"
 gem "sequel"
 gem "sqlite3"
 gem "mail"
+gem "whenever", require: false
 
 group :test do
   gem "rspec"

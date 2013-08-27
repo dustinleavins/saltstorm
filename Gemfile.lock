@@ -8,6 +8,7 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     atomic (1.1.13)
+    chronic (0.9.1)
     daemons (1.1.9)
     diff-lcs (1.2.4)
     eventmachine (1.0.3)
@@ -54,6 +55,9 @@ GEM
       polyglot
       polyglot (>= 0.3.1)
     tzinfo (0.3.37)
+    whenever (0.8.4)
+      activesupport (>= 2.3.4)
+      chronic (>= 0.6.3)
 
 PLATFORMS
   ruby
@@ -70,3 +74,4 @@ DEPENDENCIES
   sinatra
   sqlite3
   thin
+  whenever
