@@ -4,6 +4,7 @@ gem "sinatra"
 gem "highline"
 gem "sequel"
 gem "sqlite3"
+gem "mail"
 
 group :test do
   gem "rspec"

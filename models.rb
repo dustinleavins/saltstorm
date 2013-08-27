@@ -112,4 +112,16 @@ module Models
       return User.first(id: self.user_id)
     end
   end
+
+  # Represents an email to be sent by the rake task email_job.
+  class EmailJob < Sequel::Model
+    plugin :validation_helpers
+
+    def validate
+      super
+
+      validates_presence [:to, :subject, :body]
+      validates_format Models.email_regex, :to
+    end
+  end
 end

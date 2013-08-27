@@ -14,6 +14,7 @@ if ENV['RACK_ENV'].nil?
 end
 
 task :default do
+  puts ENV['RACK_ENV']
 end
 
 task :generate_secret_token do
@@ -64,4 +65,33 @@ task :initial_setup => [:generate_secret_token] do
         balance: 0)
   end
 end
+
+task :email_job do
+  require 'mail'
+  require './models.rb'
+
+  opt = YAML::load_file('config/email.yml')[ENV['RACK_ENV']]
+
+  Mail.defaults do
+    delivery_method opt[:delivery_method], (opt[:options] || {})
+  end  
+
+  Models::EmailJob.where(:sent => nil).each do |email_data|
+    
+    mail_to_send = Mail.new do
+      from opt[:from]
+      to email_data.to
+      subject email_data.subject
+      body email_data.body
+    end  
+
+    mail_to_send.deliver!
+
+    email_data.sent = 'ok';
+    email_data.save
+  end
+
+  Models::EmailJob.where(:sent => 'ok').delete
+end
+
 

@@ -15,9 +15,14 @@ GEM
       activesupport (>= 3.0.0)
     highline (1.6.19)
     i18n (0.6.5)
+    mail (2.5.4)
+      mime-types (~> 1.16)
+      treetop (~> 1.4.8)
+    mime-types (1.24)
     minitest (4.7.5)
     multi_json (1.7.9)
     pg (0.16.0)
+    polyglot (0.3.3)
     rack (1.5.2)
     rack-protection (1.5.0)
       rack
@@ -45,6 +50,9 @@ GEM
     thread_safe (0.1.2)
       atomic
     tilt (1.4.1)
+    treetop (1.4.15)
+      polyglot
+      polyglot (>= 0.3.1)
     tzinfo (0.3.37)
 
 PLATFORMS
@@ -53,6 +61,7 @@ PLATFORMS
 DEPENDENCIES
   factory_girl
   highline
+  mail
   pg
   rack-test
   rake
