@@ -81,6 +81,7 @@ describe 'Main App' do
     last_response.should be_redirect
 
     User.where(email:user_info[:email].downcase).count.should == 1
+    EmailJob.where(to: user_info[:email].downcase).count.should == 1
 
     # Try a route requiring login
     get '/api/account'

@@ -90,6 +90,11 @@ class RootApp < Sinatra::Base
                        display_name: @display_name,
                        balance: @balance)
 
+    # Send the introductory e-mail at a later time
+    EmailJob.create(to: @email,
+                    subject: "Welcome to #{app_settings['domain']}!",
+                    body: "Welcome to #{app_settings['domain']}, #{@display_name}!")
+
     session[:uid] = user.id 
     return redirect to('/main')
   end

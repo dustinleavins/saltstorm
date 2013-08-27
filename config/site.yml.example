@@ -12,6 +12,7 @@ common:
   user_signup_balance: 400
   base_bailout_balance: 10
   main_video_html: "<a href='#'>Video Link</a>"
+  domain: Fill Me In
   site_name: 'Saltstorm'
   site_description: >
       Saltstorm is an open-source 'play money' betting site
