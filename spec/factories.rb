@@ -21,4 +21,11 @@ FactoryGirl.define do
     balance 0
     permissions ['admin'].to_set
   end
+
+  factory :email_job, class:Models::EmailJob do
+    sequence(:to) {|n| "user#{n}@example.com"}
+    subject 'Subject'
+    body 'Body'
+    sent nil
+  end
 end

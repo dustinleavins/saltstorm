@@ -1,7 +1,6 @@
 ENV['RACK_ENV'] = 'test'
 Thread.abort_on_exception=true
 
-require 'fileutils'
 require 'yaml'
 require 'json'
 require 'rspec'
@@ -11,14 +10,7 @@ require 'factory_girl'
 require './app.rb'
 require './models.rb'
 require './persistence.rb'
-
-User.where().delete()
-Bet.where().delete()
-
-FactoryGirl.find_definitions
-
-FileUtils.rm(['tmp/test/match_data.json', 'tmp/test/match_open'],
-             force: true)
+require 'spec_helper'
 
 describe 'Main App' do
   include Rack::Test::Methods
@@ -989,5 +981,5 @@ describe 'Main App' do
 
     User.first(email: user.email).balance.to_i.should == 50
   end
-
 end
+

@@ -1,5 +1,6 @@
 require 'rspec'
 require './settings.rb'
+require 'spec_helper'
 
 describe 'Settings Module' do
   it "successfully loads & merges site config" do
