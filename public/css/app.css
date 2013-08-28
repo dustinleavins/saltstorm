@@ -29,6 +29,36 @@ a {
   border-radius: 8px;
 }
 
+.navbar-default {
+  background-color: #B88888;
+  font-family: "Gill Sans", Tahoma;
+}
+
+.navbar-default .navbar-text{
+  color: #222222;
+}
+
+.navbar-default .navbar-brand {
+  font-family: "Palatino Linotype", "Times New Roman";
+  color: #222222;
+  font-weight: bold;
+}
+
+.navbar-default .navbar-nav li a {
+  color: #2A6496;
+}
+
+.navbar-default .navbar-nav li a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  border-top-color: #E7E7E7;
+  border-top-width: 1px;
+  border-top-style: solid;
+  margin-top: 80px;
+}
+
 .admin-message {
   text-align: center;
 }
@@ -79,6 +109,7 @@ a {
 }
 
 .main-video {
+  text-align: center;
   padding-bottom:80px;
 }
 
