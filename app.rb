@@ -35,7 +35,7 @@ class RootApp < Sinatra::Base
         return nil
       end
 
-      user = User.first(email: email.downcase)
+      user = User.first(:email => email.downcase)
 
       if user.nil?
         return nil
@@ -78,23 +78,23 @@ class RootApp < Sinatra::Base
     @display_name = params[:display_name]
     @balance = app_settings['user_signup_balance']
 
-    return erb :signup if User.where(email: @email).count > 0
-    return erb :signup if User.where(display_name: @display_name).count > 0
+    return erb :signup if User.where(:email => @email).count > 0
+    return erb :signup if User.where(:display_name => @display_name).count > 0
 
     return erb :signup if (@password != @confirm_password) ||
       @password.nil? || @password.empty?
       @email.nil? || @email.empty? || !(@email.match Models.email_regex) ||
       @display_name.nil? || @display_name.empty?
 
-    user = User.create(email: @email,
-                       password: @password,
-                       display_name: @display_name,
-                       balance: @balance)
+    user = User.create(:email => @email,
+                       :password => @password,
+                       :display_name => @display_name,
+                       :balance => @balance)
 
     # Send the introductory e-mail at a later time
-    EmailJob.create(to: @email,
-                    subject: "Welcome to #{app_settings['domain']}!",
-                    body: "Welcome to #{app_settings['domain']}, #{@display_name}!")
+    EmailJob.create(:to => @email,
+                    :subject => "Welcome to #{app_settings['domain']}!",
+                    :body => "Welcome to #{app_settings['domain']}, #{@display_name}!")
 
     session[:uid] = user.id 
     return redirect to('/main')
@@ -106,7 +106,7 @@ class RootApp < Sinatra::Base
 
   post '/request_password_reset' do
     @email = params[:email].downcase
-    user = User.first(email: @email)
+    user = User.first(:email => @email)
 
     if user.nil?
       # This behavior might change in the future.
@@ -114,16 +114,16 @@ class RootApp < Sinatra::Base
       return erb :request_password_reset_success
     end
 
-    reset_request = PasswordResetRequest.create(email: @email)
+    reset_request = PasswordResetRequest.create(:email => @email)
 
     # At this point, 'URI' is an object with type URI::Parser
     # Object.const_get("URI") is a workaround to access the real URI module
     reset_url = "http://#{app_settings['domain']}/reset_password?" +
       Object.const_get("URI")::encode_www_form([["email", user.email], ["code", reset_request.code]])
 
-    EmailJob.create(to: @email,
-                    subject: "#{app_settings['domain']} - Password Reset",
-                    body: reset_url)
+    EmailJob.create(:to => @email,
+                    :subject => "#{app_settings['domain']} - Password Reset",
+                    :body => reset_url)
 
     @display_name = user.display_name
     return erb :request_password_reset_success
@@ -152,13 +152,13 @@ class RootApp < Sinatra::Base
       return erb :reset_password
     end
 
-    reset_request = PasswordResetRequest.first(email: @email, code: @code)
+    reset_request = PasswordResetRequest.first(:email => @email, :code => @code)
     if (reset_request.nil?)
       # TODO: Return a better error code
       return 404
     end
 
-    user = User.first(email: @email)
+    user = User.first(:email => @email)
     if (user.nil?)
       return 404
     end
@@ -167,39 +167,18 @@ class RootApp < Sinatra::Base
     user.password = @new_password
     user.save()
 
-    # Senc e-mail notification later
-    EmailJob.create(to: @email,
-                    subject: "#{app_settings['domain']} - Password Reset Successful",
-                    body: "#{user.display_name}, your password was successfully reset")
+    # Send e-mail notification later
+    EmailJob.create(:to => @email,
+                    :subject => "#{app_settings['domain']} - Password Reset Successful",
+                    :body => "#{user.display_name}, your password was successfully reset")
 
     # Delete requests for reset
-    PasswordResetRequest.where(email: @email).delete()
+    PasswordResetRequest.where(:email => @email).delete()
 
     return erb :reset_password_success
   end
 
   post '/login' do
-    #@email = params[:email]
-    #@password = params[:password]
-
-    #if (@email.nil? || @password.nil?)
-    #  return redirect '/login', 303
-    #end
-
-    #user = User.first(email: @email.downcase)
-
-    #if user.nil?
-    #  return redirect '/login', 303
-    #end
-
-    #password_hash = User.generate_password_digest(@password, user.password_salt)
-
-    #if (password_hash != user.password_hash)
-    #  return redirect '/login', 303
-    #end
-
-    #session[:uid] = user.id
-    #return redirect to('/main')
     if (authenticate(params[:email], params[:password]))
       return redirect to('/main')
     else
@@ -240,15 +219,15 @@ class RootApp < Sinatra::Base
       return [500, "{ error: 'Must be logged-in'}"]
     end
 
-    user = User.first(id: session[:uid])
+    user = User.first(:id => session[:uid])
     if user.nil?
       return [500, "{ error: 'Somehow logged-in as fake user'}"]
     end
 
     return {
-      email: user.email,
-      balance: user.balance,
-      displayName: user.display_name
+      :email => user.email,
+      :balance => user.balance,
+      :displayName => user.display_name
     }.to_json
   end
 
@@ -271,20 +250,20 @@ class RootApp < Sinatra::Base
       return [500, "{ error: 'invalid request'}"]
     end
 
-    user = User.first(id: session[:uid])
+    user = User.first(:id => session[:uid])
 
     if bid_amount > user.balance
       return [500, "{ error: 'insufficient funds'}"]
     end
 
-    existing_bet = Bet.first(user_id: user.id)
+    existing_bet = Bet.first(:user_id => user.id)
     if (existing_bet)
         existing_bet.destroy
     end
 
-    Bet.create(user_id: user.id,
-        amount: bid_amount.to_i,
-        for_participant: submitted_bid['forParticipant'])
+    Bet.create(:user_id => user.id,
+        :amount => bid_amount.to_i,
+        :for_participant => submitted_bid['forParticipant'])
 
     return [200, "{message: 'ok'}"]
   end
@@ -298,7 +277,7 @@ class RootApp < Sinatra::Base
       return [500, "{ error: 'Must be logged-in'}"]
     end
 
-    user = User.first(id: session[:uid])
+    user = User.first(:id => session[:uid])
     unless user.permissions.include? 'admin'
       return [500, "{ error: 'invalid request'}"]
     end
@@ -329,10 +308,10 @@ class RootApp < Sinatra::Base
       Persistence::MatchStatusPersistence.close_bids
         
       # Calculate amounts & odds
-      bets_for_a = Bet.where(for_participant: 'a').select_map(:amount)
+      bets_for_a = Bet.where(:for_participant => 'a').select_map(:amount)
       new_match_data['participantA']['amount'] = bets_for_a.reduce(:+)
 
-      bets_for_b = Bet.where(for_participant: 'b').select_map(:amount)
+      bets_for_b = Bet.where(:for_participant => 'b').select_map(:amount)
       new_match_data['participantB']['amount'] = bets_for_b.reduce(:+)
 
       if ((bets_for_a.count == 0) || (bets_for_b.count == 0))
@@ -345,12 +324,12 @@ class RootApp < Sinatra::Base
 
       end
       all_in_a = Bet.join(User, :id => :user_id)
-        .where(for_participant: 'a')
+        .where(:for_participant => 'a')
         .where(:amount => :balance)
         .select_map(:display_name)
 
       all_in_b = Bet.join(User, :id => :user_id)
-        .where(for_participant: 'b')
+        .where(:for_participant => 'b')
         .where(:amount => :balance)
         .select_map(:display_name)
 

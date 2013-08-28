@@ -23,17 +23,17 @@ describe 'Main App' do
 
   it "has a working index page" do
     get '/'
-    last_response.should be_ok
+    expect(last_response).to be_ok 
   end
 
   it "has a working login page" do
     get '/login'
-    last_response.should be_ok
+    expect(last_response).to be_ok
   end
 
   it "has a working signup page" do
     get '/signup'
-    last_response.should be_ok
+    expect(last_response).to be_ok
   end
 
   it "allows users to login" do
@@ -41,16 +41,15 @@ describe 'Main App' do
 
     # Sign-in
     post '/login', {
-      email: user.email,
-      password: user.password
+      :email => user.email,
+      :password => user.password
     }
 
-    last_response.should be_redirect
+    expect(last_response).to be_redirect
 
     # Try a route requiring login
     get '/api/account'
-    last_response.should be_ok
-
+    expect(last_response).to be_ok
   end
 
   it "doesn't explode for failed login attempts" do
@@ -58,115 +57,114 @@ describe 'Main App' do
 
     # Sign-in
     post '/login', {
-      email: user.email,
-      password: user.password
+      :email => user.email,
+      :password => user.password
     }
 
-    last_response.should be_redirect
+    expect(last_response).to be_redirect
 
     # Try a route requiring login
     get '/api/account'
-    last_response.should_not be_ok
-
+    expect(last_response).not_to be_ok
   end
 
   it "allows users to signup" do
     user_info = FactoryGirl.attributes_for(:user)
     post '/signup', {
-      email: user_info[:email],
-      password: user_info[:password],
+      :email => user_info[:email],
+      :password => user_info[:password],
       confirm_password: user_info[:password],
       display_name: user_info[:display_name]
     }
 
-    last_response.should be_redirect
+    expect(last_response).to be_redirect
 
-    User.where(email:user_info[:email].downcase).count.should == 1
-    EmailJob.where(to: user_info[:email].downcase).count.should == 1
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(1)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(1)
 
     # Try a route requiring login
     get '/api/account'
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Check to see if starting balance == 400
-    new_user = User.first(email:user_info[:email].downcase)
-    new_user.should_not == nil
-    new_user.balance.should == 400
+    new_user = User.first(:email => user_info[:email].downcase)
+    expect(new_user).to_not be_nil
+    expect(new_user.balance).to eq(400)
   end
 
   it "has a working 'request password reset' page" do
     get '/request_password_reset'
-    last_response.should be_ok
+    expect(last_response).to be_ok
   end
 
   it "allows users to reset password" do
     user = FactoryGirl.create(:user)
     new_password = "password5"
-    user.password.should_not == nil
-    new_password.should_not == user.password
+    expect(user.password).to_not be_nil
+    expect(new_password).to_not eq(user.password)
 
     # Request Reset
     post '/request_password_reset', {
-      email: user.email
+      :email => user.email
     }
 
-    last_response.should be_ok
-    EmailJob.where(to: user.email.downcase).count.should == 1
-    PasswordResetRequest.count(email: user.email.downcase).should == 1
-    code = PasswordResetRequest.first(email: user.email.downcase).code
+    expect(last_response).to be_ok
+    expect(EmailJob.where(:to => user.email.downcase).count).to eq(1)
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+    code = PasswordResetRequest.first(:email => user.email.downcase).code
 
     # GET reset page
     reset_password_url = "/reset_password?" + URI.encode_www_form([["email", user.email], ["code", code]])
     get reset_password_url
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Reset
     post '/reset_password', {
-      email: user.email,
-      code: code,
-      password: new_password,
-      confirm_password: new_password
+      :email => user.email,
+      :code => code,
+      :password => new_password,
+      :confirm_password => new_password
     }
 
-    last_response.should be_ok
-    updated_user = User.first(email: user.email)
-    updated_user.password_hash.should_not == user.password_hash
-    updated_user.password_salt.should_not == user.password_salt
+    expect(last_response).to be_ok
+    updated_user = User.first(:email => user.email)
+    expect(updated_user.password_hash).to_not eq(user.password_hash)
+    expect(updated_user.password_salt).to_not eq(user.password_salt)
 
     # Sign-in
     post '/login', {
-      email: updated_user.email,
-      password: 'password5'
+      :email => updated_user.email,
+      :password => 'password5'
     }
 
-    last_response.should be_redirect
+    expect(last_response).to be_redirect
 
     # Try a route requiring login
     get '/api/account'
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
-    EmailJob.where(to: user.email.downcase).count.should == 2
-    PasswordResetRequest.count(email: user.email.downcase).should == 0
+    expect(EmailJob.where(:to => user.email.downcase).count).to eq(2)
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(0)
   end
 
   it "should not allow /api/account access to anon users" do
     get '/api/account'
-    last_response.status.should == 500
+    expect(last_response.status).to eq(500)
     expect(last_response.content_type.include?('application/json')).to be_true
   end
 
   it "should not allow /api/current_match access to anon users" do
     match_data = {
-      status: 'closed',
-      winner: '',
-      participantA: { name: 'Player A', amount: 0 },
-      participantB: { name: 'Player B', amount: 0 },
-      odds: ''
+      :status => 'closed',
+      :winner => '',
+      :participantA => { :name => 'Player A', :amount => 0 },
+      :participantB => { :name => 'Player B', :amount => 0 },
+      :odds => ''
     }.to_json
 
     put '/api/current_match', match_data
-    last_response.status.should == 500
-    last_response.body.should == "{ error: 'Must be logged-in'}"
+    expect(last_response.status).to eq(500)
+    expect(last_response.body).to eq("{ error: 'Must be logged-in'}")
   end
 
   it "should not allow /api/current_match access to non-admin users" do
@@ -175,25 +173,25 @@ describe 'Main App' do
     
     # Sign-in
     post '/login', {
-      email: user.email,
-      password: user.password
+      :email => user.email,
+      :password => user.password
     }
 
-    last_response.should be_redirect
+    expect(last_response).to be_redirect
 
     header "Content-Type", "application/json"
 
     match_data = {
-      status: 'closed',
-      winner: '',
-      participantA: { name: 'Player A', amount: 0 },
-      participantB: { name: 'Player B', amount: 0 },
-      odds: ''
+      :status => 'closed',
+      :winner => '',
+      :participantA => { :name => 'Player A', :amount => 0 },
+      :participantB => { :name => 'Player B', :amount => 0 },
+      :odds => ''
     }.to_json
 
     put '/api/current_match', match_data
-    last_response.status.should == 500
-    last_response.body.should == "{ error: 'invalid request'}"
+    expect(last_response.status).to eq(500)
+    expect(last_response.body).to eq("{ error: 'invalid request'}")
   end
 
   it "allows people to bet their fake money - test #1" do
@@ -208,30 +206,30 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, balance: 21)
-    winner = FactoryGirl.create(:user, balance:10)
+    loser = FactoryGirl.create(:user, :balance => 21)
+    winner = FactoryGirl.create(:user, :balance => 10)
  
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     loser_browser.post '/login', {
-      email: loser.email,
-      password: loser.password
+      :email => loser.email,
+      :password => loser.password
     }
 
     winner_browser.post '/login', {
-      email: winner.email,
-      password: winner.password
+      :email => winner.email,
+      :password => winner.password
     }
 
     # Open bidding
@@ -243,7 +241,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Bid - loser will bet 10 on B
     loser_browser.post '/api/bet', {
@@ -251,7 +249,7 @@ describe 'Main App' do
       :amount => 10
     }.to_json
 
-    loser_browser.last_response.should be_ok
+    expect(loser_browser.last_response).to be_ok
 
     # Bid - winner will bet 1 on A
     winner_browser.post '/api/bet', {
@@ -259,7 +257,7 @@ describe 'Main App' do
       :amount => 1
     }.to_json
 
-    winner_browser.last_response.should be_ok
+    expect(winner_browser.last_response).to be_ok
 
     # Close bidding
     put '/api/current_match', {
@@ -270,20 +268,20 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_close['participantA']['amount'].to_f.should == 1.0
-    match_data_after_close['participantB']['amount'].to_f.should == 10.0
-    match_data_after_close['odds'].should == "1:10"
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(1.0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['odds']).to eq("1:10")
 
     # TODO: Change after adding user functionality to show 'all bettors'
-    match_data_after_close['bettors']['a'].should == []
-    match_data_after_close['bettors']['b'].should == []
+    expect(match_data_after_close['bettors']['a']).to match_array([])
+    expect(match_data_after_close['bettors']['b']).to match_array([])
 
-    Bet.count.should == 2
+    expect(Bet.count).to eq(2)
 
     # End match - admin client data needs to updated to
     # include bid amounts & odds
@@ -300,19 +298,19 @@ describe 'Main App' do
     while Bet.count > 0
       sleep(1)
       sleep_count += 1
-      sleep_count.should < 20 # Payout is bugged
+      expect(sleep_count).to be < 20 # Payout is bugged
     end
 
     # Check match data
     match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_payout['status'].should == 'closed'
+    expect(match_data_after_payout['status']).to  eq('closed')
 
     # Check payout amounts
-    User.first(email: loser.email).balance.to_i.should == 11
-    User.first(email: winner.email).balance.to_i.should == 20
+    expect(User.first(:email => loser.email).balance.to_i).to eq(11)
+    expect(User.first(:email => winner.email).balance.to_i).to eq(20)
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   # This an alternate 'simulate match' test that includes additional
@@ -331,30 +329,30 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, balance: 5)
-    winner = FactoryGirl.create(:user, balance: 500)
+    loser = FactoryGirl.create(:user, :balance => 5)
+    winner = FactoryGirl.create(:user, :balance => 500)
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     loser_browser.post '/login', {
-      email: loser.email,
-      password: loser.password
+      :email => loser.email,
+      :password => loser.password
     }
 
     winner_browser.post '/login', {
-      email: winner.email,
-      password: winner.password
+      :email => winner.email,
+      :password => winner.password
     }
 
     # Open bidding
@@ -366,7 +364,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Bid - loser will initially bet 5 on B
     loser_browser.post '/api/bet', {
@@ -374,7 +372,7 @@ describe 'Main App' do
       :amount => 5
     }.to_json
 
-    loser_browser.last_response.should be_ok
+    expect(loser_browser.last_response).to be_ok
     
     # Bid - winner will bet 500 on B
     winner_browser.post '/api/bet', {
@@ -382,7 +380,7 @@ describe 'Main App' do
       :amount => 500
     }.to_json
 
-    winner_browser.last_response.should be_ok
+    expect(winner_browser.last_response).to be_ok
 
     # Bid - loser will change bid to 5 on A
     loser_browser.post '/api/bet', {
@@ -390,7 +388,7 @@ describe 'Main App' do
       :amount => 5
     }.to_json
 
-    loser_browser.last_response.should be_ok
+    expect(loser_browser.last_response).to be_ok
 
     # Close bidding
     put '/api/current_match', {
@@ -401,20 +399,20 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_close['participantA']['amount'].to_f.should == 5.0
-    match_data_after_close['participantB']['amount'].to_f.should == 500.0
-    match_data_after_close['odds'].should == "1:100"
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(500.0)
+    expect(match_data_after_close['odds']).to eq("1:100")
 
     # TODO: Change after adding user functionality to show 'all bettors'
-    match_data_after_close['bettors']['a'].should == [loser.display_name]
-    match_data_after_close['bettors']['b'].should == [winner.display_name]
+    expect(match_data_after_close['bettors']['a']).to match_array([loser.display_name])
+    expect(match_data_after_close['bettors']['b']).to match_array([winner.display_name])
 
-    Bet.count.should == 2
+    expect(Bet.count).to eq(2)
 
     # Testing 'cannot bid after deadline' functionality
     winner_browser.post '/api/bet', {
@@ -422,7 +420,7 @@ describe 'Main App' do
       :amount => 499
     }.to_json
 
-    winner_browser.last_response.should_not be_ok
+    expect(winner_browser.last_response).to_not be_ok
 
 
     # End match - admin client data needs to updated to
@@ -440,19 +438,19 @@ describe 'Main App' do
     while Bet.count > 0
       sleep(1)
       sleep_count += 1
-      sleep_count.should < 20 # Payout is bugged
+      expect(sleep_count).to be < 20 # Payout is bugged
     end
 
     # Check match data
     match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_payout['status'].should == 'closed'
+    expect(match_data_after_payout['status']).to eq('closed')
 
     # Check payout amounts
-    User.first(email: loser.email).balance.to_i.should == 10 # reset
-    User.first(email: winner.email).balance.to_i.should == 505
+    expect(User.first(:email => loser.email).balance.to_i).to eq(10) # reset
+    expect(User.first(:email => winner.email).balance.to_i).to eq(505)
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   it "allows match cancellation during match" do
@@ -467,30 +465,30 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, balance: 5)
-    winner = FactoryGirl.create(:user, balance: 500)
+    loser = FactoryGirl.create(:user, :balance => 5)
+    winner = FactoryGirl.create(:user, :balance => 500)
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     loser_browser.post '/login', {
-      email: loser.email,
-      password: loser.password
+      :email => loser.email,
+      :password => loser.password
     }
 
     winner_browser.post '/login', {
-      email: winner.email,
-      password: winner.password
+      :email => winner.email,
+      :password => winner.password
     }
 
     # Open bidding
@@ -502,7 +500,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Bid - loser will bet 5 on A
     loser_browser.post '/api/bet', {
@@ -510,7 +508,7 @@ describe 'Main App' do
       :amount => 5
     }.to_json
 
-    loser_browser.last_response.should be_ok
+    expect(loser_browser.last_response).to be_ok
 
     # Bid - winner will bet 500 on B
     winner_browser.post '/api/bet', {
@@ -518,7 +516,7 @@ describe 'Main App' do
       :amount => 500
     }.to_json
 
-    winner_browser.last_response.should be_ok
+    expect(winner_browser.last_response).to be_ok
 
     # Close bidding
     put '/api/current_match', {
@@ -529,18 +527,18 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_close['participantA']['amount'].to_f.should == 5.0
-    match_data_after_close['participantB']['amount'].to_f.should == 500.0
-    match_data_after_close['odds'].should == "1:100"
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(500.0)
+    expect(match_data_after_close['odds']).to eq("1:100")
 
     # TODO: Change after adding user functionality to show 'all bettors'
-    match_data_after_close['bettors']['a'].should == [loser.display_name]
-    match_data_after_close['bettors']['b'].should == [winner.display_name]
+    expect(match_data_after_close['bettors']['a']).to match_array([loser.display_name])
+    expect(match_data_after_close['bettors']['b']).to match_array([winner.display_name])
 
     # Cancel match - admin client data needs to updated to
     # include bid amounts & odds
@@ -555,13 +553,13 @@ describe 'Main App' do
     # Payout is async
     match_data_after_cancel = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_cancel['status'].should == 'closed'
+    expect(match_data_after_cancel['status']).to eq('closed')
 
     # Check payout amounts to ensure that there is no payout
-    User.first(email: loser.email).balance.to_i.should == 5
-    User.first(email: winner.email).balance.to_i.should == 500
+    expect(User.first(:email => loser.email).balance.to_i).to eq(5)
+    expect(User.first(:email => winner.email).balance.to_i).to eq(500)
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   it "allows match cancellation during betting" do
@@ -576,30 +574,30 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, balance: 5)
-    winner = FactoryGirl.create(:user, balance: 500)
+    loser = FactoryGirl.create(:user, :balance => 5)
+    winner = FactoryGirl.create(:user,:balance => 500)
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     loser_browser.post '/login', {
-      email: loser.email,
-      password: loser.password
+      :email => loser.email,
+      :password => loser.password
     }
 
     winner_browser.post '/login', {
-      email: winner.email,
-      password: winner.password
+      :email => winner.email,
+      :password => winner.password
     }
 
     # Open bidding
@@ -611,7 +609,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Bid - loser will bet 5 on A
     loser_browser.post '/api/bet', {
@@ -619,7 +617,7 @@ describe 'Main App' do
       :amount => 5
     }.to_json
 
-    loser_browser.last_response.should be_ok
+    expect(loser_browser.last_response).to be_ok
 
     # Bid - winner will bet 500 on B
     winner_browser.post '/api/bet', {
@@ -627,7 +625,7 @@ describe 'Main App' do
       :amount => 500
     }.to_json
 
-    winner_browser.last_response.should be_ok
+    expect(winner_browser.last_response).to be_ok
 
     # Cancel bidding
     put '/api/current_match', {
@@ -638,17 +636,17 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     match_data_after_cancel = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_cancel['status'].should == 'closed'
+    expect(match_data_after_cancel['status']).to  eq('closed')
 
     # Check payout amounts to ensure that there is no payout
-    User.first(email: loser.email).balance.to_i.should == 5
-    User.first(email: winner.email).balance.to_i.should == 500
+    expect(User.first(:email => loser.email).balance.to_i).to eq(5)
+    expect(User.first(:email => winner.email).balance.to_i).to eq(500)
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   it "allows people to have matches with no one betting" do
@@ -663,15 +661,15 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
     
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     # Open bidding
@@ -683,7 +681,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Close bidding
     put '/api/current_match', {
@@ -694,20 +692,20 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_close['participantA']['amount'].to_f.should == 0
-    match_data_after_close['participantB']['amount'].to_f.should == 0.0
-    match_data_after_close['odds'].should == "0:0"
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(0.0)
+    expect(match_data_after_close['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
-    match_data_after_close['bettors']['a'].should == []
-    match_data_after_close['bettors']['b'].should == []
+    expect(match_data_after_close['bettors']['a']).to match_array([])
+    expect(match_data_after_close['bettors']['b']).to match_array([])
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # End match - admin client data needs to updated to
     # include bid amounts & odds
@@ -725,10 +723,10 @@ describe 'Main App' do
     # Check match data
     match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_payout['status'].should == 'closed'
+    expect(match_data_after_payout['status']).to eq('closed')
 
     # Check payout amounts
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   it "allows people to have one-sided matches for winner" do
@@ -743,7 +741,7 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
@@ -753,13 +751,13 @@ describe 'Main App' do
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     user_browser.post '/login', {
-      email: user.email,
-      password: user.password
+      :email => user.email,
+      :password => user.password
     }
     
     # Open bidding
@@ -771,7 +769,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Bid - User-5 will bet 10 on A
     user_browser.post '/api/bet', {
@@ -779,7 +777,7 @@ describe 'Main App' do
       :amount => 10
     }.to_json
 
-    user_browser.last_response.should be_ok
+    expect(user_browser.last_response).to be_ok
     
     # Close bidding
     put '/api/current_match', {
@@ -790,20 +788,20 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Ensure that odds & amount are calculated
     match_data_after_close =  Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_close['participantA']['amount'].to_f.should == 10.0
-    match_data_after_close['participantB']['amount'].to_f.should == 0.0
-    match_data_after_close['odds'].should == "0:0"
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(0.0)
+    expect(match_data_after_close['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
-    match_data_after_close['bettors']['a'].should == []
-    match_data_after_close['bettors']['b'].should == []
+    expect(match_data_after_close['bettors']['a']).to match_array([])
+    expect(match_data_after_close['bettors']['b']).to match_array([])
 
-    Bet.count.should == 1
+    expect(Bet.count).to eq(1)
 
     # End match - admin client data needs to updated to
     # include bid amounts & odds
@@ -821,12 +819,12 @@ describe 'Main App' do
     # Check match data
     match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_payout['status'].should == 'closed'
+    expect(match_data_after_payout['status']).to eq('closed')
 
     # There should be no payout
-    User.first(email: user.email).balance.to_i.should == 2525
+    expect(User.first(email: user.email).balance.to_i).to eq(2525)
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   # Test covering an issue where ZeroDivisionError was thrown from the
@@ -843,7 +841,7 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
@@ -853,13 +851,13 @@ describe 'Main App' do
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     user_browser.post '/login', {
-      email: user.email,
-      password: user.password
+      :email => user.email,
+      :password => user.password
     }
     
     # Open bidding
@@ -871,7 +869,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Bid - User-5 will bet 10 on A
     user_browser.post '/api/bet', {
@@ -879,7 +877,7 @@ describe 'Main App' do
       :amount => 10
     }.to_json
 
-    user_browser.last_response.should be_ok
+    expect(user_browser.last_response).to be_ok
     
     # Close bidding
     put '/api/current_match', {
@@ -890,20 +888,20 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Ensure that odds & amount are calculated
     match_data_after_close =  Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_close['participantA']['amount'].to_f.should == 10.0
-    match_data_after_close['participantB']['amount'].to_f.should == 0.0
-    match_data_after_close['odds'].should == "0:0"
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(0.0)
+    expect(match_data_after_close['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
-    match_data_after_close['bettors']['a'].should == []
-    match_data_after_close['bettors']['b'].should == []
+    expect(match_data_after_close['bettors']['a']).to match_array([])
+    expect(match_data_after_close['bettors']['b']).to match_array([])
 
-    Bet.count.should == 1
+    expect(Bet.count).to eq(1)
 
     # End match - admin client data needs to updated to
     # include bid amounts & odds
@@ -921,12 +919,12 @@ describe 'Main App' do
     # Check match data
     match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
 
-    match_data_after_payout['status'].should == 'closed'
+    expect(match_data_after_payout['status']).to eq('closed')
 
     # There should be no payout
-    User.first(email: user.email).balance.to_i.should == 2525
+    expect(User.first(:email => user.email).balance.to_i).to eq(2525)
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
   end
 
   it "does not allow non-positive integer bet amounts" do
@@ -941,7 +939,7 @@ describe 'Main App' do
 
     Persistence::MatchStatusPersistence.close_bids
 
-    Bet.count.should == 0
+    expect(Bet.count).to eq(0)
 
     # Create users
     admin = FactoryGirl.create(:admin)
@@ -951,13 +949,13 @@ describe 'Main App' do
 
     # User login
     post '/login', {
-      email: admin.email,
-      password: admin.password
+      :email => admin.email,
+      :password => admin.password
     }
 
     user_browser.post '/login', {
-      email: user.email,
-      password: user.password
+      :email => user.email,
+      :password => user.password
     }
 
     # Open bidding
@@ -969,7 +967,7 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
     # Invalid Bet: zero
     user_browser.post '/api/bet', {
@@ -977,8 +975,8 @@ describe 'Main App' do
       :amount => 0
     }.to_json
 
-    user_browser.last_response.should_not be_ok
-    user_browser.last_response.body.should include('amount must be a positive integer')
+    expect(user_browser.last_response).to_not be_ok
+    expect(user_browser.last_response.body).to include('amount must be a positive integer')
 
     # Invalid Bet: negative integer
     user_browser.post '/api/bet', {
@@ -986,8 +984,8 @@ describe 'Main App' do
       :amount => -1
     }.to_json
 
-    user_browser.last_response.should_not be_ok
-    user_browser.last_response.body.should include('amount must be a positive integer')
+    expect(user_browser.last_response).to_not be_ok
+    expect(user_browser.last_response.body).to include('amount must be a positive integer')
 
     # Invalid Bet: negative float
     user_browser.post '/api/bet', {
@@ -995,8 +993,8 @@ describe 'Main App' do
       :amount => -1.00001
     }.to_json
 
-    user_browser.last_response.should_not be_ok
-    user_browser.last_response.body.should include('amount must be a positive integer')
+    expect(user_browser.last_response).to_not be_ok
+    expect(user_browser.last_response.body).to include('amount must be a positive integer')
 
     # Invalid Bet: positive float
     user_browser.post '/api/bet', {
@@ -1004,8 +1002,8 @@ describe 'Main App' do
       :amount => 1.00001
     }.to_json
 
-    user_browser.last_response.should_not be_ok
-    user_browser.last_response.body.should include('amount must be a positive integer')
+    expect(user_browser.last_response).to_not be_ok
+    expect(user_browser.last_response.body).to include('amount must be a positive integer')
 
     # Invalid Bet: over account balance
     user_browser.post '/api/bet', {
@@ -1013,8 +1011,8 @@ describe 'Main App' do
       :amount => 51
     }.to_json
 
-    user_browser.last_response.should_not be_ok
-    user_browser.last_response.body.should include('insufficient funds')
+    expect(user_browser.last_response).to_not be_ok
+    expect(user_browser.last_response.body).to include('insufficient funds')
 
     # Invalid Bet: invalid forParticipantValue
     user_browser.post '/api/bet', {
@@ -1022,8 +1020,8 @@ describe 'Main App' do
       :amount => 50
     }.to_json
 
-    user_browser.last_response.should_not be_ok
-    user_browser.last_response.body.should include('invalid request')
+    expect(user_browser.last_response).to_not be_ok
+    expect(user_browser.last_response.body).to include('invalid request')
 
     # Cancel bidding
     put '/api/current_match', {
@@ -1034,9 +1032,9 @@ describe 'Main App' do
       :odds => '',
     }.to_json
 
-    last_response.should be_ok
+    expect(last_response).to be_ok
 
-    User.first(email: user.email).balance.to_i.should == 50
+    expect(User.first(:email => user.email).balance.to_i).to eq(50)
   end
 end
 

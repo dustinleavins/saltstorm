@@ -7,15 +7,15 @@ require 'yaml'
 
 module Settings
   @@default_site_options = {
-    path: 'config/site.yml'
+    :path => 'config/site.yml'
   }
 
   @@default_db_options = {
-    path: 'config/database.yml'
+    :path => 'config/database.yml'
   }
 
   @@default_token_options = {
-    path: 'config/secret_token.yml'
+    :path => 'config/secret_token.yml'
   }
 
   def self.site(environment, options={})

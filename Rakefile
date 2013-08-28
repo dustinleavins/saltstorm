@@ -43,7 +43,7 @@ task :initial_setup => [:generate_secret_token] do
   db = YAML::load_file('config/database.yml')
   Sequel.connect(db[ENV['RACK_ENV']])
   require './models.rb'
-  if ENV['RACK_ENV'] != 'test' && !Models::User.first(display_name: 'admin')
+  if ENV['RACK_ENV'] != 'test' && !Models::User.first(:display_name => 'admin')
     # Add admin user if it doesn't already exist
     say('Please enter an e-mail address & password for the admin user')
 
@@ -58,11 +58,11 @@ task :initial_setup => [:generate_secret_token] do
     end
 
     # Create user
-    admin_user = Models::User.create(display_name: 'admin',
-        email: email,
-        password: password, 
-        permission_entry: 'admin',
-        balance: 0)
+    admin_user = Models::User.create(:display_name => 'admin',
+        :email => email,
+        :password => password, 
+        :permission_entry => 'admin',
+        :balance => 0)
   end
 end
 
