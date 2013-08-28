@@ -23,11 +23,14 @@ a {
   color: #000000;
 }
 
-
 .form-control {
   background-color: #E0E0E0;
   color: #222222;
   border-radius: 8px;
+}
+
+.admin-message {
+  text-align: center;
 }
 
 .bet-a {

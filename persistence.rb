@@ -61,6 +61,7 @@ module Persistence
           :participantA => { :name => '', :amount => 0},
           :participantB => { :name => '', :amount => 0},
           :odds => '',
+          :message => '',
           :bettors => {
               :a => [],
               :b => [] 

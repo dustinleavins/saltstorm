@@ -395,7 +395,7 @@ class RootApp < Sinatra::Base
       }
 
     # No other status transitions are allowed
-    else
+    elsif (old_match_data['status'] != new_match_data['status'])
       return [500, "{error: 'invalid request'}"]
     end
 
