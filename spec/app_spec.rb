@@ -147,6 +147,92 @@ describe 'Main App' do
     expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(0)
   end
 
+  it "handles /request_password_reset errors" do
+    invalid_email = FactoryGirl.attributes_for(:user)[:email]
+
+    # Illegal - empty email field
+    post '/request_password_reset', {
+      :email => nil
+    }
+
+    expect(last_response).to be_ok
+    expect(EmailJob.where(:to => '').count).to eq(0)
+    expect(PasswordResetRequest.where(:email => '').count).to eq(0)
+
+    # Illegal - non-registered user
+    post '/request_password_reset', {
+      :email => invalid_email
+    }
+
+    expect(last_response).to be_ok
+    expect(EmailJob.where(:to => invalid_email.downcase).count).to eq(0)
+    expect(PasswordResetRequest.where(:email => invalid_email.downcase).count).to eq(0)
+  end
+
+  it "handles /reset_password errors" do
+    user = FactoryGirl.create(:user)
+
+    # Request Reset
+    post '/request_password_reset', {
+      :email => user.email
+    }
+
+    expect(last_response).to be_ok
+    # There's another test that checks to see if reset request is OK
+    code = PasswordResetRequest.first(:email => user.email.downcase).code
+
+    # Invalid GET - no params
+    get "/reset_password"
+    expect(last_response).to be_redirect
+
+    # Invalid GET - no email
+    get "/reset_password?#{URI.encode_www_form([["code", code]])}"
+    expect(last_response).to be_redirect
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+
+    # Invalid GET - no code
+    get "/reset_password?#{URI.encode_www_form([["email", user.email]])}"
+    expect(last_response).to be_redirect
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+
+    # Invalid GET - wrong code
+    get "/reset_password?#{URI.encode_www_form([['email', user.email], ['code', code.reverse]])}"
+    expect(last_response).to be_redirect
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+
+    # Invalid POST - no email
+    post '/reset_password', {
+      :code => code,
+      :password => 'password',
+      :confirm_password => 'password'
+    }
+
+    expect(last_response).to be_ok
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+
+    # Invalid POST - no code
+    post '/reset_password', {
+      :email => user.email,
+      :password => 'password',
+      :confirm_password => 'password'
+    }
+
+    expect(last_response).to be_ok
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+
+    # Invalid POST - password mismatch
+    post '/reset_password', {
+      :email => user.email,
+      :code => code,
+      :password => 'new password',
+      :confirm_password => 'different password'
+    }
+
+    expect(last_response).to be_ok
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+  end
+
+
   it "should not allow /api/account access to anon users" do
     get '/api/account'
     expect(last_response.status).to eq(500)

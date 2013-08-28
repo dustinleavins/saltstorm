@@ -105,7 +105,14 @@ class RootApp < Sinatra::Base
   end
 
   post '/request_password_reset' do
-    @email = params[:email].downcase
+    @email = params[:email]
+
+    if (@email.nil?)
+      return erb :request_password_reset
+    end
+
+    @email.downcase!
+
     user = User.first(:email => @email)
 
     if user.nil?
@@ -130,24 +137,29 @@ class RootApp < Sinatra::Base
   end
 
   get '/reset_password' do
-   @email = params[:email]
-   @code = params[:code]
+    @email = params[:email]
+    @code = params[:code]
 
-   if (@email.nil? || @code.nil?)
-     return redirect to('/request_password_reset')
-   else
-     return erb :reset_password
-   end
+    if (@email.nil? || @code.nil?)
+      return redirect to('/request_password_reset')
+    end
+
+    reset_request = PasswordResetRequest.first(:email => @email, :code => @code)
+    if (reset_request.nil?)
+      return redirect to('/request_password_reset')
+    else
+      return erb :reset_password
+    end
  end
 
   post '/reset_password' do
-    @email = params[:email].downcase
-    @code = params[:code]
-    @new_password = params[:password]
-    @confirm_new_password = params[:confirm_password]
+    @email = params[:email].to_s.downcase
+    @code = params[:code].to_s
+    @new_password = params[:password].to_s
+    @confirm_new_password = params[:confirm_password].to_s
 
-    if (@email.empty? || @code.nil? ||
-        @new_password.nil? || @new_password != @confirm_new_password)
+    if (@email.empty? || @code.empty? ||
+        @new_password.empty? || @new_password != @confirm_new_password)
       # Something's wrong; it's likely an invalid password
       return erb :reset_password
     end
