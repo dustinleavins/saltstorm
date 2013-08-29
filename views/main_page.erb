@@ -22,15 +22,17 @@
       </ul>
     </div>
   </nav>
-  <div class='row main-video'>
-    <div class='col-md-12'>
+  <div class='row main-video' ng-hide='showBettors'>
+    <div class='col-md-9'>
       <%= @video_link %>
     </div>
+    <div class='col-md-3'>
+    </div>
   </div>
-  <div class='row admin-message' ng-show='match.message'>
+  <div class='row admin-message' ng-show='match.message && !showBettors'>
     <p>Message from admin: {{ match.message }}</p>
   </div>
-  <div class='row'>
+  <div class='row' ng-hide='showBettors'>
     <div class='col-md-4 bet-a'>
       <div class='row'>
         <div class='col-md-6 participant-a'>
@@ -70,6 +72,27 @@
         <div class='col-md-6 participant-b'>
           <p>{{ match.participantB.name }}</p>
           <p>{{ match.participantB.amount | currency: "☺" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-md-12'>
+      <p class='text-center' ng-hide='showBettors'><a ng-click='showBettors = true' class='btn btn-default'>Show Bettors</a></p>
+      <p class='text-center' ng-show='showBettors'><a ng-click='showBettors = false' class='btn btn-default'>Show Main</a></p>
+      <div class='row' ng-show='showBettors'>
+        <div class='col-md-6'>
+          <p>{{ match.participantA.name }}</p>
+          <ul ng-show='match.bettors.a.length > 0'>
+            <li ng-repeat='bettor in match.bettors.a'>{{bettor}}</li>
+          </ul>
+        </div>
+
+        <div class='col-md-6'>
+          <p>{{ match.participantB.name }}</p>
+          <ul ng-show='match.bettors.b.length > 0'>
+            <li ng-repeat='bettor in match.bettors.b'>{{bettor}}</li>
+          </ul>
         </div>
       </div>
     </div>

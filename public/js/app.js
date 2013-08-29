@@ -5,6 +5,7 @@
  */
 
 var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q) {
+    $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds
     $scope.betAmount = 0;
     $scope.bettingThisRound = false;
