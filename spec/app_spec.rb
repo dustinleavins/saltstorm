@@ -147,6 +147,72 @@ describe 'Main App' do
     expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(0)
   end
 
+  it 'stops anonymous users from accessing account page' do
+    get '/account/'
+    expect(last_response).to_not be_ok
+  end
+
+  it "has a working account page" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    get '/account/'
+    expect(last_response).to be_ok
+  end
+
+  it "allows user to update password" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/password', {
+      :password => 'password10',
+      :confirm_password => 'password10'
+    }
+
+    expect(last_response).to be_ok
+
+    updated_user = User.first(:email => user.email.downcase)
+    expected_pw_hash = User.generate_password_digest('password10',
+                                                     updated_user.password_salt)
+
+    expect(updated_user.password_hash).to eq(expected_pw_hash)
+  end
+
+  it "allows user to update info" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => user.display_name.reverse,
+      :email => 'changed_email@example.com',
+      :password => user.password
+    }
+
+    expect(last_response).to be_ok
+
+    updated_user = User.first(:email => 'changed_email@example.com')
+    expect(updated_user).to_not be_nil
+
+    expect(updated_user.display_name).to eq(user.display_name.reverse)
+  end
+
+
+
   it "handles /request_password_reset errors" do
     invalid_email = FactoryGirl.attributes_for(:user)[:email]
 

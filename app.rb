@@ -212,6 +212,90 @@ class RootApp < Sinatra::Base
     return erb :main_page
   end
 
+  get '/account' do
+    redirect to('/account/')
+  end
+
+  get '/account/' do
+    if session[:uid].nil?
+      return redirect '/login', 303
+    end
+
+    user = User.first(:id => session[:uid])
+    if (user.nil?)
+      return redirect '/login', 303
+    end
+
+    @display_name = user.display_name
+    @email = user.email
+    erb :account
+  end
+
+  post '/account/info' do
+    if (session[:uid].nil?)
+      return redirect '/login', 303
+    end
+
+    user = User.first(:id => session[:uid])
+    if (user.nil?)
+      return redirect '/login', 303
+    end
+
+    # Check password
+    password = params[:password].to_s
+    password_hash = User.generate_password_digest(password, user.password_salt)
+
+    if (user.password_hash != password_hash)
+      # TODO: Show error
+      return redirect to('/account/')
+    end
+
+    @display_name = params[:display_name].to_s
+    if (!@display_name.empty?)
+      user.display_name = @display_name
+    end
+
+    @email = params[:email].to_s
+    if (!@email.empty?)
+      user.email = @email
+    end
+
+    user.save()
+
+    # TODO: Show success message
+    @display_name = user.display_name
+    @email = user.email
+
+    erb :account
+  end
+
+  post '/account/password' do
+    if session[:uid].nil?
+      return redirect '/login', 303
+    end
+
+    user = User.first(:id => session[:uid])
+    if (user.nil?)
+      return redirect '/login', 303
+    end
+
+    @password = params[:password].to_s
+    @confirm_password = params[:confirm_password].to_s
+
+    if (@password.empty? || @password != @confirm_password)
+      # TODO: Show error
+      return redirect to('/account/')
+    end
+
+    user.password = @password
+    user.save()
+
+    # TODO: Show success message
+    @display_name = user.display_name
+    @email = user.email
+    erb :account
+  end
+
   post '/api/login' do
     content_type :json
 
