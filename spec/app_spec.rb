@@ -179,7 +179,7 @@ describe 'Main App' do
       :confirm_password => 'password10'
     }
 
-    expect(last_response).to be_ok
+    expect(last_response).to be_redirect # redirect to /account/
 
     updated_user = User.first(:email => user.email.downcase)
     expected_pw_hash = User.generate_password_digest('password10',
@@ -203,7 +203,7 @@ describe 'Main App' do
       :password => user.password
     }
 
-    expect(last_response).to be_ok
+    expect(last_response).to be_redirect # redirect to /account/
 
     updated_user = User.first(:email => 'changed_email@example.com')
     expect(updated_user).to_not be_nil
@@ -273,7 +273,7 @@ describe 'Main App' do
       :confirm_password => 'password'
     }
 
-    expect(last_response).to be_ok
+    expect(last_response).to_not be_ok
     expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
 
     # Invalid POST - no code
@@ -283,7 +283,7 @@ describe 'Main App' do
       :confirm_password => 'password'
     }
 
-    expect(last_response).to be_ok
+    expect(last_response).to_not be_ok
     expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
 
     # Invalid POST - password mismatch

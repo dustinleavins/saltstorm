@@ -8,6 +8,7 @@ require 'json'
 require 'bigdecimal'
 require 'rubygems'
 require 'sinatra/base'
+require 'sinatra/flash'
 require './models.rb'
 require './persistence.rb'
 require './settings.rb'
@@ -19,6 +20,7 @@ class RootApp < Sinatra::Base
   set :static_cache_control, [:private]
 
   enable :sessions
+  register Sinatra::Flash
   set :session_secret, Settings::secret_token
 
   helpers do
@@ -155,6 +157,17 @@ class RootApp < Sinatra::Base
     @code = params[:code].to_s
     @new_password = params[:password].to_s
     @confirm_new_password = params[:confirm_password].to_s
+    
+    reset_request = PasswordResetRequest.first(:email => @email, :code => @code)
+    if (reset_request.nil?)
+      # /reset_password view has an error in it
+      return 500
+    end
+
+    user = User.first(:email => @email)
+    if (user.nil?)
+      return 500
+    end
 
     if (@email.empty? || @code.empty? ||
         @new_password.empty? || @new_password != @confirm_new_password)
@@ -162,16 +175,6 @@ class RootApp < Sinatra::Base
       return erb :reset_password
     end
 
-    reset_request = PasswordResetRequest.first(:email => @email, :code => @code)
-    if (reset_request.nil?)
-      # TODO: Return a better error code
-      return 404
-    end
-
-    user = User.first(:email => @email)
-    if (user.nil?)
-      return 404
-    end
 
     # Update password
     user.password = @new_password
@@ -244,7 +247,7 @@ class RootApp < Sinatra::Base
     password_hash = User.generate_password_digest(password, user.password_salt)
 
     if (user.password_hash != password_hash)
-      # TODO: Show error
+      flash.next[:info] = { :error_password => true }
       return redirect to('/account/')
     end
 
@@ -260,11 +263,11 @@ class RootApp < Sinatra::Base
 
     user.save()
 
-    # TODO: Show success message
     @display_name = user.display_name
     @email = user.email
 
-    erb :account
+    flash.next[:info] = { :success => true }
+    redirect to('/account/') 
   end
 
   post '/account/password' do
@@ -281,17 +284,17 @@ class RootApp < Sinatra::Base
     @confirm_password = params[:confirm_password].to_s
 
     if (@password.empty? || @password != @confirm_password)
-      # TODO: Show error
+      flash.next[:password] = { :error_password => true }
       return redirect to('/account/')
     end
 
     user.password = @password
     user.save()
 
-    # TODO: Show success message
     @display_name = user.display_name
     @email = user.email
-    erb :account
+    flash.next[:password] = { :success => true }
+    return redirect to('/account/')
   end
 
   post '/api/login' do
