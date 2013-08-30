@@ -123,10 +123,8 @@ class RootApp < Sinatra::Base
 
     reset_request = PasswordResetRequest.create(:email => @email)
 
-    # At this point, 'URI' is an object with type URI::Parser
-    # Object.const_get("URI") is a workaround to access the real URI module
     reset_url = "http://#{app_settings['domain']}/reset_password?" +
-      Object.const_get("URI")::encode_www_form([["email", user.email], ["code", reset_request.code]])
+      ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
 
     EmailJob.create(:to => @email,
                     :subject => "#{app_settings['domain']} - Password Reset",
