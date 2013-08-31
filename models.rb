@@ -36,7 +36,7 @@ module Models
     end
 
     def before_validation
-      if(!self.password.nil?)
+      if(!self.password.nil? && !self.password.empty?)
         self.password_salt = User.generate_salt
         self.password_hash = User.generate_password_digest(@password, self.password_salt)
       end
