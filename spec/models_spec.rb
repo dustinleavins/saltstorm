@@ -183,12 +183,14 @@ describe 'Models::PasswordResetRequest' do
   it 'rejects requests with invalid code' do
     expect do
       Models::PasswordResetRequest.create(:email => 'test@example.com',
-                                          :code => nil)
-    end.to raise_error
-
-    expect do
-      Models::PasswordResetRequest.create(:email => 'test@example.com',
                                           :code => '')
     end.to raise_error
+  end
+
+  it 'accepts requests with nil code' do
+    req = Models::PasswordResetRequest.create(:email => 'test@example.com',
+                                              :code => nil)
+
+    expect(req.code).to_not be_nil
   end
 end
