@@ -22,13 +22,31 @@ describe 'Models::User' do
     expect(user.permissions).to eq(['admin', 'test'].to_set)
   end
 
-
   it 'has functional password hash class methods' do
     salt = Models::User.generate_salt
     expect(salt).to_not be_nil
 
     password_digest = Models::User.generate_password_digest('password', salt)
     expect(password_digest).to_not be_nil
+  end
+
+  it 'rejects users with invalid e-mail addresses' do
+    expect{FactoryGirl.create(:user, :email => '')}.to raise_error
+    expect{FactoryGirl.create(:user, :email => 'test')}.to raise_error
+  end
+
+  it 'rejects users with invalid display_name' do
+    expect{FactoryGirl.create(:user, :display_name => nil)}.to raise_error
+    expect{FactoryGirl.create(:user, :display_name => '')}.to raise_error
+  end
+
+  it 'rejects users with invalid balance' do
+    expect{FactoryGirl.create(:user, :balance => nil)}.to raise_error
+  end
+
+  it 'rejects users with invalid password' do
+    expect{FactoryGirl.create(:user, :password => nil)}.to raise_error
+    expect{FactoryGirl.create(:user, :password => '')}.to raise_error
   end
 end
 
@@ -43,6 +61,35 @@ describe 'Models::Bet' do
     expect(bet.for_participant).to eq('a')
     expect(bet.amount).to eq(10)
   end
+
+  it 'rejects bets without user_ids' do
+    expect do
+      Models::Bet.create(:for_participant => 'a', :amount => 10)
+    end.to raise_error
+  end
+
+  it 'rejects bets with invalid for_participant' do
+    user = FactoryGirl.create(:user)
+    expect do
+      Models::Bet.create(:user_id => user.id,
+                         :for_participant => nil,
+                         :amount => 10)
+    end.to raise_error
+
+    expect do
+      Models::Bet.create(:user_id => user.id,
+                         :for_participant => '',
+                         :amount => 10)
+    end.to raise_error
+  end
+
+  it 'rejects bets with invalid amounts' do
+    expect do
+      Models::Bet.create(:user_id => user.id,
+                         :for_participant => 'c',
+                         :amount => nil)
+    end.to raise_error
+  end
 end
 
 describe 'Models::EmailJob' do
@@ -55,6 +102,56 @@ describe 'Models::EmailJob' do
     expect(email.subject). to eq('subject')
     expect(email.body).to eq('body')
   end
+
+  it 'rejects jobs with invalid e-mail addresses' do
+    expect do
+      Models::EmailJob.create(:to => nil,
+                              :subject => 'subject',
+                              :body => 'body')
+    end.to raise_error
+
+    expect do
+      Models::EmailJob.create(:to => '',
+                              :subject => 'subject',
+                              :body => 'body')
+    end.to raise_error
+
+
+    expect do
+      Models::EmailJob.create(:to => 'test',
+                              :subject => 'subject',
+                              :body => 'body')
+    end.to raise_error
+  end
+
+  it 'rejects jobs with invalid subject' do
+    expect do
+      Models::EmailJob.create(:to => 'test@example.com',
+                              :subject => nil,
+                              :body => 'body')
+    end.to raise_error
+
+    expect do
+      Models::EmailJob.create(:to => 'test@example.com',
+                              :subject => '',
+                              :body => 'body')
+    end.to raise_error
+  end
+
+  it 'rejects jobs with invalid body' do
+    expect do
+      Models::EmailJob.create(:to => 'test@example.com',
+                              :subject => 'subject',
+                              :body => nil)
+    end.to raise_error
+
+    expect do
+      Models::EmailJob.create(:to => 'test@example.com',
+                              :subject => 'subject',
+                              :body => '')
+    end.to raise_error
+
+  end
 end
 
 describe 'Models::PasswordResetRequest' do
@@ -64,5 +161,34 @@ describe 'Models::PasswordResetRequest' do
 
     expect(request.email).to eq('TO@example.com')
     expect(request.code).to eq('111')
+  end
+
+  it 'rejects requests with invalid e-mail addresses' do
+    expect do
+      Models::PasswordResetRequest.create(:email => nil,
+                                          :code => 'code')
+    end.to raise_error
+
+    expect do
+      Models::PasswordResetRequest.create(:email => '',
+                                          :code => 'code')
+    end.to raise_error
+
+    expect do
+      Models::PasswordResetRequest.create(:email => 'test',
+                                          :code => 'code')
+    end.to raise_error
+  end
+
+  it 'rejects requests with invalid code' do
+    expect do
+      Models::PasswordResetRequest.create(:email => 'test@example.com',
+                                          :code => nil)
+    end.to raise_error
+
+    expect do
+      Models::PasswordResetRequest.create(:email => 'test@example.com',
+                                          :code => '')
+    end.to raise_error
   end
 end
