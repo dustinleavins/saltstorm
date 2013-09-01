@@ -1,3 +1,5 @@
+ENV['RACK_ENV'] = 'test'
+
 require 'rspec'
 require './settings.rb'
 require 'spec_helper'
