@@ -2,7 +2,6 @@
 # See the file 'LICENSE.txt' for copying permission
 require 'securerandom'
 require 'yaml'
-require 'json'
 require 'fileutils'
 require 'bundler/setup'
 require 'highline/import'

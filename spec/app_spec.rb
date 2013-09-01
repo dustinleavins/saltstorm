@@ -1,13 +1,10 @@
 ENV['RACK_ENV'] = 'test'
 Thread.abort_on_exception=true
 
-require 'yaml'
 require 'json'
 require 'uri'
 require 'rspec'
 require 'rack/test'
-require 'sequel'
-require 'factory_girl'
 require './app.rb'
 require './models.rb'
 require './persistence.rb'

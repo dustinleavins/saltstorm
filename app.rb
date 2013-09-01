@@ -3,9 +3,7 @@
 #
 # Full license can be found in 'LICENSE.txt'
 require 'uri'
-require 'yaml'
 require 'json'
-require 'bigdecimal'
 require 'rubygems'
 require 'sinatra/base'
 require 'sinatra/flash'
