@@ -3,6 +3,7 @@
 #
 # Full license can be found in 'LICENSE.txt'
 
+require 'securerandom'
 require 'json'
 require 'fileutils'
 
@@ -97,6 +98,35 @@ module Persistence
     # Close bids.
     def self.close_bids
       FileUtils.rm @@bet_file, force: true
+    end
+  end
+
+  class ClientNotifications
+    @@environment = ENV['RACK_ENV']
+    @@notify_filename = "tmp/#{@@environment}/current_notification.json"
+
+    def self.current_notification_filename
+      return @@notify_filename
+    end
+
+    def self.current_notification
+      notification_data = nil
+
+      if (File.exist? @@notify_filename)
+        File.open(@@notify_filename, 'r') do |f|
+          notification_data = JSON.parse(f.readlines.join)
+        end
+      end
+
+      return notification_data
+    end
+
+    def self.current_notification=(hash_with_data)
+      save_hash = hash_with_data.clone
+      save_hash[:update_id] = SecureRandom.base64(8)
+      File.open(@@notify_filename, 'w') do |f|
+        f.write(save_hash.to_json)
+      end
     end
   end
 end

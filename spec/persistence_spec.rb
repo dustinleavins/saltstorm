@@ -45,3 +45,21 @@ describe 'Persistence::MatchStatusPersistence' do
   end
 end
 
+describe 'Persistence::ClientNotifications' do
+  it 'allows persistence of client notification' do
+    # The current notification should not exist because Persistence testing
+    # removes it.
+    expect(Persistence::ClientNotifications.current_notification).to be_nil
+    expect(File.exist? Persistence::ClientNotifications.current_notification_filename).to be_false
+
+    Persistence::ClientNotifications.current_notification = {
+      'data' => 54321
+    }
+
+    persisted_notification = Persistence::ClientNotifications.current_notification
+    expect(persisted_notification).to_not be_nil
+    expect(persisted_notification['data']).to eq(54321)
+    expect(persisted_notification['update_id']).to_not be_nil
+  end
+end
+

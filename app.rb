@@ -363,6 +363,27 @@ class RootApp < Sinatra::Base
     return [200, "{message: 'ok'}"]
   end
 
+  post '/api/send_client_notifications' do
+    content_type :json
+
+    if (session[:uid].nil?)
+      return [500, "{ error: 'Must be logged-in'}"]
+    end
+
+    user = User.first(:id => session[:uid])
+    if (!user.permissions.include? 'admin')
+      return [500, "{ error: 'invalid request'}"]
+    end
+
+    request.body.rewind
+    update_data = JSON.parse(request.body.read)
+   
+    Persistence::ClientNotifications.current_notification = update_data
+
+    # TODO: Send client notifications
+    send_file Persistence::ClientNotifications.current_notification_filename
+  end
+
   get '/api/current_match' do
     send_file Persistence::MatchStatusPersistence.match_data_file
   end

@@ -208,8 +208,6 @@ describe 'Main App' do
     expect(updated_user.display_name).to eq(user.display_name.reverse)
   end
 
-
-
   it "handles /request_password_reset errors" do
     invalid_email = FactoryGirl.attributes_for(:user)[:email]
 
@@ -300,6 +298,55 @@ describe 'Main App' do
     get '/api/account'
     expect(last_response.status).to eq(500)
     expect(last_response.content_type.include?('application/json')).to be_true
+  end
+
+  it 'should not allow /api/send_client_notifications access to anon users' do
+    post '/api/send_client_notifications', {
+      :data => 'AAAAA'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+  end
+
+  it 'should not allow /api/send_client_notifications access to non-admin users' do
+    # Create User
+    user = FactoryGirl.create(:user)
+    
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post '/api/send_client_notifications', {
+      :data => 'AAAAA'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+  end
+
+  it 'has a functional /api/send_client_notifications route' do
+    admin = FactoryGirl.create(:admin)
+
+    # Sign-in
+    post '/login', {
+      :email => admin.email,
+      :password => admin.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post '/api/send_client_notifications', {
+      :data => 'AAAAA'
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    response_data = JSON.parse(last_response.body)
+    expect(response_data['data']).to eq('AAAAA')
+    expect(response_data['update_id']).to_not be_nil
   end
 
   it "should not allow /api/current_match access to anon users" do
