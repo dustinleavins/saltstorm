@@ -3,6 +3,7 @@
 #
 # Full license can be found in 'LICENSE.txt'
 
+require 'uri'
 require 'securerandom'
 require 'digest'
 require 'set'
@@ -50,6 +51,10 @@ module Models
       validates_presence :balance
       validates_presence :password_hash
       validates_presence :password_salt
+
+      if ((!self.post_url.nil? && !self.post_url.empty?))
+        validates_format URI.regexp, :post_url
+      end
     end
 
     # Plain-text representation of password

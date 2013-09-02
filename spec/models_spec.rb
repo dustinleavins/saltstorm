@@ -12,12 +12,14 @@ describe 'Models::User' do
                                :password => 'password',
                                :display_name => 'DB_Test',
                                :balance => 25,
-                               :permissions => ['admin','test'].to_set)
+                               :permissions => ['admin','test'].to_set,
+                               :post_url => 'http://www.example.com')
 
     expect(user.email).to eq('db_test@example.com')
     expect(user.display_name).to eq('DB_Test')
     expect(user.balance). to eq(25)
     expect(user.permission_entry).to eq('admin;test')
+    expect(user.post_url).to eq('http://www.example.com')
 
     expect(user.permissions).to eq(['admin', 'test'].to_set)
   end
@@ -47,6 +49,12 @@ describe 'Models::User' do
   it 'rejects users with invalid password' do
     expect{FactoryGirl.create(:user, :password => nil)}.to raise_error
     expect{FactoryGirl.create(:user, :password => '')}.to raise_error
+  end
+
+  it 'rejects user with invalid post_url' do
+    expect do
+      FactoryGirl.create(:user, :post_url => 'non-valid URI')
+    end.to raise_error
   end
 end
 
