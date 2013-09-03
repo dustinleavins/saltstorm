@@ -327,7 +327,7 @@ describe 'Main App' do
     expect(last_response.status).to eq(500)
   end
 
-  it 'has a functional /api/send_client_notifications route' do
+  it 'allows admins to send push notifications to clients' do
     admin = FactoryGirl.create(:admin)
 
     # Sign-in
@@ -346,7 +346,44 @@ describe 'Main App' do
 
     response_data = JSON.parse(last_response.body)
     expect(response_data['data']).to eq('AAAAA')
-    expect(response_data['update_id']).to_not be_nil
+
+    actual_update_id = Persistence::ClientNotifications.current_notification['update_id']
+    expect(response_data['update_id']).to eq(actual_update_id)
+
+    # Test what happens when users check the ID against the server's
+    post '/api/check_client_notification', response_data.to_json
+    expect(last_response).to be_ok
+    expect(last_response.body).to eq('{msg: "OK"}')
+  end
+
+  it 'handles empty requests to /api/check_client_notification' do
+    expect(Persistence::ClientNotifications.current_notification).to_not be_nil
+
+    post '/api/check_client_notification'
+
+    expect(last_response.status).to eq(500)
+  end
+
+
+  it 'handles non-JSON requests to /api/check_client_notification' do
+    expect(Persistence::ClientNotifications.current_notification).to_not be_nil
+
+    post '/api/check_client_notification', {
+      :update_id  => 'not an update id',
+      :data => 'AAAAA'
+    }
+
+    expect(last_response.status).to eq(500)
+  end
+
+  it 'handles invalid requests to /api/check_client_notification' do
+    expect(Persistence::ClientNotifications.current_notification).to_not be_nil
+
+    post '/api/check_client_notification', {
+      :data => 'AAAAA'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
   end
 
   it "should not allow /api/current_match access to anon users" do

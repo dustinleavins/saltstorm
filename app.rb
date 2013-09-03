@@ -384,6 +384,32 @@ class RootApp < Sinatra::Base
     send_file Persistence::ClientNotifications.current_notification_filename
   end
 
+  post '/api/check_client_notification' do
+    content_type :json
+    request.body.rewind
+    notification_to_check = nil
+
+    begin
+      notification_to_check = JSON.parse(request.body.read)
+    rescue JSON::ParserError
+      return [500, '{error: "Request must be in JSON format"}']
+    end
+
+    user_provided_id = notification_to_check['update_id']
+
+    if (user_provided_id.nil?)
+      return [500, '{error: "Request must include update_id"}']
+    end
+
+    update_id = Persistence::ClientNotifications.current_notification['update_id']
+
+    if (user_provided_id != update_id)
+      return [500, '{error: "Invalid update_id"}']
+    else
+      return '{msg: "OK"}'
+    end
+  end
+
   get '/api/current_match' do
     send_file Persistence::MatchStatusPersistence.match_data_file
   end
