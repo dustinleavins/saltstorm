@@ -7,6 +7,7 @@ gem "sequel"
 gem "sqlite3"
 gem "mail"
 gem "whenever", :require => false
+gem 'rest-client'
 
 group :test do
   gem "rspec"
