@@ -13,8 +13,8 @@
 </div>
 <% if (flash[:password]) %>
 <div class='row col-md-12'>
-  <% if (flash[:password][:error_password]) %>
-  <div class='alert alert-danger'>Invalid Password</div>
+  <% if (flash[:password][:error]) %>
+    <div class='alert alert-danger'>Invalid Password</div>
   <% elsif (flash[:password][:success]) %>
   <div class='alert alert-success'>Successfully Changed Password</div>
   <% end %>
@@ -99,3 +99,7 @@
     <button type="submit" class="btn btn-default">Update Info</button>
   </p>
 </form>
+<div class='row col-md-12'>
+  <p class='text-center'><a class='btn btn-default' href='/main'>Main</a></p>
+</div>
+

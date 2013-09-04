@@ -293,19 +293,17 @@ class RootApp < Sinatra::Base
       return redirect '/login', 303
     end
 
-    @password = params[:password].to_s
-    @confirm_password = params[:confirm_password].to_s
+    password = params[:password].to_s
+    confirm_password = params[:confirm_password].to_s
 
-    if (@password.empty? || @password != @confirm_password)
-      flash.next[:password] = { :error_password => true }
+    if (password.empty? || password != confirm_password)
+      flash.next[:password] = { :error => true }
       return redirect to('/account/')
     end
 
-    user.password = @password
+    user.password = password
     user.save()
 
-    @display_name = user.display_name
-    @email = user.email
     flash.next[:password] = { :success => true }
     return redirect to('/account/')
   end
