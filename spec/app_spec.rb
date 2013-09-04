@@ -328,6 +328,9 @@ describe 'Main App' do
   end
 
   it 'allows admins to send push notifications to clients' do
+    # This test should never, ever send real notifications
+    expect(User.all_post_urls).to be_empty
+
     admin = FactoryGirl.create(:admin)
 
     # Sign-in

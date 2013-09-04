@@ -90,6 +90,11 @@ module Models
     def self.generate_salt
       return SecureRandom.base64(8)
     end
+
+    # Retrieves a list containing post_url for all users
+    def self.all_post_urls
+      return self.exclude(:post_url => nil).select_map(:post_url)
+    end
   end
 
   # Represents a bet made by a user. Bets are stored temporarily by

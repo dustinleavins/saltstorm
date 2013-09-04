@@ -5,6 +5,7 @@
 require 'uri'
 require 'json'
 require 'rubygems'
+require 'rest_client'
 require 'sinatra/base'
 require 'sinatra/flash'
 require './models.rb'
@@ -380,7 +381,18 @@ class RootApp < Sinatra::Base
    
     Persistence::ClientNotifications.current_notification = update_data
 
-    # TODO: Send client notifications
+    Thread.new do
+      notification_body = Persistence::ClientNotifications.current_notification.to_json
+
+      User.all_post_urls.each do |url|
+        begin
+          RestClient.post url, notification_body, :content_type => :json
+        rescue RestClient::RequestTimeout
+          # TODO: Log request failure
+        end
+      end
+    end
+
     send_file Persistence::ClientNotifications.current_notification_filename
   end
 

@@ -56,6 +56,15 @@ describe 'Models::User' do
       FactoryGirl.create(:user, :post_url => 'non-valid URI')
     end.to raise_error
   end
+
+  it 'properly retrieves all post_urls' do
+    FactoryGirl.create(:user, :post_url => 'http://www.example.com/test')
+    post_urls = User.all_post_urls
+    expect(post_urls).to_not be_nil
+    expect(post_urls.length).to eq(2)
+    expect(post_urls.first).to eq('http://www.example.com')
+    expect(post_urls.last).to eq('http://www.example.com/test')
+  end
 end
 
 describe 'Models::Bet' do
