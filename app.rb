@@ -228,6 +228,7 @@ class RootApp < Sinatra::Base
 
     @display_name = user.display_name
     @email = user.email
+    @post_url = user.post_url
     erb :account
   end
 
@@ -250,6 +251,7 @@ class RootApp < Sinatra::Base
       return redirect to('/account/')
     end
 
+    # TODO: Add 'original display_name/email/post_url' in case of error
     @display_name = params[:display_name].to_s
     if (!@display_name.empty?)
       user.display_name = @display_name
@@ -260,10 +262,20 @@ class RootApp < Sinatra::Base
       user.email = @email
     end
 
-    user.save()
+    @post_url = params[:post_url].to_s
+    if (!@post_url.empty?)
+      user.post_url = @post_url
+    end
 
-    @display_name = user.display_name
-    @email = user.email
+    if (!user.valid?)
+      flash.next[:info] = {
+        :error_post_url => !(user.errors[:post_url].nil?)
+      }
+
+      redirect to('/account/')
+    end
+
+    user.save()
 
     flash.next[:info] = { :success => true }
     redirect to('/account/') 
