@@ -226,9 +226,13 @@ class RootApp < Sinatra::Base
       return redirect '/login', 303
     end
 
-    @display_name = user.display_name
-    @email = user.email
-    @post_url = user.post_url
+    @original = {
+      :display_name => user.display_name,
+      :email => user.email,
+      :post_url => user.post_url
+    }
+
+    @current = flash[:current] || @original
     erb :account
   end
 
@@ -246,31 +250,29 @@ class RootApp < Sinatra::Base
     password = params[:password].to_s
     password_hash = User.generate_password_digest(password, user.password_salt)
 
+    flash.next[:current] = {
+      :display_name => params[:display_name].to_s,
+      :email => params[:email].to_s,
+      :post_url => params[:post_url].to_s
+    }
+
     if (user.password_hash != password_hash)
-      flash.next[:info] = { :error_password => true }
+      flash.next[:info] = { :error => {:password => true } }
       return redirect to('/account/')
     end
 
-    # TODO: Add 'original display_name/email/post_url' in case of error
-    @display_name = params[:display_name].to_s
-    if (!@display_name.empty?)
-      user.display_name = @display_name
-    end
-
-    @email = params[:email].to_s
-    if (!@email.empty?)
-      user.email = @email
-    end
-
-    @post_url = params[:post_url].to_s
-    if (!@post_url.empty?)
-      user.post_url = @post_url
-    end
+    user.display_name = flash.next[:current][:display_name]
+    user.email = flash.next[:current][:email]
+    user.post_url = flash.next[:current][:post_url]
 
     if (!user.valid?)
-      flash.next[:info] = {
-        :error_post_url => !(user.errors[:post_url].nil?)
+      error_info = {
+        :display_name =>  !(user.errors[:display_name].nil?),
+        :email =>  !(user.errors[:email].nil?),
+        :post_url => !(user.errors[:post_url].nil?)
       }
+
+      flash.next[:info] = { :error => error_info }
 
       redirect to('/account/')
     end

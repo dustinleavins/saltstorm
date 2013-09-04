@@ -47,8 +47,13 @@
 </div>
 <% if (flash[:info]) %>
 <div class='row col-md-12'>
-  <% if (flash[:info][:error_password]) %>
-  <div class='alert alert-danger'>Incorrect Password</div>
+  <% if (flash[:info][:error]) %>
+  <div class='alert alert-danger'>
+    <% if (flash[:info][:error][:password]) %><p>Incorrect Password</p><% end %>
+    <% if (flash[:info][:error][:email]) %><p>Invalid e-mail</p><% end %>
+    <% if (flash[:info][:error][:display_name]) %><p>Invalid display name</p><% end %>
+    <% if (flash[:info][:error][:post_url]) %><p>Invalid URL</p><% end %>
+  </div>
   <% elsif (flash[:info][:success]) %>
   <div class='alert alert-success'>Successfully Changed Info</div>
   <% end %>
@@ -64,30 +69,30 @@
              ng-model='currentPassword' />
     </p>
   </div>
-  <p>Current E-mail: <%= @email %></p>
+  <p>Current E-mail: <%= @original[:email] %></p>
   <div class='form-group' ng-class='{"has-error": infoForm.email.$invalid}'>
     <p>
       <label for='email'>New E-Mail Address</label>
       <input type='text' name='email' autocapitalize='off' class='form-control'
-             ng-model='email' />
+             ng-model='email' ng-init='email = "<%= @current[:email] %>"' 
+             required />
     </p>
   </div>
-  <p>Current Display Name: <%= @display_name %></p>
+  <p>Current Display Name: <%= @original[:display_name] %></p>
   <div class='form-group' ng-class='{"has-error": infoForm.display_name.$invalid}'>
     <p>
       <label for='display_name'>Name to display</label>
       <input type='text' name='display_name' autocapitalize='off' class='form-control'
-             ng-model='displayName' />
-
+             ng-model='displayName' ng-init='displayName = "<%= @current[:display_name] %>"'
+             required />
     </p>
   </div>
-  <p>Current notification URL: <%= @post_url %></p>
+  <p>Current notification URL: <%= @original[:post_url] %></p>
   <div class='form-group' ng-class='{"has-error": infoForm.post_url.$invalid}'>
     <p>
       <label for='post_url'>Notification URL</label>
       <input type='text' name='post_url' autocapitalize='off' class='form-control'
-             ng-model='postUrl' />
-
+             ng-model='postUrl' ng-init='postUrl = "<%= @current[:post_url] %>"' />
     </p>
   </div>
   <p>
