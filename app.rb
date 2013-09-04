@@ -399,7 +399,7 @@ class RootApp < Sinatra::Base
       User.all_post_urls.each do |url|
         begin
           RestClient.post url, notification_body, :content_type => :json
-        rescue RestClient::RequestTimeout
+        rescue RestClient::Exception
           # TODO: Log request failure
         end
       end
