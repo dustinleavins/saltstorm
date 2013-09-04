@@ -58,7 +58,15 @@ describe 'Models::User' do
   end
 
   it 'properly retrieves all post_urls' do
+    # A previous test creates a user with non-empty post_url
+    
+    # These user's URLs should not be included
+    FactoryGirl.create(:user, :post_url => '')
+    FactoryGirl.create(:user, :post_url => nil)
+
+    # This user's URL should be included
     FactoryGirl.create(:user, :post_url => 'http://www.example.com/test')
+
     post_urls = User.all_post_urls
     expect(post_urls).to_not be_nil
     expect(post_urls.length).to eq(2)

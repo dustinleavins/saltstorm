@@ -93,7 +93,10 @@ module Models
 
     # Retrieves a list containing post_url for all users
     def self.all_post_urls
-      return self.exclude(:post_url => nil).select_map(:post_url)
+      return self
+        .exclude(:post_url => '')
+        .exclude(:post_url => nil)
+        .select_map(:post_url)
     end
   end
 
