@@ -8,6 +8,12 @@
   <h1><%= titleize('Login') %></h1>
   <p><%= @site_description %></p>
 </div>
+<% if (flash[:error]) %>
+<div class='row col-md-12'>
+  <div class='alert alert-danger'>Incorrect e-mail or password</div>
+</div>
+<% end %>
+
 <form action='/login' method='post' name='loginForm'>
   <div class='form-group' ng-class='{"has-error": loginForm.email.$invalid}'>
     <p>

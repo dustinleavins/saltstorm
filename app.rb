@@ -68,6 +68,17 @@ class RootApp < Sinatra::Base
     return erb :login
   end
 
+  post '/login' do
+    if (authenticate(params[:email], params[:password]))
+      return redirect to('/main')
+    else
+      flash.next[:error] = true
+      return redirect to('/login'), 303
+    end
+    flash.next[:error] = true
+    return redirect to('/login'), 303
+  end
+
   get '/signup' do
     return erb :signup
   end
@@ -79,18 +90,28 @@ class RootApp < Sinatra::Base
     @display_name = params[:display_name]
     @balance = app_settings['user_signup_balance']
 
-    return erb :signup if User.where(:email => @email).count > 0
-    return erb :signup if User.where(:display_name => @display_name).count > 0
+    if (@password != @confirm_password)
+      flash.next[:error] = { :password => true }
+      return redirect to('/signup')
+    elsif (User.where(:email => @email).count > 0)
+      flash.next[:error] = { :email_not_unique => true }
+      return redirect to('/signup')
+    elsif (User.where(:display_name => @display_name).count > 0)
+      flash.next[:error] = { :display_name_not_unique => true }
+      return redirect to('/signup')
+    end
 
-    return erb :signup if (@password != @confirm_password) ||
-      @password.nil? || @password.empty?
-      @email.nil? || @email.empty? || !(@email.match Models.email_regex) ||
-      @display_name.nil? || @display_name.empty?
+    user = User.new(:email => @email,
+                    :password => @password,
+                    :display_name => @display_name,
+                    :balance => @balance)
 
-    user = User.create(:email => @email,
-                       :password => @password,
-                       :display_name => @display_name,
-                       :balance => @balance)
+    if (!user.valid?)
+      flash.next[:error] = user.errors
+      return redirect to('/signup')
+    end
+
+    user.save()
 
     # Send the introductory e-mail at a later time
     EmailJob.create(:to => @email,
@@ -171,6 +192,7 @@ class RootApp < Sinatra::Base
     if (@email.empty? || @code.empty? ||
         @new_password.empty? || @new_password != @confirm_new_password)
       # Something's wrong; it's likely an invalid password
+      flash.now[:error] = true
       return erb :reset_password
     end
 
@@ -188,14 +210,6 @@ class RootApp < Sinatra::Base
     PasswordResetRequest.where(:email => @email).delete()
 
     return erb :reset_password_success
-  end
-
-  post '/login' do
-    if (authenticate(params[:email], params[:password]))
-      return redirect to('/main')
-    else
-      return redirect '/login', 303
-    end
   end
 
   get '/logout' do
