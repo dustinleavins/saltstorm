@@ -209,6 +209,7 @@ class RootApp < Sinatra::Base
     # Delete requests for reset
     PasswordResetRequest.where(:email => @email).delete()
 
+    @display_name = user.display_name
     return erb :reset_password_success
   end
 
