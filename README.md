@@ -15,13 +15,13 @@ You must have shell access on your web server and the ability to run Rack web ap
 By default, the Gemfile specifies the 'thin' gem to use for a server. You can deploy this app with Phusion Passenger, Puma, or anything else (please don't use WEBrick), but I use thin for development.
 
 ## Saltstorm is a WIP
-Saltstorm is unstable and has no version number. Stuff will constantly break.
+Saltstorm is unstable and has no version number. Stuff might break.
 
 ## License Info
 AGPL3.
 
 ## Saltstorm Uses Cool Technologies
-I built Saltstorm with Sinatra and Sequel. The Rakefile uses Highline for user input. whenever makes the cron job for sending e-mails. mail sends e-mails. Tests use rspec, rack-test, and factory\_girl.
+I built Saltstorm with Sinatra (with sinatra-flash) and Sequel. The Rakefile uses Highline for user input. whenever makes the cron job for sending e-mails. mail sends e-mails. RestClient POSTs data to web users. Tests use rspec, rack-test, and factory\_girl.
 
-The front-end uses jQuery (every web front-end uses it), AngularJS, and ~~Twitter~~ Bootstrap 3.0. Javascript & CSS are pulled from CDNs provided by Google and [Bootstrap CDN](http://bootstrapcdn.com).
+The front-end uses jQuery (every web front-end uses it), AngularJS, and  Bootstrap 3.0. Javascript & CSS are pulled from CDNs provided by Google and [Bootstrap CDN](http://bootstrapcdn.com).
 
