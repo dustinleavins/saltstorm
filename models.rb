@@ -91,7 +91,8 @@ module Models
       return SecureRandom.base64(8)
     end
 
-    # Retrieves a list containing post_url for all users
+    # Retrieves a list containing post_url for all users, excluding empty
+    # and null values
     def self.all_post_urls
       return self
         .exclude(:post_url => '')
@@ -139,6 +140,7 @@ module Models
     end
   end
 
+  # Represents a request made to reset a user's password.
   class PasswordResetRequest < Sequel::Model
     plugin :validation_helpers
     def validate

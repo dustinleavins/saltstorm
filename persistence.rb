@@ -101,14 +101,17 @@ module Persistence
     end
   end
 
+  # Persists the most recent notification made by an admin to web clients.
   class ClientNotifications
     @@environment = ENV['RACK_ENV']
     @@notify_filename = "tmp/#{@@environment}/current_notification.json"
 
+    # Name of the file containing the most recent notification.
     def self.current_notification_filename
       return @@notify_filename
     end
 
+    # Hash containing data from the most recent notification.
     def self.current_notification
       notification_data = nil
 
@@ -121,6 +124,7 @@ module Persistence
       return notification_data
     end
 
+    # Create a new notification to be sent to clients.
     def self.current_notification=(hash_with_data)
       save_hash = hash_with_data.clone
       save_hash[:update_id] = SecureRandom.base64(8)
