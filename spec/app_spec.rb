@@ -356,7 +356,7 @@ describe 'Main App' do
     # Test what happens when users check the ID against the server's
     post '/api/check_client_notification', response_data.to_json
     expect(last_response).to be_ok
-    expect(last_response.body).to eq('{msg: "OK"}')
+    expect(last_response.body).to eq('{message: "OK"}')
   end
 
   it 'handles empty requests to /api/check_client_notification' do

@@ -327,7 +327,7 @@ class RootApp < Sinatra::Base
     request.body.rewind
     auth_info = JSON.parse(request.body.read)
     if (authenticate(auth_info['email'], auth_info['password']))
-      return 'ok'.to_json
+      return { :message => 'ok' }.to_json
     else
       return [500, '{error: "invalid login"}']
     end
@@ -443,7 +443,7 @@ class RootApp < Sinatra::Base
     if (user_provided_id != update_id)
       return [500, '{error: "Invalid update_id"}']
     else
-      return '{msg: "OK"}'
+      return '{message: "OK"}'
     end
   end
 
