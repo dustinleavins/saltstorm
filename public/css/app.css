@@ -18,9 +18,27 @@ a {
 }
 
 .btn-default {
-  background-image: linear-gradient(to bottom, #E0E0E0 50%, #D8D8D8 50%);
-  background-image: -webkit-linear-gradient(bottom, #E0E0E0 50%, #D8D8D8 50%);
+  background-image: linear-gradient(to bottom, #F0F0F0 50%, #999999);
+  background-image: -webkit-linear-gradient(bottom, #F0F0F0 50%, #999999);
   color: #000000;
+  border-color: #999999;
+}
+
+.btn-default:hover {
+  border-color: #999999;
+  color: #888888;
+}
+
+.btn-primary {
+  background-image: linear-gradient(to bottom, #333333 50%, #666666);
+  background-image: -webkit-linear-gradient(bottom, #333333 50%, #666666);
+  border-color: #333333;
+  color: #F0F0f0;
+}
+
+.btn-primary:hover {
+  border-color: #333333;
+  color: #888888;
 }
 
 .form-control {
