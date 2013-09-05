@@ -70,13 +70,11 @@ class RootApp < Sinatra::Base
 
   post '/login' do
     if (authenticate(params[:email], params[:password]))
-      return redirect to('/main')
+      redirect to('/main')
     else
       flash.next[:error] = true
-      return redirect to('/login'), 303
+      redirect to('/login'), 303
     end
-    flash.next[:error] = true
-    return redirect to('/login'), 303
   end
 
   get '/signup' do
@@ -91,14 +89,14 @@ class RootApp < Sinatra::Base
     @balance = app_settings['user_signup_balance']
 
     if (@password != @confirm_password)
-      flash.next[:error] = { :password => true }
-      return redirect to('/signup')
+      flash.now[:error] = { :password => true }
+      return erb :signup
     elsif (User.where(:email => @email).count > 0)
-      flash.next[:error] = { :email_not_unique => true }
-      return redirect to('/signup')
+      flash.now[:error] = { :email_not_unique => true }
+      return erb :signup
     elsif (User.where(:display_name => @display_name).count > 0)
-      flash.next[:error] = { :display_name_not_unique => true }
-      return redirect to('/signup')
+      flash.now[:error] = { :display_name_not_unique => true }
+      return erb :signup
     end
 
     user = User.new(:email => @email,
@@ -107,8 +105,8 @@ class RootApp < Sinatra::Base
                     :balance => @balance)
 
     if (!user.valid?)
-      flash.next[:error] = user.errors
-      return redirect to('/signup')
+      flash.now[:error] = user.errors
+      return erb :signup
     end
 
     user.save()
@@ -148,6 +146,7 @@ class RootApp < Sinatra::Base
     reset_url = "http://#{app_settings['domain']}/reset_password?" +
       ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
 
+    # TODO: Send a full e-mail instead of just the password reset URL
     EmailJob.create(:to => @email,
                     :subject => "#{app_settings['domain']} - Password Reset",
                     :body => reset_url)
@@ -166,9 +165,9 @@ class RootApp < Sinatra::Base
 
     reset_request = PasswordResetRequest.first(:email => @email, :code => @code)
     if (reset_request.nil?)
-      return redirect to('/request_password_reset')
+      redirect to('/request_password_reset')
     else
-      return erb :reset_password
+      erb :reset_password
     end
  end
 
@@ -195,7 +194,6 @@ class RootApp < Sinatra::Base
       flash.now[:error] = true
       return erb :reset_password
     end
-
 
     # Update password
     user.password = @new_password
