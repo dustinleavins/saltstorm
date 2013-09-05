@@ -65,6 +65,38 @@ describe 'Main App' do
     expect(last_response).not_to be_ok
   end
 
+  it "allows api users to login" do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/api/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to be_ok
+  end
+
+  it "doesn't explode for failed api login attempts" do
+    user = FactoryGirl.build(:user) # Do not save
+
+    # Sign-in
+    post '/api/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).not_to be_ok
+  end
+
   it "allows users to signup" do
     user_info = FactoryGirl.attributes_for(:user)
     post '/signup', {
