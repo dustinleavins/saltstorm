@@ -49,7 +49,28 @@ describe 'Main App' do
     expect(last_response).to be_ok
   end
 
-  it "doesn't explode for failed login attempts" do
+  it "allows users to logout" do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    get '/logout'
+    expect(last_response).to be_redirect
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+
+  end
+
+
+  it "does not allow non-users to login" do
     user = FactoryGirl.build(:user) # Do not save
 
     # Sign-in
@@ -62,7 +83,38 @@ describe 'Main App' do
 
     # Try a route requiring login
     get '/api/account'
-    expect(last_response).not_to be_ok
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allow users to login with incorrect password" do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password.reverse
+    }
+
+    expect(last_response).to be_redirect
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allow users to login without password" do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+    }
+
+    expect(last_response).to be_redirect
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
   end
 
   it "allows api users to login" do
@@ -120,6 +172,142 @@ describe 'Main App' do
     expect(new_user).to_not be_nil
     expect(new_user.balance).to eq(400)
   end
+
+  it "does not allows user to signup with incorrect confirm password" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/signup', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      confirm_password: user_info[:password].reverse,
+      display_name: user_info[:display_name]
+    }
+
+    expect(last_response).to_not be_redirect
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to signup with empty password" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/signup', {
+      :email => user_info[:email],
+      :password => '',
+      confirm_password: '',
+      display_name: user_info[:display_name]
+    }
+
+    expect(last_response).to_not be_redirect
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to signup with empty email" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/signup', {
+      :email => '',
+      :password => user_info[:password],
+      confirm_password: user_info[:password],
+      display_name: user_info[:display_name]
+    }
+
+    expect(last_response).to_not be_redirect
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to signup with empty name" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/signup', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      confirm_password: user_info[:password],
+      display_name: ''
+    }
+
+    expect(last_response).to_not be_redirect
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to signup with duplicate e-mail" do
+    existing_user_email = FactoryGirl.create(:user).email
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/signup', {
+      :email => existing_user_email,
+      :password => user_info[:password],
+      confirm_password: user_info[:password],
+      display_name: user_info[:display_name]
+    }
+
+    expect(last_response).to_not be_redirect
+
+    expect(User.where(:display_name =>user_info[:display_name]).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to signup with duplicate name" do
+    existing_user_name = FactoryGirl.create(:user).display_name
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/signup', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      confirm_password: user_info[:password],
+      display_name: existing_user_name 
+    }
+
+    expect(last_response).to_not be_redirect
+
+    expect(User.where(:email =>user_info[:email]).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "allows users to access /main" do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    # Try a route requiring login
+    get '/main'
+    expect(last_response).to be_ok
+  end
+
+  it "blocks anonymous users from accessing /main" do
+    get '/main'
+    expect(last_response).to be_redirect
+  end
+
 
   it "has a working 'request password reset' page" do
     get '/request_password_reset'
