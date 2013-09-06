@@ -1,6 +1,7 @@
 ENV['RACK_ENV'] = 'test'
 Thread.abort_on_exception=true
 
+require 'spec_helper'
 require 'json'
 require 'uri'
 require 'rspec'
@@ -8,7 +9,6 @@ require 'rack/test'
 require './app.rb'
 require './models.rb'
 require './persistence.rb'
-require 'spec_helper'
 
 describe 'Main App' do
   include Rack::Test::Methods

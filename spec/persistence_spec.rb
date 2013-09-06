@@ -1,9 +1,9 @@
 ENV['RACK_ENV'] = 'test'
 
+require 'spec_helper'
 require 'fileutils'
 require 'rspec'
 require './persistence.rb'
-require 'spec_helper'
 
 describe 'Persistence' do
   it 'successfully initializes persistence' do

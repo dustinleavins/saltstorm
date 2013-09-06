@@ -1,3 +1,6 @@
+require 'simplecov'
+
+SimpleCov.start
 require 'fileutils'
 require 'rspec'
 require 'factory_girl'

@@ -1,10 +1,10 @@
 ENV['RACK_ENV'] = 'test'
 
+require 'spec_helper'
 require 'set'
 require 'rspec'
 require 'factory_girl'
 require './models.rb'
-require 'spec_helper'
 
 describe 'Models::User' do
   it 'allows access to properties' do
