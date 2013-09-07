@@ -67,7 +67,7 @@ describe 'Models::User' do
     # This user's URL should be included
     FactoryGirl.create(:user, :post_url => 'http://www.example.com/test')
 
-    post_urls = User.all_post_urls
+    post_urls = Models::User.all_post_urls
     expect(post_urls).to_not be_nil
     expect(post_urls.length).to eq(2)
     expect(post_urls.first).to eq('http://www.example.com')
