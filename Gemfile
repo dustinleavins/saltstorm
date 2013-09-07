@@ -4,20 +4,23 @@ gem "sinatra"
 gem "sinatra-flash"
 gem "highline"
 gem "sequel"
-gem "sqlite3"
 gem "mail"
 gem "whenever", :require => false
-gem 'rest-client'
+gem "rest-client"
 
 group :test do
-  gem "rspec"
-  gem "rack-test"
-  gem "factory_girl"
+  gem "rspec", :require => false
+  gem "rack-test", :require => false
+  gem "factory_girl", :require => false
   gem "simplecov", :require => false
 end
 
+group :sqlite3 do
+  gem "sqlite3", :require => false
+end
+
 group :pg do
-  gem "pg"
+  gem "pg", :require => false
 end
 
 group :thin do
