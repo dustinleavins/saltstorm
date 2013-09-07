@@ -51,6 +51,10 @@ class RootApp < Sinatra::Base
       session[:uid] = user.id
       return 'ok'
     end
+
+    def is_authenticated?
+      return !(session[:uid].nil?)
+    end
   end
 
   
@@ -217,7 +221,7 @@ class RootApp < Sinatra::Base
   end
 
   get '/main' do
-    if session[:uid].nil?
+    if (!is_authenticated?)
       return redirect '/login', 303
     end
 
@@ -230,7 +234,7 @@ class RootApp < Sinatra::Base
   end
 
   get '/account/' do
-    if session[:uid].nil?
+    if (!is_authenticated?)
       return redirect '/login', 303
     end
 
@@ -250,7 +254,7 @@ class RootApp < Sinatra::Base
   end
 
   post '/account/info' do
-    if (session[:uid].nil?)
+    if (!is_authenticated?)
       return redirect '/login', 303
     end
 
@@ -297,7 +301,7 @@ class RootApp < Sinatra::Base
   end
 
   post '/account/password' do
-    if session[:uid].nil?
+    if (!is_authenticated?)
       return redirect '/login', 303
     end
 
@@ -336,7 +340,7 @@ class RootApp < Sinatra::Base
   get '/api/account' do
     content_type :json
 
-    if session[:uid].nil?
+    if (!is_authenticated?)
       return [500, "{ error: 'Must be logged-in'}"]
     end
 
@@ -357,7 +361,7 @@ class RootApp < Sinatra::Base
       return [500, "{ error: 'Cannot bet fun happytime bucks at this time.'}"]
     end
 
-    if session[:uid].nil?
+    if (!is_authenticated?)
       return [500, "{ error: 'Must be logged-in'}"]
     end
   
@@ -392,7 +396,7 @@ class RootApp < Sinatra::Base
   post '/api/send_client_notifications' do
     content_type :json
 
-    if (session[:uid].nil?)
+    if (!is_authenticated?)
       return [500, "{ error: 'Must be logged-in'}"]
     end
 
@@ -452,7 +456,7 @@ class RootApp < Sinatra::Base
   end
 
   put '/api/current_match' do
-    if session[:uid].nil?
+    if (!is_authenticated?)
       return [500, "{ error: 'Must be logged-in'}"]
     end
 
