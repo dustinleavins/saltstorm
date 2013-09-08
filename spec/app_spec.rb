@@ -308,7 +308,6 @@ describe 'Main App' do
     expect(last_response).to be_redirect
   end
 
-
   it "has a working 'request password reset' page" do
     get '/request_password_reset'
     expect(last_response).to be_ok
@@ -364,6 +363,11 @@ describe 'Main App' do
     expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(0)
   end
 
+  it 'has a working /account redirect' do
+    get '/account'
+    expect(last_response).to be_redirect
+  end
+
   it 'stops anonymous users from accessing account page' do
     get '/account/'
     expect(last_response).to_not be_ok
@@ -405,6 +409,39 @@ describe 'Main App' do
     expect(updated_user.password_hash).to eq(expected_pw_hash)
   end
 
+  it "prevents anonymous user from updating password" do
+    post '/account/password', {
+      :password => 'password10',
+      :confirm_password => 'password10'
+    }
+
+    expect(last_response).to be_redirect # redirect to /login
+  end
+
+  it "prevents user from updating password with invalid password" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/password', {
+      :password => '',
+      :confirm_password => ''
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+
+    updated_user = User.first(:email => user.email.downcase)
+    unexpected_pw_hash = User.generate_password_digest('',
+                                                       updated_user.password_salt)
+
+    expect(updated_user.password_hash).to_not eq(unexpected_pw_hash)
+  end
+
+
   it "allows user to update info" do
     user = FactoryGirl.create(:user)
 
@@ -427,6 +464,59 @@ describe 'Main App' do
 
     expect(updated_user.display_name).to eq(user.display_name.reverse)
   end
+
+  it "prevents anonymous users from updating info" do
+    post '/account/info', {
+      :display_name => 'n/a',
+      :email => 'n/a',
+      :password => 'n/a'
+    }
+
+    expect(last_response).to be_redirect # redirect to /login
+  end
+
+  it "prevents user from updating info with incorrect password" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => user.display_name.reverse,
+      :email => 'changed_email@example.com',
+      :password => user.password.reverse
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+    expect(User.first(:display_name => user.display_name.reverse)).to be_nil
+  end
+
+  it "prevents user from updating info with invalid name" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => '',
+      :email => 'changed_email@example.com',
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+
+    # Ensure that the display name wasn't updated
+    expect(User.first(:email => user.email).display_name).to_not be_nil
+    expect(User.first(:email => user.email).display_name).to_not eq('')
+  end
+
+  # TODO: Tests for invalid email and post_url
 
   it "handles /request_password_reset errors" do
     invalid_email = FactoryGirl.attributes_for(:user)[:email]
@@ -609,7 +699,37 @@ describe 'Main App' do
     expect(last_response.status).to eq(500)
   end
 
-  it "should not allow /api/current_match access to anon users" do
+  it 'successfully checks invalid update_id during /api/check_client_notification' do
+    expect(Persistence::ClientNotifications.current_notification).to_not be_nil
+
+    post '/api/check_client_notification', {
+      :update_id => 'This is not the update id',
+      :data => 'AAAAA'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+  end
+
+  it 'should allow anonymous users to access /api/current_match GET' do
+    # By this point in testing, match data might not be set
+    # Reset match data
+    Persistence::MatchStatusPersistence.save_file({
+      :status => 'closed',
+      :winner => '',
+      :participantA => { :name => '', :amount => 0},
+      :participantB => { :name => '', :amount => 0},
+      :odds => '',
+    })
+
+    Persistence::MatchStatusPersistence.close_bids
+
+    expect(Bet.count).to eq(0)
+
+    get '/api/current_match'
+    expect(last_response).to be_ok
+  end
+
+  it "should not allow /api/current_match PUT access to anon users" do
     match_data = {
       :status => 'closed',
       :winner => '',
@@ -623,7 +743,7 @@ describe 'Main App' do
     expect(last_response.body).to eq("{ error: 'Must be logged-in'}")
   end
 
-  it "should not allow /api/current_match access to non-admin users" do
+  it "should not allow /api/current_match PUT access to non-admin users" do
     # Create User
     user = FactoryGirl.create(:user)
     
@@ -773,6 +893,7 @@ describe 'Main App' do
   # tests for the following:
   # - 'Change bet' functionality
   # - 'Cannot bet after betting closes' functionality
+  # - Anonymous users should not be able to bet
   it "allows people to bet their fake money - test #2" do
     # Reset match data
     Persistence::MatchStatusPersistence.save_file({
@@ -794,6 +915,7 @@ describe 'Main App' do
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
+    anonymous_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
     # User login
     post '/login', {
@@ -845,6 +967,14 @@ describe 'Main App' do
     }.to_json
 
     expect(loser_browser.last_response).to be_ok
+
+   # Anonymous user test
+    anonymous_browser.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => 5
+    }.to_json
+
+    expect(anonymous_browser.last_response.status).to eq(500)
 
     # Close bidding
     put '/api/current_match', {
