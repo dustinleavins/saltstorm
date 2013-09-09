@@ -18,6 +18,8 @@
     </div>
     <div class='collapse navbar-collapse navbar-ex1-collapse'>
       <ul class='nav navbar-nav navbar-right'>
+        <li ng-hide='showBettors'><a ng-click='showBettors = true'>Show Bettors</a></li>
+        <li ng-show='showBettors'><a ng-click='showBettors = false'>Show Main</a></li>
         <li><a href='/account/'>Account</a></li>
         <li><a href='/logout'>Logout</a></li>
       </ul>
@@ -77,25 +79,20 @@
       </div>
     </div>
   </div>
-  <div class='row'>
-    <div class='col-md-12'>
-      <p class='text-center' ng-hide='showBettors'><a ng-click='showBettors = true' class='btn btn-default'>Show Bettors</a></p>
-      <p class='text-center' ng-show='showBettors'><a ng-click='showBettors = false' class='btn btn-default'>Show Main</a></p>
-      <div class='row' ng-show='showBettors'>
-        <div class='col-md-6'>
-          <p>{{ match.participantA.name }}</p>
-          <ul ng-show='match.bettors.a.length > 0'>
-            <li ng-repeat='bettor in match.bettors.a'>{{bettor}}</li>
-          </ul>
-        </div>
+  <div class='row' ng-show='showBettors'>
+    <p class='bettors-header'>Bettors who went all-in</p>
+    <div class='col-md-6'>
+      <p class='bettors-participant-name'>{{ match.participantA.name }}</p>
+      <ul ng-show='match.bettors.a.length > 0'>
+        <li ng-repeat='bettor in match.bettors.a'>{{bettor}}</li>
+      </ul>
+    </div>
 
-        <div class='col-md-6'>
-          <p>{{ match.participantB.name }}</p>
-          <ul ng-show='match.bettors.b.length > 0'>
-            <li ng-repeat='bettor in match.bettors.b'>{{bettor}}</li>
-          </ul>
-        </div>
-      </div>
+    <div class='col-md-6'>
+      <p class='bettors-participant-name'>{{ match.participantB.name }}</p>
+      <ul ng-show='match.bettors.b.length > 0'>
+        <li ng-repeat='bettor in match.bettors.b'>{{bettor}}</li>
+      </ul>
     </div>
   </div>
 </div>

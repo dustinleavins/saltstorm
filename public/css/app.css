@@ -8,6 +8,10 @@ a {
   color: #2A6496;
 }
 
+a:hover {
+  cursor: pointer;
+}
+
 .btn-set .btn {
     margin-right: 80px;
 }
@@ -47,8 +51,12 @@ a {
   border-radius: 8px;
 }
 
+.navbar-static-top {
+  border-radius: 8px;
+}
+
 .navbar-default {
-  background-color: #B88888;
+  background-color: #C3AEC2;
 }
 
 .navbar-default .navbar-text{
@@ -68,9 +76,8 @@ a {
   text-decoration: underline;
 }
 
-
 .page-header {
-  border-bottom-color: #B88888;
+  border-bottom-color: #C3AEC2;
 }
 
 .alert {
@@ -78,7 +85,7 @@ a {
 }
 
 footer {
-  border-top-color: #B88888;
+  border-top-color: #C3AEC2;
   border-top-width: 1px;
   border-top-style: solid;
   margin-top: 80px;
@@ -90,7 +97,7 @@ footer {
 
 .bet-a {
   color: #000000;
-  background-color: #FFA500;
+  background-color: #FFD485;
   border-style: solid;
   border-color: #000000;
   border-width: 2px;
@@ -109,16 +116,16 @@ footer {
 }
 
 .btn-bet-a {
-  background-color: #FFA500;
+  background-color: #FFB833;
   border-color: #000000;
-  border-width: 3px;
+  border-width: 2px;
   color: #000000;
 }
 
 .btn-bet-b {
-  background-color: #8888FF;
+  background-color: #5C5CFF;
   border-color: #000000;
-  border-width: 3px;
+  border-width: 2px;
   color: #000000;
 }
 
@@ -129,6 +136,15 @@ footer {
   text-align: right;
 }
 
+.bettors-participant-name {
+  font-weight: bold;
+}
+
+.bettors-header {
+  font-weight: bold;
+  text-align: center;
+}
+
 .bet-info {
   text-align: center;
 }
@@ -136,5 +152,3 @@ footer {
 .main-video {
   text-align: center;
   padding-bottom:80px;
-}
-
