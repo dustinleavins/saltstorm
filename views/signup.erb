@@ -9,54 +9,56 @@
   <p><%= @site_description %></p>
 </div>
 <% if (flash[:error]) %>
-<div class='row col-md-12'>
-  <div class='alert alert-danger'>
-    <% if flash[:error][:display_name_not_unique] %><p>Someone else is currently using the requested name</p><% end %>
-    <% if flash[:error][:email_not_unique] %><p>Someone else is currently using the requested e-mail</p><% end %>
-    <% if flash[:error][:email] %><p>Invalid E-mail Address</p><% end %>
-    <% if flash[:error][:password] %><p>Password and 'Confirm Password' must be the same</p><% end %>
-    <% if flash[:error][:display_name] %><p>Please enter a display name</p><% end %>
-  </div>
+<div class='alert alert-danger'>
+  <% if flash[:error][:display_name_not_unique] %><p>Someone else is currently using the requested name</p><% end %>
+  <% if flash[:error][:email_not_unique] %><p>Someone else is currently using the requested e-mail</p><% end %>
+  <% if flash[:error][:email] %><p>Invalid E-mail Address</p><% end %>
+  <% if flash[:error][:password] %><p>Password and 'Confirm Password' must be the same</p><% end %>
+  <% if flash[:error][:display_name] %><p>Please enter a display name</p><% end %>
 </div>
 <% end %>
-<form action='/signup' method='post' name='signupForm'>
-  <div class='form-group' ng-class='{"has-error": signupForm.email.$invalid}'>
-    <p>
-      <label for='email'>E-Mail Address</label>
-      <input type='text' name='email' autocapitalize='off' class='form-control'
-             ng-model='email'
-             required />
-    </p>
-  </div>
+<div class='row'>
+  <div class='col-md-6'>
+    <form action='/signup' method='post' name='signupForm'>
+      <div class='form-group' ng-class='{"has-error": signupForm.email.$invalid}'>
+        <p>
+          <label for='email'>E-Mail Address</label>
+          <input type='text' name='email' autocapitalize='off' class='form-control'
+                 ng-model='email'
+                 required />
+        </p>
+      </div>
 
-  <div class='form-group' ng-class='{"has-error": signupForm.password.$invalid}'>
-    <p>
-      <label for='password'>Password</label>
-      <input type='password' name='password' autocapitalize='off' class='form-control'
-             ng-model='password'
-             required />
-    </p>
-  </div>
+      <div class='form-group' ng-class='{"has-error": signupForm.password.$invalid}'>
+        <p>
+          <label for='password'>Password</label>
+          <input type='password' name='password' autocapitalize='off' class='form-control'
+                 ng-model='password'
+                 required />
+        </p>
+      </div>
 
-  <div class='form-group' ng-class='{"has-error": signupForm.confirm_password.$invalid}'>
-    <p>
-      <label for='confirm_password'>Confirm Password</label>
-      <input type='password' name='confirm_password' autocapitalize='off' class='form-control'
-             ng-model='confirmPassword'
-             required />
-    </p>
-  </div>
+      <div class='form-group' ng-class='{"has-error": signupForm.confirm_password.$invalid}'>
+        <p>
+          <label for='confirm_password'>Confirm Password</label>
+          <input type='password' name='confirm_password' autocapitalize='off' class='form-control'
+                 ng-model='confirmPassword'
+                 required />
+        </p>
+      </div>
 
-  <div class='form-group' ng-class='{"has-error": signupForm.display_name.$invalid}'>
-    <p>
-      <label for='display_name'>Name to display</label>
-      <input type='text' name='display_name' autocapitalize='off' class='form-control'
-             ng-model='displayName'
-             required />
-    </p>
-  </div>
+      <div class='form-group' ng-class='{"has-error": signupForm.display_name.$invalid}'>
+        <p>
+          <label for='display_name'>Name to display</label>
+          <input type='text' name='display_name' autocapitalize='off' class='form-control'
+                 ng-model='displayName'
+                 required />
+        </p>
+      </div>
 
-  <p>
-    <button type="submit" class="btn btn-primary">Signup</button>
-  </p>
-</form>
+      <p>
+        <button type="submit" class="btn btn-primary">Signup</button>
+      </p>
+    </form>
+  </div>
+</div>

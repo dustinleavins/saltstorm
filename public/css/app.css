@@ -1,19 +1,21 @@
 body {
-  background-color: #B88888;
-  color: #222222;
-  font-family: "Gill Sans", Tahoma;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Palatino Linotype", "Times New Roman";
+  background-color: #FFFFFF;
+  color: #333333;
+  font-family: Verdana;
 }
 
 a {
   color: #2A6496;
 }
 
+.btn-set .btn {
+    margin-right: 80px;
+}
+.btn-set .btn:last-child {
+    margin-right: 0;
+}
+
 .btn {
-  font-weight: bold;
   border-radius: 8px;
 }
 
@@ -42,23 +44,19 @@ a {
 }
 
 .form-control {
-  background-color: #E0E0E0;
-  color: #222222;
   border-radius: 8px;
 }
 
 .navbar-default {
   background-color: #B88888;
-  font-family: "Gill Sans", Tahoma;
 }
 
 .navbar-default .navbar-text{
-  color: #222222;
+  color: #000000;
 }
 
 .navbar-default .navbar-brand {
-  font-family: "Palatino Linotype", "Times New Roman";
-  color: #222222;
+  color: #000000;
   font-weight: bold;
 }
 
@@ -70,8 +68,17 @@ a {
   text-decoration: underline;
 }
 
+
+.page-header {
+  border-bottom-color: #B88888;
+}
+
+.alert {
+  border-radius: 8px;
+}
+
 footer {
-  border-top-color: #E7E7E7;
+  border-top-color: #B88888;
   border-top-width: 1px;
   border-top-style: solid;
   margin-top: 80px;
