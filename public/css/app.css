@@ -1,7 +1,15 @@
+html {
+  height: 100%;
+}
 body {
   background-color: #FFFFFF;
   color: #333333;
   font-family: Verdana;
+  height: 100%;
+}
+
+.container {
+  height: 100%;
 }
 
 a {
@@ -91,6 +99,10 @@ footer {
   margin-top: 80px;
 }
 
+.main-content {
+  height: 100%;
+}
+
 .admin-message {
   text-align: center;
 }
@@ -151,6 +163,7 @@ footer {
 
 .main-video {
   text-align: center;
-  padding-bottom:80px;
+  height: 65%;
+  margin-bottom: 40px;
 }
 
