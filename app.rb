@@ -150,7 +150,6 @@ class RootApp < Sinatra::Base
     reset_url = "http://#{app_settings['domain']}/reset_password?" +
       ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
 
-    # TODO: Send a full e-mail instead of just the password reset URL
     EmailJob.create(:to => @email,
                     :subject => "#{app_settings['domain']} - Password Reset",
                     :body => reset_url)
@@ -417,7 +416,6 @@ class RootApp < Sinatra::Base
         begin
           RestClient.post url, notification_body, :content_type => :json
         rescue RestClient::Exception
-          # TODO: Log request failure
         end
       end
     end
