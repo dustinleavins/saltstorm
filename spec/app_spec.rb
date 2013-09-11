@@ -516,7 +516,73 @@ describe 'Main App' do
     expect(User.first(:email => user.email).display_name).to_not eq('')
   end
 
-  # TODO: Tests for invalid email and post_url
+  it "prevents user from updating info with invalid email" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => user.display_name.reverse,
+      :email => '',
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+
+    # Ensure that the display name wasn't updated
+    expect(User.first(:email => user.email)).to_not be_nil
+    expect(User.first(:email => user.email).display_name).to_not eq(user.display_name.reverse)
+  end
+
+  it "prevents user from updating info with invalid email" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => user.display_name.reverse,
+      :email => '',
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+
+    # Ensure that the display name wasn't updated
+    expect(User.first(:email => user.email)).to_not be_nil
+    expect(User.first(:email => user.email).display_name).to_not eq(user.display_name.reverse)
+  end
+
+  it "prevents user from updating info with invalid post_url" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => user.display_name,
+      :email => user.email,
+      :password => user.password,
+      :post_url => 'invalid'
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+
+    # Ensure that the post_url wasn't updated
+    expect(User.first(:email => user.email)).to_not be_nil
+    expect(User.first(:email => user.email).post_url).to_not eq('invalid')
+  end
+
 
   it "handles /request_password_reset errors" do
     invalid_email = FactoryGirl.attributes_for(:user)[:email]
