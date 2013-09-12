@@ -116,9 +116,10 @@ class RootApp < Sinatra::Base
     user.save()
 
     # Send the introductory e-mail at a later time
+    @domain = app_settings['domain']
     EmailJob.create(:to => @email,
-                    :subject => "Welcome to #{app_settings['domain']}!",
-                    :body => "Welcome to #{app_settings['domain']}, #{@display_name}!")
+                    :subject => "Welcome to #{@domain}!",
+                    :body => erb(:'email/intro'))
 
     session[:uid] = user.id 
     return redirect to('/main')
@@ -147,12 +148,12 @@ class RootApp < Sinatra::Base
 
     reset_request = PasswordResetRequest.create(:email => @email)
 
-    reset_url = "http://#{app_settings['domain']}/reset_password?" +
+    @reset_url = "http://#{app_settings['domain']}/reset_password?" +
       ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
 
     EmailJob.create(:to => @email,
                     :subject => "#{app_settings['domain']} - Password Reset",
-                    :body => reset_url)
+                    :body => erb(:'email/reset_request'))
 
     @display_name = user.display_name
     return erb :request_password_reset_success
@@ -203,9 +204,10 @@ class RootApp < Sinatra::Base
     user.save()
 
     # Send e-mail notification later
+    @display_name = user.display_name
     EmailJob.create(:to => @email,
                     :subject => "#{app_settings['domain']} - Password Reset Successful",
-                    :body => "#{user.display_name}, your password was successfully reset")
+                    :body => erb(:'email/password_changed'))
 
     # Delete requests for reset
     PasswordResetRequest.where(:email => @email).delete()
