@@ -8,6 +8,7 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     atomic (1.1.13)
+    atomic (1.1.13-java)
     chronic (0.10.1)
     daemons (1.1.9)
     diff-lcs (1.2.4)
@@ -16,6 +17,8 @@ GEM
       activesupport (>= 3.0.0)
     highline (1.6.19)
     i18n (0.6.5)
+    jdbc-postgres (9.2.1002.1)
+    jdbc-sqlite3 (3.7.2.1)
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
@@ -58,6 +61,8 @@ GEM
       rack (>= 1.0.0)
     thread_safe (0.1.2)
       atomic
+    thread_safe (0.1.2-java)
+      atomic
     tilt (1.4.1)
     treetop (1.4.15)
       polyglot
@@ -68,11 +73,14 @@ GEM
       chronic (>= 0.6.3)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
   factory_girl
   highline
+  jdbc-postgres
+  jdbc-sqlite3
   mail
   pg
   rack-test

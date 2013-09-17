@@ -16,14 +16,16 @@ group :test do
 end
 
 group :sqlite3 do
-  gem "sqlite3", :require => false
+  gem "sqlite3", :require => false, :platforms => :ruby
+  gem "jdbc-sqlite3", :require => false, :platforms => :jruby
 end
 
 group :pg do
-  gem "pg", :require => false
+  gem "pg", :require => false, :platforms => :ruby
+  gem "jdbc-postgres", :require => false, :platforms => :jruby
 end
 
 group :thin do
-  gem "thin", :require => false
+  gem "thin", :require => false, :platforms => :ruby
 end
 
