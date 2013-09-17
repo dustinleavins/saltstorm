@@ -15,7 +15,7 @@ describe 'email_job' do
     end
 
     expect(Models::EmailJob.count).to eq(20)
-    expect(`rake RACK_ENV=test`).to eq("test\n")
+    expect(`rake RACK_ENV=test`).to match(/test\s*/)
     `rake email_job RACK_ENV=test`
     expect(Models::EmailJob.count).to eq(0)
   end
