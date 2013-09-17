@@ -22,6 +22,10 @@ class RootApp < Sinatra::Base
   register Sinatra::Flash
   set :session_secret, Settings::secret_token
 
+  configure :development, :production do
+    enable :logging
+  end
+
   helpers do
     def titleize(page_title='')
       if page_title.nil? or page_title.empty?
@@ -438,6 +442,7 @@ class RootApp < Sinatra::Base
         begin
           RestClient.post url, notification_body, :content_type => :json
         rescue RestClient::Exception
+          logger.error "Cannot push client notification to '#{url}' - #{$!}"
         end
       end
     end
