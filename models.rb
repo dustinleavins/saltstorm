@@ -173,6 +173,7 @@ module Models
       validates_presence [:user_id, :payment_type, :amount, :status]
 
       valid_statuses = ['pending', 'complete']
+      valid_types = ['rankup']
 
       if (!(valid_statuses.member? status))
         errors.add(:status, 'invalid status')
@@ -181,6 +182,11 @@ module Models
       if (new? && amount > user.balance)
         errors.add(:amount,
                    'Amount cannot be higher than user\'s balance for new Payment')
+      end
+
+      if (!(valid_types.member? payment_type))
+        errors.add(:payment_type,
+                   'Unsupported payment type')
       end
     end
   end

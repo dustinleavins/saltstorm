@@ -245,6 +245,7 @@ describe 'Models::Payment' do
   it 'rejects payments with invalid payment_type' do
     expect{FactoryGirl.create(:payment, :payment_type => nil)}.to raise_error
     expect{FactoryGirl.create(:payment, :payment_type => '')}.to raise_error
+    expect{FactoryGirl.create(:payment, :payment_type => 'unsupported')}.to raise_error
   end
 
   it 'rejects payments with invalid status' do
