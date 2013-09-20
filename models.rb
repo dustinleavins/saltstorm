@@ -32,6 +32,16 @@ module Models
     plugin :validation_helpers
     one_to_many :payments
 
+    # TODO: Temporary
+    def self.max_rank
+      5
+    end
+
+    # TODO: Temporary
+    def self.rankup_amount
+      10000
+    end
+
     def before_save
       self.email = self.email.downcase
       super
@@ -181,7 +191,8 @@ module Models
 
       if (new? && amount > user.balance)
         errors.add(:amount,
-                   'Amount cannot be higher than user\'s balance for new Payment')
+                   'Amount cannot be higher than user\'s balance for new Payment ' +
+                   "amount: #{amount} balance: #{user.balance}")
       end
 
       if (!(valid_types.member? payment_type))

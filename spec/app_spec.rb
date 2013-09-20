@@ -669,7 +669,6 @@ describe 'Main App' do
     expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
   end
 
-
   it "should not allow /api/account access to anon users" do
     get '/api/account'
     expect(last_response.status).to eq(500)
@@ -836,6 +835,133 @@ describe 'Main App' do
     expect(last_response.body).to eq("{ error: 'invalid request'}")
   end
 
+  it 'allows users to rankup with /api/payment' do
+    user = FactoryGirl.create(:user, :balance => 20000)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post('/api/payment', {
+      :amount => 10000,
+      :payment_type => 'rankup'
+    }.to_json)
+
+    expect(last_response).to be_ok
+
+    updated_user_balance = User.first(:id => user.id).balance
+    expect(updated_user_balance).to eq(10000)
+
+    updated_user_rank = User.first(:id => user.id).rank
+    expect(updated_user_rank).to eq(1)
+
+    payment_model = Payment.first(:user_id => user.id)
+    expect(payment_model).to_not be_nil
+    expect(payment_model.amount).to eq(10000)
+    expect(payment_model.payment_type).to eq('rankup')
+    expect(payment_model.status).to eq('complete')
+  end
+
+  it 'refuses to rankup users with max rank in /api/payment' do
+    user = FactoryGirl.create(:user, :balance => 20000, :rank => 5)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post('/api/payment', {
+      :amount => 10000,
+      :payment_type => 'rankup'
+    }.to_json)
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.first(:id => user.id).balance).to eq(20000) # unchanged
+    expect(User.first(:id => user.id).rank).to eq(5) # unchanged
+
+    expect(Payment.first(:user_id => user.id)).to be_nil
+  end
+
+
+  it 'bails out users who spend everything with /api/payment' do
+    user = FactoryGirl.create(:user, :balance => 10000)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post('/api/payment', {
+      :amount => 10000,
+      :payment_type => 'rankup'
+    }.to_json)
+
+    expect(last_response).to be_ok
+
+    updated_user_balance = User.first(:id => user.id).balance
+    expect(updated_user_balance).to eq(10) # bailout
+
+    updated_user_rank = User.first(:id => user.id).rank
+    expect(updated_user_rank).to eq(1)
+
+    payment_model = Payment.first(:user_id => user.id)
+    expect(payment_model).to_not be_nil
+    expect(payment_model.amount).to eq(10000)
+    expect(payment_model.payment_type).to eq('rankup')
+    expect(payment_model.status).to eq('complete')
+  end
+
+
+  it 'prevents invalid amount on /api/payment' do
+    user = FactoryGirl.create(:user, :balance => 10)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post('/api/payment', {
+      :amount => 11,
+      :payment_type => 'not supported'
+    }.to_json)
+
+    expect(last_response.status).to eq(500)
+  end
+
+
+  it 'prevents invalid payment_type on /api/payment' do
+    user = FactoryGirl.create(:user, :balance => 1000)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    expect(last_response).to be_redirect
+
+    post('/api/payment', {
+      :amount => 100,
+      :payment_type => 'not supported'
+    }.to_json)
+
+    expect(last_response.status).to eq(500)
+  end
+
   it "allows people to bet their fake money - test #1" do
     # Reset match data
     Persistence::MatchStatusPersistence.save_file({
@@ -960,6 +1086,7 @@ describe 'Main App' do
   # - 'Change bet' functionality
   # - 'Cannot bet after betting closes' functionality
   # - Anonymous users should not be able to bet
+  # - Users should not be able to make payments while betting
   it "allows people to bet their fake money - test #2" do
     # Reset match data
     Persistence::MatchStatusPersistence.save_file({
@@ -1041,6 +1168,16 @@ describe 'Main App' do
     }.to_json
 
     expect(anonymous_browser.last_response.status).to eq(500)
+
+    # Payment failure test
+    loser_browser.post '/api/payment', {
+      :payment_type => 'rankup',
+      :amount => 10
+    }.to_json
+    
+    expect(loser_browser.last_response.status).to eq(500)
+    expect(JSON.parse(loser_browser.last_response.body)['error']).to(
+      eq('Cannot make payment while betting'))
 
     # Close bidding
     put '/api/current_match', {

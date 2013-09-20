@@ -418,6 +418,66 @@ class RootApp < Sinatra::Base
     return [200, "{message: 'ok'}"]
   end
 
+  post '/api/payment' do
+    content_type :json
+
+    if (!is_authenticated?)
+      return [500, "{ error: 'Must be logged-in'}"]
+    end
+
+    if (Bet.where(:user_id => session[:uid]).count > 0)
+      return [500, { :error => 'Cannot make payment while betting'}.to_json]
+    end
+
+    request.body.rewind
+    user_payment_info = JSON.parse(request.body.read)
+
+    user = User.first(:id => session[:uid])
+   
+    payment = Payment.new(
+      :user => user,
+      :payment_type => user_payment_info['payment_type'],
+      :amount => user_payment_info['amount'],
+      :status => 'pending'
+    )
+
+    if (!payment.valid?)
+      return [500, { :error => 'Invalid payment details'}.to_json]
+    end
+
+    payment.save
+
+    previous_balance = user.balance
+    if (user.balance > payment.amount)
+      user.balance -= payment.amount
+    else # user wants to go broke on a payment
+      user.balance = app_settings['base_bailout_balance']
+    end
+    
+    user.save
+
+    # 'rankup' processing
+    if (payment.amount != User.rankup_amount)
+      user.balance = previous_balance
+      user.save
+      payment.delete
+      return [500, { :error => 'Invalid amount for rankup' }.to_json]
+    elsif (user.rank == User.max_rank)
+      user.balance = previous_balance
+      user.save
+      payment.delete
+      return [500, { :error => 'Already at maximum rank' }.to_json]
+    else
+      user.rank += 1
+      user.save
+    end
+    
+    payment.status = 'complete'
+    payment.save
+
+    return [200, '{message: \'OK\'}']
+  end
+
   post '/api/send_client_notifications' do
     content_type :json
 
