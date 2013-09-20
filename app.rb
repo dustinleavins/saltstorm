@@ -607,6 +607,15 @@ class RootApp < Sinatra::Base
           Bet.all.each do |bet|
             user = bet.user
 
+            if user.balance < bet.amount
+              # It is possible for the user, by manipulating payments and
+              # betting, to be in a state where bet amount exceeds
+              # account balance.
+              #
+              # Just ignore these bets!
+              next
+            end
+
             if bet.for_participant.downcase == winner
               user.balance += (bet.amount * odds).ceil
             elsif user.balance > bet.amount
