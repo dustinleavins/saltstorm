@@ -13,13 +13,15 @@ describe 'Models::User' do
                                :display_name => 'DB_Test',
                                :balance => 25,
                                :permissions => ['admin','test'].to_set,
-                               :post_url => 'http://www.example.com')
+                               :post_url => 'http://www.example.com',
+                               :rank => 1)
 
     expect(user.email).to eq('db_test@example.com')
     expect(user.display_name).to eq('DB_Test')
     expect(user.balance).to eq(25)
     expect(user.permission_entry).to eq('admin;test')
     expect(user.post_url).to eq('http://www.example.com')
+    expect(user.rank).to eq(1)
 
     expect(user.permissions).to eq(['admin', 'test'].to_set)
   end
