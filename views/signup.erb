@@ -14,7 +14,7 @@
   <% if flash[:error][:email_not_unique] %><p>Someone else is currently using the requested e-mail</p><% end %>
   <% if flash[:error][:email] %><p>Invalid E-mail Address</p><% end %>
   <% if flash[:error][:password] %><p>Password and 'Confirm Password' must be the same</p><% end %>
-  <% if flash[:error][:display_name] %><p>Please enter a display name</p><% end %>
+  <% if flash[:error][:display_name] %><p>Display name is required; must be 20 characters or less</p><% end %>
 </div>
 <% end %>
 <div class='row'>
@@ -51,6 +51,7 @@
         <p>
           <label for='display_name'>Name to display</label>
           <input type='text' name='display_name' autocapitalize='off' class='form-control'
+                 ng-maxlength='20'
                  ng-model='displayName'
                  required />
         </p>

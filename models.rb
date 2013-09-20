@@ -52,6 +52,8 @@ module Models
       validates_presence :password_hash
       validates_presence :password_salt
 
+      validates_max_length 20, :display_name
+
       if ((!self.post_url.nil? && !self.post_url.empty?))
         validates_format URI.regexp, :post_url
       end

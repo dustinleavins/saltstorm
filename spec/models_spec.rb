@@ -40,6 +40,7 @@ describe 'Models::User' do
   it 'rejects users with invalid display_name' do
     expect{FactoryGirl.create(:user, :display_name => nil)}.to raise_error
     expect{FactoryGirl.create(:user, :display_name => '')}.to raise_error
+    expect{FactoryGirl.create(:user, :display_name => 'twenty one character')}.to raise_error
   end
 
   it 'rejects users with invalid balance' do
