@@ -3,6 +3,7 @@
 #
 # Full license can be found in 'LICENSE.txt'
 
+require 'date'
 require 'uri'
 require 'securerandom'
 require 'digest'
@@ -29,6 +30,7 @@ module Models
   # Represents a user
   class User < Sequel::Model
     plugin :validation_helpers
+    one_to_many :payments
 
     def before_save
       self.email = self.email.downcase
@@ -155,5 +157,31 @@ module Models
       self.code ||= SecureRandom.urlsafe_base64
     end
   end
-end
 
+  # Represents a fun-money payment made by a user
+  class Payment < Sequel::Model
+    plugin :validation_helpers
+    many_to_one :user
+
+    def before_save
+      self.date_modified = DateTime.now
+      super
+    end
+
+    def validate
+      super
+      validates_presence [:user_id, :payment_type, :amount, :status]
+
+      valid_statuses = ['pending', 'complete']
+
+      if (!(valid_statuses.member? status))
+        errors.add(:status, 'invalid status')
+      end
+
+      if (new? && amount > user.balance)
+        errors.add(:amount,
+                   'Amount cannot be higher than user\'s balance for new Payment')
+      end
+    end
+  end
+end

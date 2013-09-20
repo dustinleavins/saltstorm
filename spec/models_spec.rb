@@ -17,7 +17,7 @@ describe 'Models::User' do
 
     expect(user.email).to eq('db_test@example.com')
     expect(user.display_name).to eq('DB_Test')
-    expect(user.balance). to eq(25)
+    expect(user.balance).to eq(25)
     expect(user.permission_entry).to eq('admin;test')
     expect(user.post_url).to eq('http://www.example.com')
 
@@ -218,5 +218,54 @@ describe 'Models::PasswordResetRequest' do
                                               :code => nil)
 
     expect(req.code).to_not be_nil
+  end
+end
+
+describe 'Models::Payment' do
+  it 'allows access to properties' do
+    user = FactoryGirl.create(:user, :balance => 100)
+    payment = Models::Payment.create(
+      :user => user,
+      :payment_type => 'rankup',
+      :amount => 10,
+      :status => 'pending')
+
+    expect(payment.user_id).to eq(user.id)
+    expect(payment.user.id).to eq(user.id)
+    expect(payment.payment_type).to eq('rankup')
+    expect(payment.amount).to eq(10)
+    expect(payment.status).to eq('pending')
+    expect(payment.date_modified).to_not be_nil
+
+    # Testing User's side of the association
+    expect(user.payments).to_not be_nil
+    expect(user.payments.length).to eq(1)
+  end
+
+  it 'rejects payments with invalid payment_type' do
+    expect{FactoryGirl.create(:payment, :payment_type => nil)}.to raise_error
+    expect{FactoryGirl.create(:payment, :payment_type => '')}.to raise_error
+  end
+
+  it 'rejects payments with invalid status' do
+    expect{FactoryGirl.create(:payment, :status => nil)}.to raise_error
+    expect{FactoryGirl.create(:payment, :status => '')}.to raise_error
+    expect{FactoryGirl.create(:payment, :status => 'not allowed')}.to raise_error
+  end
+
+  it 'rejects payments with invalid user_id' do
+    expect{FactoryGirl.create(:payment, :user => nil)}.to raise_error
+  end
+
+  it 'rejects payments with invalid amount' do
+    user_with_low_balance = FactoryGirl.create(:user, :balance => 5)
+    
+    expect{FactoryGirl.create(:payment, :amount => 0)}.to raise_error
+    expect{FactoryGirl.create(:payment, :amount => nil)}.to raise_error
+    
+    expect do
+      FactoryGirl.create(:payment, :user => user_with_low_balance, :amount => 6)
+    end.to raise_error
+
   end
 end

@@ -28,4 +28,11 @@ FactoryGirl.define do
     body 'Body'
     sent nil
   end
+
+  factory :payment, class:Models::Payment do
+    association :user, :factory => :user, :amount => 100
+    payment_type 'rankup'
+    amount 10
+    status 'pending'
+  end
 end
