@@ -1197,9 +1197,16 @@ describe 'Main App' do
     expect(match_data_after_close['participantB']['amount'].to_f).to eq(500.0)
     expect(match_data_after_close['odds']).to eq("1:100")
 
-    # TODO: Change after adding user functionality to show 'all bettors'
-    expect(match_data_after_close['bettors']['a']).to match_array([loser.display_name])
-    expect(match_data_after_close['bettors']['b']).to match_array([winner.display_name])
+    expected_bettors_a = [
+      { 'displayName' => loser.display_name, 'rank' => loser.rank }
+    ]
+
+    expected_bettors_b = [
+      { 'displayName' => winner.display_name, 'rank' => winner.rank }
+    ]
+
+    expect(match_data_after_close['bettors']['a']).to match_array(expected_bettors_a)
+    expect(match_data_after_close['bettors']['b']).to match_array(expected_bettors_b)
 
     expect(Bet.count).to eq(2)
 
@@ -1325,9 +1332,15 @@ describe 'Main App' do
     expect(match_data_after_close['participantB']['amount'].to_f).to eq(500.0)
     expect(match_data_after_close['odds']).to eq("1:100")
 
-    # TODO: Change after adding user functionality to show 'all bettors'
-    expect(match_data_after_close['bettors']['a']).to match_array([loser.display_name])
-    expect(match_data_after_close['bettors']['b']).to match_array([winner.display_name])
+    expected_bettors_a = [
+      { 'displayName' => loser.display_name, 'rank' => loser.rank }
+    ]
+
+    expected_bettors_b = [
+      { 'displayName' => winner.display_name, 'rank' => winner.rank }
+    ]
+    expect(match_data_after_close['bettors']['a']).to match_array(expected_bettors_a)
+    expect(match_data_after_close['bettors']['b']).to match_array(expected_bettors_b)
 
     # Cancel match - admin client data needs to updated to
     # include bid amounts & odds

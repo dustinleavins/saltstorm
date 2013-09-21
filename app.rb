@@ -599,19 +599,29 @@ class RootApp < Sinatra::Base
         new_match_data[:odds] = "#{odds.numerator}:#{odds.denominator}"
 
       end
-      all_in_a = Bet.join(User, :id => :user_id)
+
+      #all_in_a = Bet.join(User, :id => :user_id)
+      all_in_a = User.join(Bet, :user_id => :id)
         .where(:for_participant => 'a')
         .where(:amount => :balance)
-        .select_map(:display_name)
+        .select(:display_name, :rank)
+        .all
 
-      all_in_b = Bet.join(User, :id => :user_id)
+      #all_in_b = Bet.join(User, :id => :user_id)
+      all_in_b = User.join(Bet, :user_id => :id)
         .where(:for_participant => 'b')
         .where(:amount => :balance)
-        .select_map(:display_name)
+        .select(:display_name, :rank)
+        .all
 
       new_match_data[:bettors] = {
-        :a => all_in_a,
-        :b => all_in_b
+        :a => all_in_a.map do |a|
+          { 'displayName' => a.display_name, 'rank' => a.rank }
+        end,
+
+        :b => all_in_b.map do |b|
+          { 'displayName' => b.display_name, 'rank' => b.rank }
+        end
       }
 
     elsif (old_match_data['status'] == 'inProgress' &&
