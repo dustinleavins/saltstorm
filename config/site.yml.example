@@ -7,7 +7,6 @@
 #    site_name: 'Saltstorm - TESTING'
 #    site_description: 'Test Site'
 
-
 common:
   user_signup_balance: 400
   base_bailout_balance: 10
@@ -17,4 +16,7 @@ common:
   site_description: >
       Saltstorm is an open-source 'play money' betting site
       inspired by <a href='http://www.saltybet.com'>Salty Bet</a>.
+  rankup:
+    max_rank: 5
+    amounts: [10000, 50000]
 

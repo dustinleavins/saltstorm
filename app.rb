@@ -456,20 +456,32 @@ class RootApp < Sinatra::Base
     user.save
 
     # 'rankup' processing
-    if (payment.amount != User.rankup_amount)
-      user.balance = previous_balance
-      user.save
-      payment.delete
-      return json_response(500, { :error => 'Invalid amount for rankup' })
-    elsif (user.rank == User.max_rank)
+    if (user.rank == app_settings['rankup']['max_rank'])
+      # already at max rank
       user.balance = previous_balance
       user.save
       payment.delete
       return json_response(500, { :error => 'Already at maximum rank' })
-    else
-      user.rank += 1
-      user.save
     end
+
+    requested_rank = user.rank + 1
+
+    rankup_amount = nil
+    if (app_settings['rankup']['amounts'].length < requested_rank)
+      rankup_amount = app_settings['rankup']['amounts'].last
+    else
+      rankup_amount = app_settings['rankup']['amounts'][requested_rank - 1]
+    end
+
+    if (payment.amount != rankup_amount)
+      user.balance = previous_balance
+      user.save
+      payment.delete
+      return json_response(500, { :error => 'Invalid amount for rankup' })
+    end
+
+    user.rank = requested_rank
+    user.save
     
     payment.status = 'complete'
     payment.save

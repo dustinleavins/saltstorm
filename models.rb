@@ -32,16 +32,6 @@ module Models
     plugin :validation_helpers
     one_to_many :payments
 
-    # TODO: Temporary
-    def self.max_rank
-      5
-    end
-
-    # TODO: Temporary
-    def self.rankup_amount
-      10000
-    end
-
     def before_save
       self.email = self.email.downcase
       super
