@@ -59,6 +59,11 @@ class RootApp < Sinatra::Base
     def is_authenticated?
       return !(session[:uid].nil?)
     end
+
+    def json_response(status_code, hash)
+      content_type :json
+      return [status_code, hash.to_json]
+    end
   end
 
   
@@ -351,43 +356,39 @@ class RootApp < Sinatra::Base
   end
 
   post '/api/login' do
-    content_type :json
-
     request.body.rewind
     auth_info = JSON.parse(request.body.read)
     if (authenticate(auth_info['email'], auth_info['password']))
-      return { :message => 'ok' }.to_json
+      return json_response(200, { :message => 'ok' })
     else
-      return [500, '{error: "invalid login"}']
+      return json_response(500, { :error => 'invalid login' })
     end
   end
 
   get '/api/account' do
-    content_type :json
-
     if (!is_authenticated?)
-      return [500, "{ error: 'Must be logged-in'}"]
+      return json_response(500, { :error => 'Must be logged-in' })
     end
 
     user = User.first(:id => session[:uid])
     if user.nil?
-      return [500, "{ error: 'Somehow logged-in as fake user'}"]
+      return json_response(500, { :error => 'Somehow logged-in as fake user' })
     end
 
-    return {
+    return json_response(200, {
       :email => user.email,
       :balance => user.balance,
       :displayName => user.display_name
-    }.to_json
+    })
   end
 
   post '/api/bet' do
     if !Persistence::MatchStatusPersistence.bids_open?
-      return [500, "{ error: 'Cannot bet fun happytime bucks at this time.'}"]
+      return json_response(500, { :error => 'Cannot bet fun happytime bucks at this time.' }) 
     end
 
     if (!is_authenticated?)
-      return [500, "{ error: 'Must be logged-in'}"]
+      return json_response(500, { :error => 'Must be logged-in' })
     end
   
     request.body.rewind
@@ -395,15 +396,15 @@ class RootApp < Sinatra::Base
     bid_amount = submitted_bid['amount']
 
     if ((bid_amount < 1) || (bid_amount.floor != bid_amount))
-      return [500, "{error: 'amount must be a positive integer'}"]
+      return json_response(500, { :error => 'amount must be a positive integer' })
     elsif (!['a','b'].include?(submitted_bid['forParticipant']))
-      return [500, "{ error: 'invalid request'}"]
+      return json_response(500, { :error => 'invalid request' })
     end
 
     user = User.first(:id => session[:uid])
 
     if bid_amount > user.balance
-      return [500, "{ error: 'insufficient funds'}"]
+      return json_response(500, { :error => 'insufficient funds' })
     end
 
     existing_bet = Bet.first(:user_id => user.id)
@@ -415,18 +416,16 @@ class RootApp < Sinatra::Base
         :amount => bid_amount.to_i,
         :for_participant => submitted_bid['forParticipant'])
 
-    return [200, "{message: 'ok'}"]
+    return json_response(200, { :message => 'ok'})
   end
 
   post '/api/payment' do
-    content_type :json
-
     if (!is_authenticated?)
-      return [500, "{ error: 'Must be logged-in'}"]
+      return json_response(500, { :error => 'Must be logged-in' })
     end
 
     if (Bet.where(:user_id => session[:uid]).count > 0)
-      return [500, { :error => 'Cannot make payment while betting'}.to_json]
+      return json_response(500, { :error => 'Cannot make payment while betting'})
     end
 
     request.body.rewind
@@ -442,7 +441,7 @@ class RootApp < Sinatra::Base
     )
 
     if (!payment.valid?)
-      return [500, { :error => 'Invalid payment details'}.to_json]
+      return json_response(500, { :error => 'Invalid payment details'})
     end
 
     payment.save
@@ -461,12 +460,12 @@ class RootApp < Sinatra::Base
       user.balance = previous_balance
       user.save
       payment.delete
-      return [500, { :error => 'Invalid amount for rankup' }.to_json]
+      return json_response(500, { :error => 'Invalid amount for rankup' })
     elsif (user.rank == User.max_rank)
       user.balance = previous_balance
       user.save
       payment.delete
-      return [500, { :error => 'Already at maximum rank' }.to_json]
+      return json_response(500, { :error => 'Already at maximum rank' })
     else
       user.rank += 1
       user.save
@@ -475,19 +474,17 @@ class RootApp < Sinatra::Base
     payment.status = 'complete'
     payment.save
 
-    return [200, '{message: \'OK\'}']
+    return json_response(200, { :message => 'ok' })
   end
 
   post '/api/send_client_notifications' do
-    content_type :json
-
     if (!is_authenticated?)
-      return [500, "{ error: 'Must be logged-in'}"]
+      return json_response(500, { :error => 'Must be logged-in' })
     end
 
     user = User.first(:id => session[:uid])
     if (!user.permissions.include? 'admin')
-      return [500, "{ error: 'invalid request'}"]
+      return json_response(500, { :error => 'invalid request' })
     end
 
     request.body.rewind
@@ -511,28 +508,27 @@ class RootApp < Sinatra::Base
   end
 
   post '/api/check_client_notification' do
-    content_type :json
     request.body.rewind
     notification_to_check = nil
 
     begin
       notification_to_check = JSON.parse(request.body.read)
     rescue JSON::ParserError
-      return [500, '{error: "Request must be in JSON format"}']
+      return json_response(500, { :error => 'Request must be in JSON format' })
     end
 
     user_provided_id = notification_to_check['update_id']
 
     if (user_provided_id.nil?)
-      return [500, '{error: "Request must include update_id"}']
+      return json_response(500, { :error => 'Request must include update_id' })
     end
 
     update_id = Persistence::ClientNotifications.current_notification['update_id']
 
     if (user_provided_id != update_id)
-      return [500, '{error: "Invalid update_id"}']
+      return json_response(500, { :error => 'Invalid update_id' })
     else
-      return '{message: "OK"}'
+      return json_response(200, { :message => "OK" })
     end
   end
 
@@ -542,12 +538,12 @@ class RootApp < Sinatra::Base
 
   put '/api/current_match' do
     if (!is_authenticated?)
-      return [500, "{ error: 'Must be logged-in'}"]
+      return json_response(500, { :error => 'Must be logged-in' })
     end
 
     user = User.first(:id => session[:uid])
     unless user.permissions.include? 'admin'
-      return [500, "{ error: 'invalid request'}"]
+      return json_response(500, { :error => 'invalid request' })
     end
   
     old_match_data = Persistence::MatchStatusPersistence.get_from_file
@@ -562,7 +558,7 @@ class RootApp < Sinatra::Base
     # Normal match status transitions:
     # closed -> open -> inProgress -> payout
     if (old_match_data['status'] == 'closed' &&
-      new_match_data['status'] == 'open')
+        new_match_data['status'] == 'open')
       Persistence::MatchStatusPersistence.open_bids
 
       # Reset bettors lists
@@ -613,7 +609,7 @@ class RootApp < Sinatra::Base
     elsif (old_match_data['status'] == 'payout' &&
            new_match_data['status'] == 'closed')
       # payout -> closed transition is internal
-      return [500, "{error: 'Cannot manually transition from payout to closed status'}"]
+      return json_response(500, { :error => 'Cannot manually transition from payout to closed status' })
 
     # Non-normal status transition: inProgress -> closed
     # Represents 'match cancellation' during match
@@ -643,7 +639,7 @@ class RootApp < Sinatra::Base
 
     # No other status transitions are allowed
     elsif (old_match_data['status'] != new_match_data['status'])
-      return [500, "{error: 'invalid request'}"]
+      return json_response(500, { :error => 'invalid request' })
     end
 
     # Save status
@@ -696,6 +692,6 @@ class RootApp < Sinatra::Base
       end
     end
 
-    return [200, "{message: 'OK'}"]
+    return json_response(200, { :message => 'OK' })
   end
 end

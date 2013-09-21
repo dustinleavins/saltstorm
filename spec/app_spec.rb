@@ -731,7 +731,7 @@ describe 'Main App' do
     # Test what happens when users check the ID against the server's
     post '/api/check_client_notification', response_data.to_json
     expect(last_response).to be_ok
-    expect(last_response.body).to eq('{message: "OK"}')
+    expect(last_response.body).to eq('{"message":"OK"}')
   end
 
   it 'handles empty requests to /api/check_client_notification' do
@@ -805,7 +805,7 @@ describe 'Main App' do
 
     put '/api/current_match', match_data
     expect(last_response.status).to eq(500)
-    expect(last_response.body).to eq("{ error: 'Must be logged-in'}")
+    expect(last_response.body).to eq('{"error":"Must be logged-in"}')
   end
 
   it "should not allow /api/current_match PUT access to non-admin users" do
@@ -832,7 +832,7 @@ describe 'Main App' do
 
     put '/api/current_match', match_data
     expect(last_response.status).to eq(500)
-    expect(last_response.body).to eq("{ error: 'invalid request'}")
+    expect(last_response.body).to eq('{"error":"invalid request"}')
   end
 
   it 'allows users to rankup with /api/payment' do
