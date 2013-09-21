@@ -355,6 +355,31 @@ class RootApp < Sinatra::Base
     return redirect to('/account/')
   end
 
+  get '/payments' do
+    if (!is_authenticated?)
+      return redirect '/login', 303
+    end
+
+    user = User.first(:id => session[:uid])
+    if (user.nil?)
+      return redirect '/login', 303
+    end
+
+    @current_rank = user.rank
+    @max_rank = app_settings['rankup']['max_rank']
+
+    if (@current_rank == @max_rank)
+      @next_rank_amount = nil # should be unused
+    elsif (app_settings['rankup']['amounts'].length < (@current_rank + 1))
+      @next_rank_amount = app_settings['rankup']['amounts'].last
+    else
+      @next_rank_amount = app_settings['rankup']['amounts'][@current_rank]
+    end
+
+    erb :payments
+  end
+
+
   post '/api/login' do
     request.body.rewind
     auth_info = JSON.parse(request.body.read)

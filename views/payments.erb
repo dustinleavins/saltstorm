@@ -1,0 +1,48 @@
+<%
+
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (C) 2013  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+<div class='page-header'>
+  <h1><%= titleize('Buy Stuff') %></h1>
+  <p><%= @site_description %></p>
+</div>
+<div ng-controller='PaymentsController' class='main-content'
+     ng-init='currentRank = <%= @current_rank %>; maxRank = <%= @max_rank %>'>
+  <div class='row'>
+    <div class='col-md-6'>
+      <h2>Upgrade Rank</h2>
+      <p>TODO: Explanation of Rankup</p>
+      <p>Current rank: {{ currentRank }}</p>
+      <div class='alert alert-danger' ng-show='insufficientFunds'>
+        <p>Insufficient Funds &#9785;</p>
+      </div>
+      <p ng-show='atMaxRank()'>You are already at the highest rank allowed by the server.</p>
+
+      <form name='rankupForm'
+            ng-init='amount=<%= @next_rank_amount %>'
+            ng-submit='rankup()'
+            ng-hide='atMaxRank()'>
+        <div class='form-group'>
+          <p>
+            <label for='amount'>Amount</label>
+            <input type='text' name='amount' autocapitalize='off' class='form-control'
+                   readonly
+                   ng-model='amount'
+                   required />
+          </p>
+        </div>
+        <p>
+          <button type="submit" class="btn btn-default">Upgrade Rank</button>
+        </p>
+      </form>
+
+    </div>
+  </div>
+  <div class='row col-md-12'>
+    <p class='text-center'><a class='btn btn-default' href='/main'>Main</a></p>
+  </div>
+</div>
+

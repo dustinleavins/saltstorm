@@ -4,6 +4,31 @@
  * Full license can be found in 'LICENSE.txt'
  */
 
+var PaymentsController = ['$scope', '$window', function($scope, $window) {
+    $scope.atMaxRank = function() {
+        return $scope.currentRank >= $scope.maxRank;
+    };
+    $scope.rankup = function() {
+       $.post('/api/payment', JSON.stringify({
+            payment_type: 'rankup',
+            amount: $scope.amount
+        }))
+        .done(function() {
+            $scope.$apply(function() {
+                $scope.insufficientFunds = false;
+            });
+
+            $window.alert('Gratz on your new rank');
+        })
+        .fail(function() {
+            $scope.$apply(function() {
+                $scope.insufficientFunds = true;
+            });
+        });
+
+    };
+}];
+
 var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q) {
     $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds

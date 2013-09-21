@@ -308,6 +308,24 @@ describe 'Main App' do
     expect(last_response).to be_redirect
   end
 
+  it 'allows users to access /payments' do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    get '/payments'
+    expect(last_response).to be_ok
+  end
+
+  it "blocks anonymous users from accessing /payments" do
+    get '/payments'
+    expect(last_response).to be_redirect
+  end
+
   it "has a working 'request password reset' page" do
     get '/request_password_reset'
     expect(last_response).to be_ok
