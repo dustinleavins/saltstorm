@@ -59,12 +59,18 @@ module Models
       validates_presence :email
       validates_format Models.email_regex, :email
 
-      validates_presence :display_name
-      validates_presence :balance
-      validates_presence :password_hash
-      validates_presence :password_salt
+      validates_presence [:display_name, :balance, :password_hash,
+        :password_salt]
 
       validates_max_length 20, :display_name
+
+      validates_integer :balance
+      validates_integer :rank unless rank.nil? # rank can be nil during validation
+
+      if (balance < 0)
+        errors.add(:balance,
+                   'Balance cannot be below 0 for any user')
+      end
 
       if ((!self.post_url.nil? && !self.post_url.empty?))
         validates_format URI.regexp, :post_url

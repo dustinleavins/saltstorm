@@ -60,6 +60,34 @@ describe 'Models::User' do
     end.to raise_error
   end
 
+  it 'rejects user with invalid rank' do
+    expect do
+      FactoryGirl.create(:user, :rank => 'invalid')
+    end.to raise_error
+  end
+
+  it 'rejects user with invalid balance' do
+    expect do
+      FactoryGirl.create(:user, :balance => 'invalid')
+    end.to raise_error
+
+    expect do
+      FactoryGirl.create(:user, :balance => -1)
+    end.to raise_error
+  end
+
+
+  it 'fills-in rank after create' do
+    user = Models::User.create(:email => 'ranktest@example.com',
+                               :password => 'password',
+                               :display_name => 'ranktest',
+                               :balance => 25)
+
+    expect(user.rank).to_not be_nil
+    expect(user.rank).to eq(0) # starting rank
+  end
+
+
   it 'properly retrieves all post_urls' do
     # A previous test creates a user with non-empty post_url
     
