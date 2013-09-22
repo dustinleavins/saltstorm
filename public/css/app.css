@@ -157,6 +157,18 @@ footer {
   text-align: center;
 }
 
+.bettors-list {
+  list-style: none;
+}
+
+.bettors-list img {
+  vertical-align: middle;
+}
+
+.bettors-list .name {
+  padding-left: 4px;
+}
+
 .bet-info {
   text-align: center;
 }

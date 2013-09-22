@@ -80,15 +80,19 @@
     <p class='bettors-header'>Bettors who went all-in</p>
     <div class='col-md-6'>
       <p class='bettors-participant-name'>{{ match.participantA.name }}</p>
-      <ul ng-show='match.bettors.a.length > 0'>
-        <li ng-repeat='bettor in match.bettors.a'>{{bettor.rank}} {{bettor.displayName}}</li>
+      <ul ng-show='match.bettors.a.length > 0' class='bettors-list'>
+        <li ng-repeat='bettor in match.bettors.a'>
+          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' /><span class='name'>{{bettor.displayName}}</span>
+        </li>
       </ul>
     </div>
 
     <div class='col-md-6'>
       <p class='bettors-participant-name'>{{ match.participantB.name }}</p>
-      <ul ng-show='match.bettors.b.length > 0'>
-        <li ng-repeat='bettor in match.bettors.b'>{{bettor.rank}} {{bettor.displayName}}</li>
+      <ul ng-show='match.bettors.b.length > 0' class='bettors-list'>
+        <li ng-repeat='bettor in match.bettors.b'>
+          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' /> {{bettor.displayName}}
+        </li>
       </ul>
     </div>
   </div>
