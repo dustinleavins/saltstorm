@@ -8,21 +8,21 @@ require 'yaml'
 # Module that retrieves server settings that are dependent on a specific
 # environment.
 module Settings
-  @@default_site_options = {
+  DEFAULT_SITE_OPTIONS = {
     :path => 'config/site.yml'
   }
 
-  @@default_db_options = {
+  DEFAULT_DB_OPTIONS = {
     :path => 'config/database.yml'
   }
 
-  @@default_token_options = {
+  DEFAULT_TOKEN_OPTIONS = {
     :path => 'config/secret_token.yml'
   }
 
   # Retrieves site options
   def self.site(environment, options={})
-    config_hash = @@default_site_options.merge(options)
+    config_hash = DEFAULT_SITE_OPTIONS.merge(options)
     yaml_file = YAML::load_file(config_hash[:path])
     environment_settings = yaml_file[environment]
     common_settings = yaml_file['common']
@@ -38,13 +38,13 @@ module Settings
 
   # Retrieves database options
   def self.db(environment, options={})
-    config_hash = @@default_db_options.merge(options)
+    config_hash = DEFAULT_DB_OPTIONS.merge(options)
     return YAML::load_file(config_hash[:path])[environment]
   end
 
   # Retrieves the secret token
   def self.secret_token(options={})
-    config_hash = @@default_token_options.merge(options)
+    config_hash = DEFAULT_TOKEN_OPTIONS.merge(options)
     return YAML::load_file(config_hash[:path])['token']
   end
 end
