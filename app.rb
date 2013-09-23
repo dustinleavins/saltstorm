@@ -256,6 +256,7 @@ class RootApp < Sinatra::Base
     end
 
     @video_link = app_settings['main_video_html']
+    @bettors_strategy = app_settings['bettors_show']
     return erb :main_page
   end
 

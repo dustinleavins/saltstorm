@@ -77,7 +77,9 @@
     </div>
   </div>
   <div class='row' ng-show='showBettors'>
-    <p class='bettors-header'>Bettors who went all-in</p>
+    <% if @bettors_strategy == 'all_in' %><p class='bettors-header'>Bettors who went all-in</p>
+    <% elsif @bettors_strategy == 'all_bettors' %><p class='bettors-header'>All Bettors</p>
+    <% end %>
     <div class='col-md-6'>
       <p class='bettors-participant-name'>{{ match.participantA.name }}</p>
       <ul ng-show='match.bettors.a.length > 0' class='bettors-list'>
