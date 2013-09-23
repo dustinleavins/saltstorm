@@ -32,6 +32,15 @@ module Models
     plugin :validation_helpers
     one_to_many :payments
 
+    GetBettorsStrategies = {
+      'all_in' => lambda do |for_participant|
+        User.join(Bet, :user_id => :id)
+          .where(:for_participant => for_participant)
+          .where(:amount => :balance)
+          .all
+      end
+    }
+
     def before_save
       self.email = self.email.downcase
       super
@@ -108,6 +117,10 @@ module Models
         .exclude(:post_url => '')
         .exclude(:post_url => nil)
         .select_map(:post_url)
+    end
+
+    def self.get_bettors(for_participant, method)
+      GetBettorsStrategies[method].call(for_participant)
     end
   end
 

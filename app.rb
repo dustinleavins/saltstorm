@@ -626,18 +626,21 @@ class RootApp < Sinatra::Base
       end
 
       #all_in_a = Bet.join(User, :id => :user_id)
-      all_in_a = User.join(Bet, :user_id => :id)
-        .where(:for_participant => 'a')
-        .where(:amount => :balance)
-        .select(:display_name, :rank)
-        .all
+      #all_in_a = User.join(Bet, :user_id => :id)
+      #  .where(:for_participant => 'a')
+      #  .where(:amount => :balance)
+      #  .select(:display_name, :rank)
+      #  .all
+      bettors_setting = app_settings['bettors_show']
+      all_in_a = User.get_bettors('a', bettors_setting)
 
       #all_in_b = Bet.join(User, :id => :user_id)
-      all_in_b = User.join(Bet, :user_id => :id)
-        .where(:for_participant => 'b')
-        .where(:amount => :balance)
-        .select(:display_name, :rank)
-        .all
+      #all_in_b = User.join(Bet, :user_id => :id)
+      #  .where(:for_participant => 'b')
+      #  .where(:amount => :balance)
+      #  .select(:display_name, :rank)
+      #  .all
+      all_in_b = User.get_bettors('b', bettors_setting)
 
       new_match_data[:bettors] = {
         :a => all_in_a.map do |a|

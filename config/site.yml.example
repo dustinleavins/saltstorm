@@ -10,6 +10,7 @@
 common:
   user_signup_balance: 400
   base_bailout_balance: 10
+  bettors_show: 'all_in'
   main_video_html: "<a href='#'>Video Link</a>"
   domain: Fill Me In
   site_name: 'Saltstorm'
