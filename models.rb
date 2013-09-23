@@ -38,6 +38,12 @@ module Models
           .where(:for_participant => for_participant)
           .where(:amount => :balance)
           .all
+      end,
+
+      'all_bettors' => lambda do |for_participant|
+        User.join(Bet, :user_id => :id)
+          .where(:for_participant => for_participant)
+          .all
       end
     }
 
