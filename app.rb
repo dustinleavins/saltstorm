@@ -541,7 +541,7 @@ class RootApp < Sinatra::Base
       end
     end
 
-    send_file Persistence::ClientNotifications.current_notification_filename
+    send_file Persistence::ClientNotifications::NOTIFY_FILENAME
   end
 
   post '/api/check_client_notification' do
@@ -570,7 +570,7 @@ class RootApp < Sinatra::Base
   end
 
   get '/api/current_match' do
-    send_file Persistence::MatchStatusPersistence.match_data_file
+    send_file Persistence::MatchStatusPersistence::MATCH_DATA_FILE
   end
 
   put '/api/current_match' do

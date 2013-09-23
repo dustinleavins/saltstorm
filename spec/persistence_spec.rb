@@ -23,7 +23,7 @@ end
 
 describe 'Persistence::MatchStatusPersistence' do
   it 'allows access to match data' do
-    expect(Persistence::MatchStatusPersistence.match_data_file).to eq('tmp/test/match_data.json')
+    expect(Persistence::MatchStatusPersistence::MATCH_DATA_FILE).to eq('tmp/test/match_data.json')
 
     match_data = Persistence::MatchStatusPersistence.get_from_file
     expect(match_data).to_not be_nil
@@ -50,7 +50,7 @@ describe 'Persistence::ClientNotifications' do
     # The current notification should not exist because Persistence testing
     # removes it.
     expect(Persistence::ClientNotifications.current_notification).to be_nil
-    expect(File.exist? Persistence::ClientNotifications.current_notification_filename).to be_false
+    expect(File.exist? Persistence::ClientNotifications::NOTIFY_FILENAME).to be_false
 
     Persistence::ClientNotifications.current_notification = {
       'data' => 54321

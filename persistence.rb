@@ -32,7 +32,7 @@ module Persistence
     end
 
     # Initialize match_data
-    if (!File.exist?(MatchStatusPersistence.match_data_file))
+    if (!File.exist?(MatchStatusPersistence::MATCH_DATA_FILE))
       MatchStatusPersistence.get_from_file()
     end
 
@@ -40,14 +40,10 @@ module Persistence
 
   # Persists current match status.
   class MatchStatusPersistence
-    @@environment = ENV['RACK_ENV']
-    @@match_data_file = "tmp/#{@@environment}/match_data.json"
-    @@bet_file = "tmp/#{@@environment}/match_open"
 
     # Name of file containing match data.
-    def self.match_data_file
-      return @@match_data_file
-    end
+    MATCH_DATA_FILE = "tmp/#{ENV['RACK_ENV']}/match_data.json"
+    BET_FILE = "tmp/#{ENV['RACK_ENV']}/match_open"
 
     # Retrieves match data from match_data_file.
     # If match_data_file does not exist, this automatically
@@ -55,7 +51,7 @@ module Persistence
     def self.get_from_file
       match_data = nil
 
-      if (!File.exist?(@@match_data_file))
+      if (!File.exist?(MATCH_DATA_FILE))
         self.save_file({
           :status => 'closed',
           :winner => '',
@@ -71,7 +67,7 @@ module Persistence
 
       end
 
-      File.open(@@match_data_file) do |f|
+      File.open(MATCH_DATA_FILE) do |f|
         match_data = JSON.parse(f.readlines.join)
       end
 
@@ -80,43 +76,39 @@ module Persistence
 
     # Saves match_data to the file.
     def self.save_file(new_match_data)
-      File.open(@@match_data_file, 'w') do |f|
+      File.open(MATCH_DATA_FILE, 'w') do |f|
         f.write new_match_data.to_json
       end
     end
 
     # Test to see if bids are currently open.
     def self.bids_open?
-      return File.exist?(@@bet_file)
+      return File.exist?(BET_FILE)
     end
 
     # Open bids.
     def self.open_bids
-      FileUtils.touch @@bet_file
+      FileUtils.touch BET_FILE
     end
 
     # Close bids.
     def self.close_bids
-      FileUtils.rm @@bet_file, force: true
+      FileUtils.rm BET_FILE, force: true
     end
   end
 
   # Persists the most recent notification made by an admin to web clients.
   class ClientNotifications
-    @@environment = ENV['RACK_ENV']
-    @@notify_filename = "tmp/#{@@environment}/current_notification.json"
 
     # Name of the file containing the most recent notification.
-    def self.current_notification_filename
-      return @@notify_filename
-    end
-
+    NOTIFY_FILENAME = "tmp/#{ENV['RACK_ENV']}/current_notification.json"
+    
     # Hash containing data from the most recent notification.
     def self.current_notification
       notification_data = nil
 
-      if (File.exist? @@notify_filename)
-        File.open(@@notify_filename, 'r') do |f|
+      if (File.exist? NOTIFY_FILENAME)
+        File.open(NOTIFY_FILENAME, 'r') do |f|
           notification_data = JSON.parse(f.readlines.join)
         end
       end
@@ -128,7 +120,7 @@ module Persistence
     def self.current_notification=(hash_with_data)
       save_hash = hash_with_data.clone
       save_hash[:update_id] = SecureRandom.base64(8)
-      File.open(@@notify_filename, 'w') do |f|
+      File.open(NOTIFY_FILENAME, 'w') do |f|
         f.write(save_hash.to_json)
       end
     end
