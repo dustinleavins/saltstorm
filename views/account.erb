@@ -84,6 +84,7 @@
       <label for='display_name'>Name to display</label>
       <input type='text' name='display_name' autocapitalize='off' class='form-control'
              ng-model='displayName' ng-init='displayName = "<%= @current[:display_name] %>"'
+             ng-maxlength='20'
              required />
     </p>
   </div>
