@@ -3,6 +3,7 @@
 #
 # Full license can be found in 'LICENSE.txt'
 require 'uri'
+require 'cgi'
 require 'json'
 require 'rubygems'
 require 'rest_client'
@@ -95,13 +96,13 @@ class RootApp < Sinatra::Base
   end
 
   post '/signup' do
-    @email = params[:email].downcase
-    @password = params[:password]
-    @confirm_password = params[:confirm_password]
-    @display_name = params[:display_name]
-    @balance = app_settings['user_signup_balance']
+    @email = CGI::escapeHTML(params[:email].downcase)
+    password = params[:password]
+    confirm_password = params[:confirm_password]
+    @display_name = CGI::escapeHTML(params[:display_name])
+    balance = app_settings['user_signup_balance']
 
-    if (@password != @confirm_password)
+    if (password != confirm_password)
       flash.now[:error] = { :password => true }
       return erb :signup
     elsif (User.where(:email => @email).count > 0)
@@ -113,9 +114,9 @@ class RootApp < Sinatra::Base
     end
 
     user = User.new(:email => @email,
-                    :password => @password,
+                    :password => password,
                     :display_name => @display_name,
-                    :balance => @balance)
+                    :balance => balance)
 
     if (!user.valid?)
       flash.now[:error] = user.errors
@@ -275,9 +276,9 @@ class RootApp < Sinatra::Base
     end
 
     @original = {
-      :display_name => user.display_name,
-      :email => user.email,
-      :post_url => user.post_url
+      :display_name => CGI::escapeHTML(user.display_name),
+      :email => CGI::escapeHTML(user.email),
+      :post_url => CGI::escapeHTML(user.post_url.to_s) # post_url might be nil
     }
 
     @current = flash[:current] || @original
@@ -299,9 +300,9 @@ class RootApp < Sinatra::Base
     password_hash = User.generate_password_digest(password, user.password_salt)
 
     flash.next[:current] = {
-      :display_name => params[:display_name].to_s,
-      :email => params[:email].to_s,
-      :post_url => params[:post_url].to_s
+      :display_name => CGI::escapeHTML(params[:display_name].to_s),
+      :email => CGI::escapeHTML(params[:email].to_s),
+      :post_url => CGI::escapeHTML(params[:post_url].to_s)
     }
 
     if (user.password_hash != password_hash)
