@@ -25,6 +25,7 @@
           <label for='email'>E-Mail Address</label>
           <input type='text' name='email' autocapitalize='off' class='form-control'
                  ng-model='email'
+                 ng-init='email = "<%= @email %>"'
                  required />
         </p>
       </div>
@@ -53,6 +54,7 @@
           <input type='text' name='display_name' autocapitalize='off' class='form-control'
                  ng-maxlength='20'
                  ng-model='displayName'
+                 ng-init='displayName = "<%= @display_name %>"'
                  required />
         </p>
       </div>
