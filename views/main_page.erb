@@ -33,18 +33,18 @@
     <p>Message from admin: {{ match.message }}</p>
   </div>
   <div class='row' ng-hide='showBettors'>
-    <div class='col-md-4 bet-a'>
+    <div class='col-sm-4 bet-a'>
       <div class='row'>
-        <div class='col-md-6 participant-a'>
+        <div class='col-xs-6 participant-a'>
           <p>{{ match.participantA.name }}</p>
           <p>{{ match.participantA.amount | currency: "☺" }}</p>
         </div>
-        <div class='col-md-6'>
+        <div class='col-xs-6'>
           <p class='pull-right'><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
         </div>
       </div>
     </div>
-    <div class='col-md-4 bet-info'>
+    <div class='col-sm-4 bet-info'>
       <form name='betForm'>
         <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
           <p>
@@ -64,12 +64,12 @@
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
       <p>Odds: {{ match.odds }}</p>
     </div>
-    <div class='col-md-4 bet-b'>
+    <div class='col-sm-4 bet-b'>
       <div class='row'>
-        <div class='col-md-6'>
+        <div class='col-xs-6'>
           <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
         </div>
-        <div class='col-md-6 participant-b'>
+        <div class='col-xs-6 participant-b'>
           <p>{{ match.participantB.name }}</p>
           <p>{{ match.participantB.amount | currency: "☺" }}</p>
         </div>
@@ -80,7 +80,7 @@
     <% if @bettors_strategy == 'all_in' %><p class='bettors-header'>Bettors who went all-in</p>
     <% elsif @bettors_strategy == 'all_bettors' %><p class='bettors-header'>All Bettors</p>
     <% end %>
-    <div class='col-md-6'>
+    <div class='col-sm-6'>
       <p class='bettors-participant-name'>{{ match.participantA.name }}</p>
       <ul ng-show='match.bettors.a.length > 0' class='bettors-list'>
         <li ng-repeat='bettor in match.bettors.a'>
@@ -89,7 +89,7 @@
       </ul>
     </div>
 
-    <div class='col-md-6'>
+    <div class='col-sm-6'>
       <p class='bettors-participant-name'>{{ match.participantB.name }}</p>
       <ul ng-show='match.bettors.b.length > 0' class='bettors-list'>
         <li ng-repeat='bettor in match.bettors.b'>
