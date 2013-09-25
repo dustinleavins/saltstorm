@@ -3,4 +3,5 @@ config/*.yml
 tmp/*
 log/*
 coverage/*
+.bundle/*
 
