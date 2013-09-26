@@ -25,10 +25,10 @@ group :pg do
   gem "jdbc-postgres", :require => false, :platforms => :jruby
 end
 
-group :mysql do
-  gem "mysql2", :require => false, :platforms => :ruby
-  gem "jdbc-mysql", :require => false, :platforms => :jruby
-end
+#group :mysql do
+#  gem "mysql2", :require => false, :platforms => :ruby
+#  gem "jdbc-mysql", :require => false, :platforms => :jruby
+#end
 
 group :thin do
   gem "thin", :require => false, :platforms => :ruby

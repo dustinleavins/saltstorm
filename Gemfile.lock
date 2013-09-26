@@ -17,7 +17,6 @@ GEM
       activesupport (>= 3.0.0)
     highline (1.6.19)
     i18n (0.6.5)
-    jdbc-mysql (5.1.25)
     jdbc-postgres (9.2.1002.1)
     jdbc-sqlite3 (3.7.2.1)
     mail (2.5.4)
@@ -26,7 +25,6 @@ GEM
     mime-types (1.25)
     minitest (4.7.5)
     multi_json (1.8.0)
-    mysql2 (0.3.13)
     pg (0.17.0)
     polyglot (0.3.3)
     rack (1.5.2)
@@ -81,11 +79,9 @@ PLATFORMS
 DEPENDENCIES
   factory_girl
   highline
-  jdbc-mysql
   jdbc-postgres
   jdbc-sqlite3
   mail
-  mysql2
   pg
   rack-test
   rake
