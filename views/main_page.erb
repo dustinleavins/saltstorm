@@ -84,7 +84,8 @@
       <p class='bettors-participant-name'>{{ match.participantA.name }}</p>
       <ul ng-show='match.bettors.a.length > 0' class='bettors-list'>
         <li ng-repeat='bettor in match.bettors.a'>
-          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' /><span class='name'>{{bettor.displayName}}</span>
+          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' width='14' height='14' alt='Rank symbol' />
+          <span class='name'>{{bettor.displayName}}</span>
         </li>
       </ul>
     </div>
@@ -93,7 +94,8 @@
       <p class='bettors-participant-name'>{{ match.participantB.name }}</p>
       <ul ng-show='match.bettors.b.length > 0' class='bettors-list'>
         <li ng-repeat='bettor in match.bettors.b'>
-          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' /> {{bettor.displayName}}
+          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' width='14' height='14' alt='Rank symbol' />
+          <span class='name'>{{bettor.displayName}}</span>
         </li>
       </ul>
     </div>
