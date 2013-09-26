@@ -1,20 +1,28 @@
 # Saltstorm - Fun-Money Betting on the Web
 
 ## What is Saltstorm?
-Saltstorm is an open-source clone of [Salty Bet](http://www.saltybet.com) built with Ruby.
+Saltstorm is an open-source clone of [Salty Bet](http://www.saltybet.com).
 
 ## Deployment
-You must have shell access on your web server and the ability to run Rack web apps. Initial setup is a seven-step process:
 
-1. Put the files on your server and run `bundle install`
-2. Create and setup your database of choice (currently supports Postgre and SQLite)
+### Requirements
+You must have a web server with shell access and Ruby (I'm currently using 1.9.3). Right now, *this web app only supports SQLite and PostgreSQL*. The deployment instructions assume that you have prior experience with deploying Ruby web applications.
+
+### Deployment Instructions
+1. Pull this repo and  run `bundle install`
+2. Create and setup your database of choice (no need to create tables)
 3. Create a config/database.yml file to provide DB connection details
+    1. `cp config/database.yml.example config/database.yml`
 4. Create a config/email.yml file for sending emails to users
-5. Run `rake initial_setup`
+    1. `cp config/email.yml.example config/email.yml`
+5. Run `rake initial_setup` (this creates tables and does other stuff)
 6. Tweak config/site.yml to your liking
+    1. *Change the domain* (`domain` setting) to the domain you are deploying Saltstorm to
+    2. Change the `main_video_html` setting use 'embed' code for your stream
+    3. Please change the name (`site_name`) and description (`site_description`)
 7. Setup important cron jobs using `bundle exec whenever` ([official site for whenever](https://github.com/javan/whenever))
 
-The Gemfile includes the 'thin' gem. But you can probably deploy it using anything (please don't use WEBrick). I'll try to add MySQL gems in the future.
+The Gemfile includes the 'thin' gem. But you can probably deploy it using anything (please don't use WEBrick).
 
 ## Saltstorm is a WIP
 Saltstorm is unstable and has no version number. I hope that nothing breaks, but it could!
