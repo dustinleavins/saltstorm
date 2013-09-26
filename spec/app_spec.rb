@@ -33,10 +33,10 @@ describe 'Main App' do
     expect(last_response).to be_ok
   end
 
-  it "allows users to login" do
+  it "allows users to login and logout" do
     user = FactoryGirl.create(:user)
 
-    # Sign-in
+    # Login
     post '/login', {
       :email => user.email,
       :password => user.password
@@ -47,19 +47,8 @@ describe 'Main App' do
     # Try a route requiring login
     get '/api/account'
     expect(last_response).to be_ok
-  end
 
-  it "allows users to logout" do
-    user = FactoryGirl.create(:user)
-
-    # Sign-in
-    post '/login', {
-      :email => user.email,
-      :password => user.password
-    }
-
-    expect(last_response).to be_redirect
-
+    # Logout
     get '/logout'
     expect(last_response).to be_redirect
 
@@ -68,7 +57,6 @@ describe 'Main App' do
     expect(last_response).to_not be_ok
 
   end
-
 
   it "does not allow non-users to login" do
     user = FactoryGirl.build(:user) # Do not save
@@ -171,6 +159,24 @@ describe 'Main App' do
     new_user = User.first(:email => user_info[:email].downcase)
     expect(new_user).to_not be_nil
     expect(new_user.balance).to eq(400)
+  end
+
+  it 'does not allow HTML injection on /signup' do
+    post '/signup', {
+      :email => '<p>Hello email</p>',
+      :password => 'pass1',
+      confirm_password: 'pass2',
+      display_name: '<p>Hello Display Name</p>'
+    }
+
+    expect(last_response).to_not be_redirect
+
+    response_body = last_response.body.downcase
+    expect(response_body).to include('&lt;p&gt;hello email&lt;/p&gt;')
+    expect(response_body).to_not include('<p>hello email</p>')
+
+    expect(response_body).to include('&lt;p&gt;hello display name&lt;/p&gt;')
+    expect(response_body).to_not include('<p>hello display name</p>')
   end
 
   it "does not allows user to signup with incorrect confirm password" do
@@ -481,6 +487,34 @@ describe 'Main App' do
     expect(updated_user).to_not be_nil
 
     expect(updated_user.display_name).to eq(user.display_name.reverse)
+  end
+
+  it 'does not allow HTML injection for /account info change ' do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    post '/account/info', {
+      :display_name => '<p>hello display name</p>',
+      :email => '<p>hello email</p>',
+      :password => 'incorrect password'
+    }
+
+    expect(last_response).to be_redirect # redirect to /account/
+
+    get('/account/')
+    expect(last_response).to be_ok
+    response_body = last_response.body.downcase
+
+    expect(response_body).to include('&lt;p&gt;hello display name&lt;/p&gt;')
+    expect(response_body).to_not include('<p>hello display name</p>')
+
+    expect(response_body).to include('&lt;p&gt;hello email&lt;/p&gt;')
+    expect(response_body).to_not include('<p>hello email</p>')
   end
 
   it "prevents anonymous users from updating info" do
