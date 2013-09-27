@@ -1,16 +1,23 @@
 # Saltstorm - Fun-Money Betting on the Web
 
 ## What is Saltstorm?
-Saltstorm is an open-source clone of [Salty Bet](http://www.saltybet.com).
+Saltstorm is an open-source fun-money betting web app that is heavily inspired by [Salty Bet](http://www.saltybet.com). 
+ 
+### What Makes Saltstorm Different?
+Saltstorm:
+* Enables admins to push detailed match data to stats sites
+* Allows users to spend fun-money (currently on CoD Prestige-like ranks)
+* Has a JSON API for clients and administrators
 
 ## Deployment
+These deployment instructions assume that you have prior experience with deploying Ruby web applications.
 
 ### Requirements
-You must have a web server with shell access and Ruby (I'm currently using 1.9.3). Right now, *this web app only supports SQLite and PostgreSQL*. The deployment instructions assume that you have prior experience with deploying Ruby web applications.
+Web server with shell access and Ruby (1.9.3 is used for development). Right now, *this web app only supports SQLite and PostgreSQL*. For production, *you need access to a PostgreSQL server*.
 
 ### Deployment Instructions
 1. Pull this repo and  run `bundle install`
-2. Create and setup your database of choice (no need to create tables)
+2. Create and setup your database of choice (don't create tables)
 3. Create a config/database.yml file to provide DB connection details
     1. `cp config/database.yml.example config/database.yml`
 4. Create a config/email.yml file for sending emails to users
