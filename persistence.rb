@@ -7,7 +7,7 @@ require 'securerandom'
 require 'json'
 require 'fileutils'
 
-# Module containing a static class for non-database persistence.
+# Module containing 'static' classes for non-database persistence.
 module Persistence
   
   # Initializes non-database persistence.
@@ -43,6 +43,8 @@ module Persistence
 
     # Name of file containing match data.
     MATCH_DATA_FILE = "tmp/#{ENV['RACK_ENV']}/match_data.json"
+
+    # Name of the file used as the bet lock
     BET_FILE = "tmp/#{ENV['RACK_ENV']}/match_open"
 
     # Retrieves match data from match_data_file.

@@ -32,6 +32,7 @@ module Models
     plugin :validation_helpers
     one_to_many :payments
 
+    # Hash of lambdas that return arrays of betting Users.
     GetBettorsStrategies = {
       'all_in' => lambda do |for_participant|
         User.join(Bet, :user_id => :id)
@@ -83,14 +84,9 @@ module Models
     end
 
     # Plain-text representation of password
-    def password
-      return @password
-    end
-
-    # Plain-text representation of password
-    def password=(v)
-      @password = v
-    end
+    # Do not depend on this to be non-nil for users that are already
+    # logged-in.
+    attr_accessor :password
 
     # Retrieves a Set of permissions
     def permissions
@@ -125,6 +121,8 @@ module Models
         .select_map(:post_url)
     end
 
+    # Gets an array of users betting on 'for_participant' using
+    # the specified method string.
     def self.get_bettors(for_participant, method)
       GetBettorsStrategies[method].call(for_participant)
     end
