@@ -691,12 +691,23 @@ class RootApp < Sinatra::Base
 
         winner = match_data['winner'].downcase
   
-        odds_winner = winner == 'a' ? 'participantA' : 'participantB'
-        odds_loser = winner != 'a' ? 'participantA' : 'participantB'
+        odds_winner = nil
+        odds_loser = nil
+        amount_winner = 0.to_r
+        amount_loser = 0.to_r
 
-        amount_winner = (match_data[odds_winner]['amount'].to_r)
-        amount_loser = (match_data[odds_loser]['amount'].to_r)
+        if (winner != 'tie')
+          odds_winner = winner == 'a' ? 'participantA' : 'participantB'
+          odds_loser = winner != 'a' ? 'participantA' : 'participantB'
 
+          amount_winner = (match_data[odds_winner]['amount'].to_r)
+          amount_loser = (match_data[odds_loser]['amount'].to_r)
+        end
+
+        # Skip payout if:
+        # at least one participant did not have any bettors
+        #   -or-
+        # match ended in a tie
         if (amount_winner != 0.to_r && amount_loser != 0.to_r)
           odds = amount_loser / amount_winner
 

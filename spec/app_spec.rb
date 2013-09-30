@@ -1416,6 +1416,125 @@ describe 'Main App' do
     expect(Bet.count).to eq(0)
   end
 
+  it 'allows people to bet their fake money - test #3 tie' do
+    # Reset match data
+    Persistence::MatchStatusPersistence.save_file({
+      :status => 'closed',
+      :winner => '',
+      :participantA => { :name => '', :amount => 0},
+      :participantB => { :name => '', :amount => 0},
+      :odds => '',
+    })
+
+    Persistence::MatchStatusPersistence.close_bids
+
+    expect(Bet.count).to eq(0)
+
+    # Create users
+    admin = FactoryGirl.create(:admin)
+    bettor_a = FactoryGirl.create(:user, :balance => 21)
+    bettor_b = FactoryGirl.create(:user, :balance => 10)
+ 
+    browser_a = Rack::Test::Session.new(Rack::MockSession.new(app))
+    browser_b = Rack::Test::Session.new(Rack::MockSession.new(app))
+
+    # User login
+    post '/login', {
+      :email => admin.email,
+      :password => admin.password
+    }
+
+    browser_a.post '/login', {
+      :email => bettor_a.email,
+      :password => bettor_a.password
+    }
+
+    browser_b.post '/login', {
+      :email => bettor_b.email,
+      :password => bettor_b.password
+    }
+
+    # Open bidding
+    put '/api/current_match', {
+      :status => 'open',
+      :winner => '',
+      :participantA => { :name => 'A', :amount => 0},
+      :participantB => { :name => 'B', :amount => 0},
+      :odds => '',
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    # Bid - bettor_a
+    browser_a.post '/api/bet', {
+      'forParticipant' => 'a',
+      :amount => 5
+    }.to_json
+
+    expect(browser_a.last_response).to be_ok
+
+    # Bid - bettor_b
+    browser_b.post '/api/bet', {
+      'forParticipant' => 'b',
+      :amount => 5
+    }.to_json
+
+    expect(browser_b.last_response).to be_ok
+
+    # Close bidding
+    put '/api/current_match', {
+      :status => 'inProgress',
+      :winner => '',
+      :participantA => { :name => 'A', :amount => 0},
+      :participantB => { :name => 'B', :amount => 0},
+      :odds => '',
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    # Ensure that odds & amount are calculated
+    match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
+
+    expect(match_data_after_close['participantA']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participantB']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['odds']).to eq("1:1")
+
+    # TODO: Change after adding user functionality to show 'all bettors'
+    expect(match_data_after_close['bettors']['a']).to match_array([])
+    expect(match_data_after_close['bettors']['b']).to match_array([])
+
+    expect(Bet.count).to eq(2)
+
+    # End match
+    put '/api/current_match', {
+      :status => 'payout',
+      :winner => 'tie',
+      :participantA => match_data_after_close['participantA'],
+      :participantB => match_data_after_close['participantB'],
+      :odds => match_data_after_close['odds'],
+    }.to_json
+
+    # Payout is async
+    sleep_count = 0
+    while Bet.count > 0
+      sleep(1)
+      sleep_count += 1
+      expect(sleep_count).to be < 20 # Payout is bugged
+    end
+
+    # Check match data
+    match_data_after_payout = Persistence::MatchStatusPersistence.get_from_file
+
+    expect(match_data_after_payout['status']).to  eq('closed')
+
+    # Payout should not occur
+    expect(User.first(:email => bettor_a.email).balance.to_i).to eq(21)
+    expect(User.first(:email => bettor_b.email).balance.to_i).to eq(10)
+
+    expect(Bet.count).to eq(0)
+  end
+
+
   it "allows match cancellation during betting" do
     # Reset match data
     Persistence::MatchStatusPersistence.save_file({
