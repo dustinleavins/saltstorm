@@ -78,6 +78,10 @@ class RootApp < Sinatra::Base
     return erb :index
   end
 
+  get '/css/app.css' do
+    return scss :app
+  end
+
   get '/login' do
     return erb :login
   end

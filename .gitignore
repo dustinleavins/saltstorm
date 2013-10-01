@@ -4,4 +4,5 @@ tmp/*
 log/*
 coverage/*
 .bundle/*
+.sass-cache/*
 
