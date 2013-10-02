@@ -15,19 +15,20 @@ body {
 
 a {
   color: #2A6496;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
-a:hover {
-  cursor: pointer;
-}
-
-.btn-set .btn {
+.btn-set {
+  .btn {
     margin-right: 80px;
-}
-.btn-set .btn:last-child {
-    margin-right: 0;
-}
+  }
 
+  .btn:last-child {
+    margin-right: 0;
+  }
+}
 .btn {
   border-radius: 8px;
 }
@@ -49,11 +50,11 @@ a:hover {
   background-image: -webkit-linear-gradient(bottom, #333333 50%, #666666);
   border-color: #333333;
   color: #F0F0f0;
-}
 
-.btn-primary:hover {
-  border-color: #333333;
-  color: #888888;
+  &:hover {
+    border-color: #333333;
+    color: #888888;
+  }
 }
 
 .form-control {
@@ -66,23 +67,20 @@ a:hover {
 
 .navbar-default {
   background-color: #C3AEC2;
-}
+  .navbar-text{
+    color: #000000;
+  }
 
-.navbar-default .navbar-text{
-  color: #000000;
-}
-
-.navbar-default .navbar-brand {
-  color: #000000;
-  font-weight: bold;
-}
-
-.navbar-default .navbar-nav li a {
-  color: #2A6496;
-}
-
-.navbar-default .navbar-nav li a:hover {
-  text-decoration: underline;
+  .navbar-brand {
+    color: #000000;
+    font-weight: bold;
+  }
+  .navbar-nav li a {
+    color: #2A6496;
+  }
+  .navbar-nav li a:hover {
+    text-decoration: underline;
+  }
 }
 
 .page-header {
@@ -160,14 +158,13 @@ footer {
 
 .bettors-list {
   list-style: none;
-}
+  img {
+    vertical-align: middle;
+  }
 
-.bettors-list img {
-  vertical-align: middle;
-}
-
-.bettors-list .name {
-  padding-left: 4px;
+  .name {
+    padding-left: 4px;
+  }
 }
 
 .bet-info {
