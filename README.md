@@ -40,7 +40,7 @@ AGPL3.
 ## Saltstorm Uses Cool Technologies
 I built Saltstorm with Sinatra (with sinatra-flash) and Sequel. The Rakefile uses Highline for user input. whenever makes the cron job for sending e-mails. mail sends e-mails. RestClient POSTs data to web users. 
 
-The front-end uses jQuery, AngularJS, and  Bootstrap 3.0. Javascript & CSS are pulled from CDNs provided by Google and [Bootstrap CDN](http://bootstrapcdn.com).
+The front-end uses Sass, jQuery, AngularJS, and  Bootstrap 3.0. Javascript & CSS are pulled from CDNs provided by Google and [Bootstrap CDN](http://bootstrapcdn.com).
 
 Tests use rspec, rack-test, factory\_girl, and simplecov.
 
