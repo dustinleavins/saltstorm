@@ -7,7 +7,7 @@ Saltstorm is an open-source fun-money betting web app that is heavily inspired b
 Saltstorm:
 * Enables admins to push detailed match data to stats sites
 * Allows users to spend fun-money (currently on CoD Prestige-like ranks)
-* Has a JSON API for clients and administrators
+* Has a JSON API for clients and administrators ([Example Ruby Script](https://gist.github.com/dustinleavins/6815346))
 
 ## Deployment
 These deployment instructions assume that you have prior experience with deploying Ruby web applications.
