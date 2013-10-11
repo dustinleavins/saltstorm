@@ -265,6 +265,14 @@ class RootApp < Sinatra::Base
     return erb :main_page
   end
 
+  get '/main_mobile' do
+    if (!is_authenticated?)
+      return redirect '/login', 303
+    end
+
+    return erb :main_page_mobile
+  end
+
   get '/account' do
     redirect to('/account/')
   end

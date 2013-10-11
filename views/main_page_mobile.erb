@@ -1,0 +1,62 @@
+<%
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (C) 2013  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+<div ng-controller='FakeBetController' class='main-content'>
+  <nav class='navbar navbar-default navbar-static-top' role='navigation'>
+    <div class='navbar-header'>
+      <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-ex1-collapse'>
+        <span class='sr-only'>Toggle navigation</span>
+        <span class='icon-bar'></span>
+        <span class='icon-bar'></span>
+        <span class='icon-bar'></span>
+      </button>
+      <a class='navbar-brand' href='#'><%= titleize() %></a>
+      <p class='navbar-text'>Logged-in as {{ account.displayName }}</p>
+    </div>
+    <div class='collapse navbar-collapse navbar-ex1-collapse'>
+      <ul class='nav navbar-nav navbar-right'>
+        <li><a href='/payments'>Buy Stuff</a></li>
+        <li><a href='/account/'>Account</a></li>
+        <li><a href='/logout'>Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class='row admin-message' ng-show='match.message'>
+    <p>Message from admin: {{ match.message }}</p>
+  </div>
+  <div class='row'>
+    <div class='col-xs-4 bet-a'>
+      <p>{{ match.participantA.name }}</p>
+      <p>{{ match.participantA.amount | currency: "☺" }}</p>
+      <p><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+    </div>
+    <div class='col-xs-4 bet-info'>
+      <form name='betForm'>
+        <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
+          <p>
+          <input type='number'
+                 class='form-control'
+                 name='amount'
+                 min='1'
+                 placeholder='Bet amount'
+                 required
+                 ng-model='betAmount' />
+          </p>
+        </div>
+        <p>Balance: {{ account.balance | currency: "☺"  }}</p>
+      </form>
+      <p ng-show='betUpdateFailed'>Could not update bet</p>
+      <p ng-show='bettingThisRound'>You are betting this round!</p>
+      <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
+      <p>Odds: {{ match.odds }}</p>
+    </div>
+    <div class='col-xs-4 bet-b text-right'>
+      <p>{{ match.participantB.name }}</p>
+      <p>{{ match.participantB.amount | currency: "☺" }}</p>
+      <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+    </div>
+  </div>
+</div>

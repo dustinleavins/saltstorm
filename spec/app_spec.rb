@@ -309,8 +309,27 @@ describe 'Main App' do
     expect(last_response).to be_ok
   end
 
+  it 'allows users to access /main_mobile' do
+    user = FactoryGirl.create(:user)
+
+    # Sign-in
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }
+
+    # Try a route requiring login
+    get '/main_mobile'
+    expect(last_response).to be_ok
+  end
+
   it "blocks anonymous users from accessing /main" do
     get '/main'
+    expect(last_response).to be_redirect
+  end
+
+  it "blocks anonymous users from accessing /main_mobile" do
+    get '/main_mobile'
     expect(last_response).to be_redirect
   end
 
