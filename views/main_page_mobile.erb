@@ -29,10 +29,12 @@
     <p>Message from admin: {{ match.message }}</p>
   </div>
   <div class='row'>
-    <div class='col-xs-4 bet-a'>
-      <p>{{ match.participantA.name }}</p>
-      <p>{{ match.participantA.amount | currency: "☺" }}</p>
-      <p><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+    <div class='col-xs-4'>
+      <div class='bet-a text-right'>
+        <p>{{ match.participantA.name }}</p>
+        <p>{{ match.participantA.amount | currency: "☺" }}</p>
+        <p><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+      </div>
     </div>
     <div class='col-xs-4 bet-info'>
       <form name='betForm'>
@@ -54,10 +56,12 @@
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
       <p>Odds: {{ match.odds }}</p>
     </div>
-    <div class='col-xs-4 bet-b text-right'>
-      <p>{{ match.participantB.name }}</p>
-      <p>{{ match.participantB.amount | currency: "☺" }}</p>
-      <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+    <div class='col-xs-4'>
+      <div class='bet-b'>
+        <p>{{ match.participantB.name }}</p>
+        <p>{{ match.participantB.amount | currency: "☺" }}</p>
+        <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+      </div>
     </div>
   </div>
 </div>

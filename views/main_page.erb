@@ -34,14 +34,16 @@
     <p>Message from admin: {{ match.message }}</p>
   </div>
   <div class='row' ng-hide='showBettors'>
-    <div class='col-sm-4 bet-a'>
-      <div class='row'>
-        <div class='col-xs-6 participant-a'>
-          <p>{{ match.participantA.name }}</p>
-          <p>{{ match.participantA.amount | currency: "☺" }}</p>
-        </div>
-        <div class='col-xs-6'>
-          <p class='pull-right'><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+    <div class='col-sm-4'>
+      <div class='bet-a'>
+        <div class='row'>
+          <div class='col-xs-6 participant-a'>
+            <p>{{ match.participantA.name }}</p>
+            <p>{{ match.participantA.amount | currency: "☺" }}</p>
+          </div>
+          <div class='col-xs-6'>
+            <p class='pull-right'><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+          </div>
         </div>
       </div>
     </div>
@@ -65,14 +67,16 @@
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
       <p>Odds: {{ match.odds }}</p>
     </div>
-    <div class='col-sm-4 bet-b'>
-      <div class='row'>
-        <div class='col-xs-6'>
-          <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
-        </div>
-        <div class='col-xs-6 participant-b'>
-          <p>{{ match.participantB.name }}</p>
-          <p>{{ match.participantB.amount | currency: "☺" }}</p>
+    <div class='col-sm-4'>
+      <div class='bet-b'>
+        <div class='row'>
+          <div class='col-xs-6'>
+            <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+          </div>
+          <div class='col-xs-6 participant-b'>
+            <p>{{ match.participantB.name }}</p>
+            <p>{{ match.participantB.amount | currency: "☺" }}</p>
+          </div>
         </div>
       </div>
     </div>
