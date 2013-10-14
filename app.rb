@@ -87,7 +87,11 @@ class RootApp < Sinatra::Base
   end
 
   post '/login' do
-    if (authenticate(params[:email], params[:password]))
+    auth_ok = authenticate(params[:email], params[:password])
+
+    if (auth_ok && params[:mobile])
+      redirect to('/main_mobile')
+    elsif (auth_ok)
       redirect to('/main')
     else
       flash.next[:error] = true

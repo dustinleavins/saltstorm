@@ -43,6 +43,7 @@ describe 'Main App' do
     }
 
     expect(last_response).to be_redirect
+    expect(last_response.location).to include('/main')
 
     # Try a route requiring login
     get '/api/account'
@@ -57,6 +58,25 @@ describe 'Main App' do
     expect(last_response).to_not be_ok
 
   end
+
+  it "allows users to login to main_mobile" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password,
+      :mobile => true
+    }
+
+    expect(last_response).to be_redirect
+    expect(last_response.location).to include('/main_mobile')
+
+    # Try a route requiring login
+    get '/api/account'
+    expect(last_response).to be_ok
+  end
+
 
   it "does not allow non-users to login" do
     user = FactoryGirl.build(:user) # Do not save
