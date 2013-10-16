@@ -872,9 +872,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -889,8 +896,10 @@ describe 'Main App' do
     match_data = {
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => 'Player A', :amount => 0 },
-      :participantB => { :name => 'Player B', :amount => 0 },
+      :participants => {
+        'a' => { :name => 'Player A', :amount => 0 },
+        'b' => { :name => 'Player B', :amount => 0 }
+      },
       :odds => ''
     }.to_json
 
@@ -916,8 +925,10 @@ describe 'Main App' do
     match_data = {
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => 'Player A', :amount => 0 },
-      :participantB => { :name => 'Player B', :amount => 0 },
+      :participants => {
+        'a' => { :name => 'Player A', :amount => 0 },
+        'b' => { :name => 'Player B', :amount => 0 }
+      },
       :odds => ''
     }.to_json
 
@@ -1058,9 +1069,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1095,8 +1113,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1122,8 +1142,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1132,8 +1154,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(1.0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(1.0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(10.0)
     expect(match_data_after_close['odds']).to eq("1:10")
 
     # TODO: Change after adding user functionality to show 'all bettors'
@@ -1142,13 +1164,11 @@ describe 'Main App' do
 
     expect(Bet.count).to eq(2)
 
-    # End match - admin client data needs to updated to
-    # include bid amounts & odds
+    # End match
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'a',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1183,9 +1203,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1221,8 +1248,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0},
+      },
       :odds => '',
     }.to_json
 
@@ -1274,8 +1303,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1284,8 +1315,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(5.0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(500.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(500.0)
     expect(match_data_after_close['odds']).to eq("1:100")
 
     expected_bettors_a = [
@@ -1315,8 +1346,7 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'b',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1345,9 +1375,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1382,8 +1419,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0},
+      },
       :odds => '',
     }.to_json
 
@@ -1409,8 +1448,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1419,8 +1460,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(5.0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(500.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(500.0)
     expect(match_data_after_close['odds']).to eq("1:100")
 
     expected_bettors_a = [
@@ -1438,8 +1479,7 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'closed',
       :winner => 'b',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1460,9 +1500,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1497,8 +1544,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b'  => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1524,8 +1573,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b'  => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1534,8 +1585,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(5.0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(5.0)
     expect(match_data_after_close['odds']).to eq("1:1")
 
     # TODO: Change after adding user functionality to show 'all bettors'
@@ -1548,8 +1599,7 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'tie',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1579,9 +1629,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+        'a' => { :name => '', :amount => 0},
+        'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1616,8 +1673,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0},
+      },
       :odds => '',
     }.to_json
 
@@ -1643,8 +1702,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1666,9 +1727,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1688,8 +1756,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1699,8 +1769,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1709,8 +1781,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(0.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(0.0)
     expect(match_data_after_close['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
@@ -1724,8 +1796,7 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'a',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1746,11 +1817,17 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
-
     Persistence::MatchStatusPersistence.close_bids
 
     expect(Bet.count).to eq(0)
@@ -1776,8 +1853,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0},
+      },
       :odds => '',
     }.to_json
 
@@ -1795,8 +1874,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => { 
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1805,8 +1886,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close =  Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(10.0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(0.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(0.0)
     expect(match_data_after_close['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
@@ -1820,8 +1901,7 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'a',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1846,9 +1926,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+          'a' => { :name => '', :amount => 0},
+          'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1876,8 +1963,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1895,8 +1984,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'inProgress',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0}
+      },
       :odds => '',
     }.to_json
 
@@ -1905,8 +1996,8 @@ describe 'Main App' do
     # Ensure that odds & amount are calculated
     match_data_after_close =  Persistence::MatchStatusPersistence.get_from_file
 
-    expect(match_data_after_close['participantA']['amount'].to_f).to eq(10.0)
-    expect(match_data_after_close['participantB']['amount'].to_f).to eq(0.0)
+    expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(0.0)
     expect(match_data_after_close['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
@@ -1920,8 +2011,7 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'b',
-      :participantA => match_data_after_close['participantA'],
-      :participantB => match_data_after_close['participantB'],
+      :participants => match_data_after_close['participants'],
       :odds => match_data_after_close['odds'],
     }.to_json
 
@@ -1944,9 +2034,16 @@ describe 'Main App' do
     Persistence::MatchStatusPersistence.save_file({
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => '', :amount => 0},
-      :participantB => { :name => '', :amount => 0},
+      :participants => {
+        'a' => { :name => '', :amount => 0},
+        'b' => { :name => '', :amount => 0}
+      },
       :odds => '',
+      :message => '',
+      :bettors => {
+          :a => [],
+          :b => [] 
+      }
     })
 
     Persistence::MatchStatusPersistence.close_bids
@@ -1974,8 +2071,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'open',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0},
+      },
       :odds => '',
     }.to_json
 
@@ -2039,8 +2138,10 @@ describe 'Main App' do
     put '/api/current_match', {
       :status => 'closed',
       :winner => '',
-      :participantA => { :name => 'A', :amount => 0},
-      :participantB => { :name => 'B', :amount => 0},
+      :participants => {
+        'a' => { :name => 'A', :amount => 0},
+        'b' => { :name => 'B', :amount => 0},
+      },
       :odds => '',
     }.to_json
 

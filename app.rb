@@ -628,16 +628,16 @@ class RootApp < Sinatra::Base
         
       # Calculate amounts & odds
       bets_for_a = Bet.where(:for_participant => 'a').select_map(:amount)
-      new_match_data['participantA']['amount'] = bets_for_a.reduce(:+)
+      new_match_data['participants']['a']['amount'] = bets_for_a.reduce(:+)
 
       bets_for_b = Bet.where(:for_participant => 'b').select_map(:amount)
-      new_match_data['participantB']['amount'] = bets_for_b.reduce(:+)
+      new_match_data['participants']['b']['amount'] = bets_for_b.reduce(:+)
 
       if ((bets_for_a.count == 0) || (bets_for_b.count == 0))
         new_match_data[:odds] = '0:0'
       else
-        odds = (new_match_data['participantA']['amount'].to_r) / 
-          (new_match_data['participantB']['amount'].to_r)
+        odds = (new_match_data['participants']['a']['amount'].to_r) / 
+          (new_match_data['participants']['b']['amount'].to_r)
 
         new_match_data[:odds] = "#{odds.numerator}:#{odds.denominator}"
 
@@ -713,11 +713,11 @@ class RootApp < Sinatra::Base
         amount_loser = 0.to_r
 
         if (winner != 'tie')
-          odds_winner = winner == 'a' ? 'participantA' : 'participantB'
-          odds_loser = winner != 'a' ? 'participantA' : 'participantB'
+          odds_winner = winner
+          odds_loser = winner != 'a' ? 'a' : 'b'
 
-          amount_winner = (match_data[odds_winner]['amount'].to_r)
-          amount_loser = (match_data[odds_loser]['amount'].to_r)
+          amount_winner = (match_data['participants'][odds_winner]['amount'].to_r)
+          amount_loser = (match_data['participants'][odds_loser]['amount'].to_r)
         end
 
         # Skip payout if:

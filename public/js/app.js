@@ -47,8 +47,8 @@ var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q
             return '';
         } else {
             return $scope.match.winner  === 'a' ?
-                $scope.match.participantA.name :
-                $scope.match.participantB.name;
+                $scope.match.participants['a'].name :
+                $scope.match.participants['b'].name;
         }
     };
 

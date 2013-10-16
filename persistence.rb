@@ -57,8 +57,10 @@ module Persistence
         self.save_file({
           :status => 'closed',
           :winner => '',
-          :participantA => { :name => '', :amount => 0},
-          :participantB => { :name => '', :amount => 0},
+          :participants => {
+              'a' => { :name => '', :amount => 0},
+              'b' => { :name => '', :amount => 0}
+          },
           :odds => '',
           :message => '',
           :bettors => {
