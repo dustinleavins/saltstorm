@@ -22,7 +22,7 @@ Web server with shell access and Ruby (1.9.3 is used for development). Right now
     1. `cp config/database.yml.example config/database.yml`
 4. Create a config/email.yml file for sending emails to users
     1. `cp config/email.yml.example config/email.yml`
-5. Run `rake initial_setup` (this creates tables and does other stuff)
+5. Run `rake initial_setup RACK_ENV='production'` (this creates tables and does other stuff)
 6. Tweak config/site.yml to your liking
     1. *Change the domain* (`domain` setting) to the domain you are deploying Saltstorm to
     2. Change the `main_video_html` setting use 'embed' code for your stream
