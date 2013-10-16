@@ -63,10 +63,14 @@ a {
 
 .navbar-static-top {
   border-radius: 8px;
+  
 }
 
 .navbar-default {
   background-color: #C3AEC2;
+  border-color: #888888;
+  border-width: 2px;
+  border-style: solid;
   .navbar-text{
     color: #000000;
   }
@@ -110,7 +114,7 @@ footer {
   color: #000000;
   background-color: #FFD485;
   border-style: solid;
-  border-color: #000000;
+  border-color: #888888;
   border-width: 2px;
   border-radius: 8px;
   padding: 10px;
@@ -120,7 +124,7 @@ footer {
   color: #000000;
   background-color: #8888FF;
   border-style: solid;
-  border-color: #000000;
+  border-color: #888888;
   border-width: 2px;
   border-radius: 8px;
   padding: 10px;
