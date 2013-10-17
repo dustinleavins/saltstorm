@@ -438,9 +438,12 @@ class RootApp < Sinatra::Base
     submitted_bid = JSON.parse(request.body.read)
     bid_amount = submitted_bid['amount']
 
+    participant_keys = Persistence::MatchStatusPersistence
+      .get_from_file['participants'].keys
+
     if ((bid_amount < 1) || (bid_amount.floor != bid_amount))
       return json_response(500, { :error => 'amount must be a positive integer' })
-    elsif (!['a','b'].include?(submitted_bid['forParticipant']))
+    elsif (!participant_keys.include?(submitted_bid['forParticipant']))
       return json_response(500, { :error => 'invalid request' })
     end
 
@@ -667,20 +670,13 @@ class RootApp < Sinatra::Base
         end
       end
 
-      bettors_setting = app_settings['bettors_show']
-      all_in_a = User.get_bettors('a', bettors_setting)
-
-      all_in_b = User.get_bettors('b', bettors_setting)
-
-      new_match_data[:bettors] = {
-        :a => all_in_a.map do |a|
-          { 'displayName' => a.display_name, 'rank' => a.rank }
-        end,
-
-        :b => all_in_b.map do |b|
-          { 'displayName' => b.display_name, 'rank' => b.rank }
+      new_match_data['bettors'] = {}
+      new_match_data['participants'].keys.each do |participant_key|
+        betting_users = User.get_bettors(participant_key, app_settings['bettors_show'])
+        new_match_data['bettors'][participant_key] = betting_users.map do |user|
+          { 'displayName' => user.display_name, 'rank' => user.rank }
         end
-      }
+      end
 
     elsif (old_match_data['status'] == 'inProgress' &&
            new_match_data['status'] == 'payout')
@@ -712,9 +708,9 @@ class RootApp < Sinatra::Base
       Bet.where().destroy
 
       # Reset bettors lists
-      new_match_data[:bettors] = {
-        :a => [],
-        :b => [] 
+      new_match_data['bettors'] = {
+        'a' => [],
+        'b' => [] 
       }
 
     # No other status transitions are allowed
@@ -731,25 +727,32 @@ class RootApp < Sinatra::Base
 
         winner = match_data['winner'].downcase
   
-        odds_winner = nil
-        odds_loser = nil
-        amount_winner = 0.to_r
-        amount_loser = 0.to_r
+        amount_winner = 0
+        amount_loser = 0
 
         if (winner != 'tie')
           odds_winner = winner
-          odds_loser = winner != 'a' ? 'a' : 'b'
+ 
+          # amount for winner can be nil; to_i forces it to be a number
+          amount_winner = (match_data['participants'][winner]['amount']).to_i
 
-          amount_winner = (match_data['participants'][odds_winner]['amount'].to_r)
-          amount_loser = (match_data['participants'][odds_loser]['amount'].to_r)
+          total = new_match_data['participants'].values.inject(0) do |sum, p|
+            if p['amount'] == nil
+              sum
+            else
+              sum + p['amount']
+            end
+          end
+
+          amount_loser = total - amount_winner
         end
 
         # Skip payout if:
         # at least one participant did not have any bettors
         #   -or-
         # match ended in a tie
-        if (amount_winner != 0.to_r && amount_loser != 0.to_r)
-          odds = amount_loser / amount_winner
+        if (amount_winner != 0 && amount_loser != 0)
+          odds = amount_loser.to_r / amount_winner.to_r
 
           Bet.all.each do |bet|
             user = bet.user
