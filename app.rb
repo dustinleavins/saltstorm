@@ -652,11 +652,7 @@ class RootApp < Sinatra::Base
         end
       else
         total = new_match_data['participants'].values.inject(0) do |sum, p|
-          if p['amount'] == nil
-            sum
-          else
-            sum + p['amount']
-          end
+          sum + p['amount'].to_i # might be nil
         end
 
         new_match_data['participants'].each do |k, v|
@@ -733,15 +729,11 @@ class RootApp < Sinatra::Base
         if (winner != 'tie')
           odds_winner = winner
  
-          # amount for winner can be nil; to_i forces it to be a number
+          # amount for winner might be nil
           amount_winner = (match_data['participants'][winner]['amount']).to_i
 
           total = new_match_data['participants'].values.inject(0) do |sum, p|
-            if p['amount'] == nil
-              sum
-            else
-              sum + p['amount']
-            end
+            sum + p['amount'].to_i # might be nil
           end
 
           amount_loser = total - amount_winner
