@@ -617,11 +617,16 @@ class RootApp < Sinatra::Base
       Persistence::MatchStatusPersistence.open_bids
 
       # Reset bettors lists
-      new_match_data[:bettors] = {
+      new_match_data['bettors'] = {
         :a => [],
         :b => [] 
       }
 
+      # Reset participant info
+      new_match_data['participants'].values.each do |p|
+        p['odds'] = ''
+        p['amount'] = 0
+      end
     elsif (old_match_data['status'] == 'open' &&
            new_match_data['status'] == 'inProgress')
       Persistence::MatchStatusPersistence.close_bids
