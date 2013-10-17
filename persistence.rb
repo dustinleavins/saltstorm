@@ -58,10 +58,9 @@ module Persistence
           :status => 'closed',
           :winner => '',
           :participants => {
-              'a' => { :name => '', :amount => 0},
-              'b' => { :name => '', :amount => 0}
+              'a' => { :name => '', :amount => 0, :odds => ''},
+              'b' => { :name => '', :amount => 0, :odds => ''}
           },
-          :odds => '',
           :message => '',
           :bettors => {
               :a => [],

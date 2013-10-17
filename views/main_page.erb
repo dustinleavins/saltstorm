@@ -65,7 +65,7 @@
       <p ng-show='betUpdateFailed'>Could not update bet</p>
       <p ng-show='bettingThisRound'>You are betting this round!</p>
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
-      <p>Odds: {{ match.odds }}</p>
+      <p>Odds: {{ match.participants['a'].odds }}</p>
     </div>
     <div class='col-sm-4'>
       <div class='bet-b'>

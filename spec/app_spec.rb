@@ -873,10 +873,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -897,10 +896,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-        'a' => { :name => 'Player A', :amount => 0 },
-        'b' => { :name => 'Player B', :amount => 0 }
+        'a' => { :name => 'Player A', :amount => 0, :odds => '' },
+        'b' => { :name => 'Player B', :amount => 0, :odds => '' }
       },
-      :odds => ''
     }.to_json
 
     put '/api/current_match', match_data
@@ -926,10 +924,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-        'a' => { :name => 'Player A', :amount => 0 },
-        'b' => { :name => 'Player B', :amount => 0 }
+        'a' => { :name => 'Player A', :amount => 0, :odds => '' },
+        'b' => { :name => 'Player B', :amount => 0, :odds => '' }
       },
-      :odds => ''
     }.to_json
 
     put '/api/current_match', match_data
@@ -1070,10 +1067,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1114,10 +1110,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1143,10 +1138,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1155,8 +1149,10 @@ describe 'Main App' do
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(1.0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("1:10")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(10.0)
-    expect(match_data_after_close['odds']).to eq("1:10")
+    expect(match_data_after_close['participants']['b']['odds']).to eq("10:1")
+
 
     # TODO: Change after adding user functionality to show 'all bettors'
     expect(match_data_after_close['bettors']['a']).to match_array([])
@@ -1169,7 +1165,6 @@ describe 'Main App' do
       :status => 'payout',
       :winner => 'a',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     # Payout is async
@@ -1204,10 +1199,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1249,10 +1243,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0},
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''},
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1304,10 +1297,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1316,8 +1308,9 @@ describe 'Main App' do
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("1:100")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(500.0)
-    expect(match_data_after_close['odds']).to eq("1:100")
+    expect(match_data_after_close['participants']['b']['odds']).to eq("100:1")
 
     expected_bettors_a = [
       { 'displayName' => loser.display_name, 'rank' => loser.rank }
@@ -1347,7 +1340,6 @@ describe 'Main App' do
       :status => 'payout',
       :winner => 'b',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     # Payout is async
@@ -1376,10 +1368,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1420,10 +1411,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0},
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''},
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1449,10 +1439,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1461,9 +1450,10 @@ describe 'Main App' do
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("1:100")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(500.0)
-    expect(match_data_after_close['odds']).to eq("1:100")
-
+    expect(match_data_after_close['participants']['b']['odds']).to eq("100:1")
+   
     expected_bettors_a = [
       { 'displayName' => loser.display_name, 'rank' => loser.rank }
     ]
@@ -1480,7 +1470,6 @@ describe 'Main App' do
       :status => 'closed',
       :winner => 'b',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     # Payout is async
@@ -1501,10 +1490,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1545,10 +1533,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b'  => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b'  => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1574,10 +1561,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b'  => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b'  => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1586,8 +1572,9 @@ describe 'Main App' do
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(5.0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("1:1")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(5.0)
-    expect(match_data_after_close['odds']).to eq("1:1")
+    expect(match_data_after_close['participants']['b']['odds']).to eq("1:1")
 
     # TODO: Change after adding user functionality to show 'all bettors'
     expect(match_data_after_close['bettors']['a']).to match_array([])
@@ -1600,7 +1587,6 @@ describe 'Main App' do
       :status => 'payout',
       :winner => 'tie',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     # Payout is async
@@ -1630,10 +1616,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-        'a' => { :name => '', :amount => 0},
-        'b' => { :name => '', :amount => 0}
+        'a' => { :name => '', :amount => 0, :odds => ''},
+        'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1674,10 +1659,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0},
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1703,10 +1687,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1728,10 +1711,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1757,10 +1739,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1770,10 +1751,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1782,8 +1762,9 @@ describe 'Main App' do
     match_data_after_close = Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("0:0")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(0.0)
-    expect(match_data_after_close['odds']).to eq("0:0")
+    expect(match_data_after_close['participants']['b']['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
     expect(match_data_after_close['bettors']['a']).to match_array([])
@@ -1797,7 +1778,6 @@ describe 'Main App' do
       :status => 'payout',
       :winner => 'a',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     # Payout is async, but in this case, it' an expensive no-op
@@ -1818,10 +1798,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1854,10 +1833,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0},
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''},
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1875,10 +1853,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => { 
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1887,8 +1864,9 @@ describe 'Main App' do
     match_data_after_close =  Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("0:0")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(0.0)
-    expect(match_data_after_close['odds']).to eq("0:0")
+    expect(match_data_after_close['participants']['b']['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
     expect(match_data_after_close['bettors']['a']).to match_array([])
@@ -1902,7 +1880,6 @@ describe 'Main App' do
       :status => 'payout',
       :winner => 'a',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     ## Payout is async, but in this case, it' an expensive no-op
@@ -1927,10 +1904,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-          'a' => { :name => '', :amount => 0},
-          'b' => { :name => '', :amount => 0}
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -1964,10 +1940,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1985,10 +1960,9 @@ describe 'Main App' do
       :status => 'inProgress',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0}
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''}
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -1997,8 +1971,9 @@ describe 'Main App' do
     match_data_after_close =  Persistence::MatchStatusPersistence.get_from_file
 
     expect(match_data_after_close['participants']['a']['amount'].to_f).to eq(10.0)
+    expect(match_data_after_close['participants']['a']['odds']).to eq("0:0")
     expect(match_data_after_close['participants']['b']['amount'].to_f).to eq(0.0)
-    expect(match_data_after_close['odds']).to eq("0:0")
+    expect(match_data_after_close['participants']['b']['odds']).to eq("0:0")
 
     # TODO: Change after adding user functionality to show 'all bettors'
     expect(match_data_after_close['bettors']['a']).to match_array([])
@@ -2012,7 +1987,6 @@ describe 'Main App' do
       :status => 'payout',
       :winner => 'b',
       :participants => match_data_after_close['participants'],
-      :odds => match_data_after_close['odds'],
     }.to_json
 
     ## Payout is async, but in this case, it' an expensive no-op
@@ -2035,10 +2009,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-        'a' => { :name => '', :amount => 0},
-        'b' => { :name => '', :amount => 0}
+        'a' => { :name => '', :amount => 0, :odds => ''},
+        'b' => { :name => '', :amount => 0, :odds => ''}
       },
-      :odds => '',
       :message => '',
       :bettors => {
           :a => [],
@@ -2072,10 +2045,9 @@ describe 'Main App' do
       :status => 'open',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0},
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''},
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok
@@ -2139,10 +2111,9 @@ describe 'Main App' do
       :status => 'closed',
       :winner => '',
       :participants => {
-        'a' => { :name => 'A', :amount => 0},
-        'b' => { :name => 'B', :amount => 0},
+        'a' => { :name => 'A', :amount => 0, :odds => ''},
+        'b' => { :name => 'B', :amount => 0, :odds => ''},
       },
-      :odds => '',
     }.to_json
 
     expect(last_response).to be_ok

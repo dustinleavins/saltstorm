@@ -627,20 +627,39 @@ class RootApp < Sinatra::Base
       Persistence::MatchStatusPersistence.close_bids
         
       # Calculate amounts & odds
-      bets_for_a = Bet.where(:for_participant => 'a').select_map(:amount)
-      new_match_data['participants']['a']['amount'] = bets_for_a.reduce(:+)
+      new_match_data['participants'].each do |k, v|
+        v['amount'] = Bet
+          .where(:for_participant => k)
+          .select_map(:amount)
+          .reduce(:+)
+      end
 
-      bets_for_b = Bet.where(:for_participant => 'b').select_map(:amount)
-      new_match_data['participants']['b']['amount'] = bets_for_b.reduce(:+)
+      parts_with_bets = new_match_data['participants'].values.count do |p|
+        p['amount'] != nil && p['amount'] > 0
+      end
 
-      if ((bets_for_a.count == 0) || (bets_for_b.count == 0))
-        new_match_data[:odds] = '0:0'
+      if (parts_with_bets < 2)
+        new_match_data['participants'].values.each do |p|
+          p['odds'] = "0:0"
+        end
       else
-        odds = (new_match_data['participants']['a']['amount'].to_r) / 
-          (new_match_data['participants']['b']['amount'].to_r)
+        total = new_match_data['participants'].values.inject(0) do |sum, p|
+          if p['amount'] == nil
+            sum
+          else
+            sum + p['amount']
+          end
+        end
 
-        new_match_data[:odds] = "#{odds.numerator}:#{odds.denominator}"
-
+        new_match_data['participants'].each do |k, v|
+          if v['amount'] == nil
+            v['odds'] = '0:0'
+          else
+            other_total = total - v['amount'].to_r
+            odds = (v['amount'].to_r) / (other_total.to_r)
+            v['odds'] = "#{odds.numerator}:#{odds.denominator}"
+          end
+        end
       end
 
       bettors_setting = app_settings['bettors_show']
