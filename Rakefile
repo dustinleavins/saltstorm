@@ -61,7 +61,11 @@ task :initial_setup => [:generate_secret_token] do
     say('Please enter an e-mail address & password for the admin user')
 
     email = ask("E-mail address: ") { |q| q.validate = Models.email_regex  }
-    password = ask("Password: ") { |q| q.echo = false }
+    password = ask("Password (must be at least 8 characters long): ") do |q|
+      q.echo = false 
+      q.validate = /.{8,}/
+    end
+
     confirm_password = ask("Confirm Password: ") { |q| q.echo = false }
 
     if password != confirm_password
