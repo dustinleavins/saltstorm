@@ -25,6 +25,20 @@ task :generate_secret_token do
   end
 end
 
+task :reset_match_data do
+  say 'Deleting existing match data files'
+  if (File.exist? Persistence::MatchStatusPersistence::MATCH_DATA_FILE)
+    File.delete Persistence::MatchStatusPersistence::MATCH_DATA_FILE
+  end
+
+  if (File.exist? Persistence::MatchStatusPersistence::BET_FILE)
+    File.delete Persistence::MatchStatusPersistence::BET_FILE
+  end
+
+  say('Initializing non-db persistence')
+  Persistence.init_persistence()
+end
+
 task :initial_setup => [:generate_secret_token] do
   if (!File.exist?('config/site.yml'))
     say("Creating 'config/site.yml'")
