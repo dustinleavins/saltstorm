@@ -867,24 +867,10 @@ describe 'Main App' do
   end
 
   it 'should allow anonymous users to access /api/current_match GET' do
+
     # By this point in testing, match data might not be set
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
+   
     expect(Bet.count).to eq(0)
 
     get '/api/current_match'
@@ -1062,23 +1048,7 @@ describe 'Main App' do
   end
 
   it "allows people to bet their fake money - test #1" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1194,23 +1164,7 @@ describe 'Main App' do
   # - Anonymous users should not be able to bet
   # - Users should not be able to make payments while betting
   it "allows people to bet their fake money - test #2" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1334,8 +1288,7 @@ describe 'Main App' do
     expect(winner_browser.last_response).to_not be_ok
 
 
-    # End match - admin client data needs to updated to
-    # include bid amounts & odds
+    # End match
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'b',
@@ -1363,23 +1316,7 @@ describe 'Main App' do
   end
 
   it "allows match cancellation during match" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1485,23 +1422,7 @@ describe 'Main App' do
   end
 
   it 'allows people to bet their fake money - test #3 tie' do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1611,23 +1532,7 @@ describe 'Main App' do
 
 
   it "allows match cancellation during betting" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-        'a' => { :name => '', :amount => 0, :odds => ''},
-        'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1706,23 +1611,7 @@ describe 'Main App' do
   end
 
   it "allows people to have matches with no one betting" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1772,8 +1661,7 @@ describe 'Main App' do
 
     expect(Bet.count).to eq(0)
 
-    # End match - admin client data needs to updated to
-    # include bid amounts & odds
+    # End match
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'a',
@@ -1793,22 +1681,7 @@ describe 'Main App' do
   end
 
   it "allows people to have one-sided matches for winner" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1874,8 +1747,7 @@ describe 'Main App' do
 
     expect(Bet.count).to eq(1)
 
-    # End match - admin client data needs to updated to
-    # include bid amounts & odds
+    # End match
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'a',
@@ -1899,23 +1771,7 @@ describe 'Main App' do
   # Test covering an issue where ZeroDivisionError was thrown from the
   # payout thread
   it "allows people to have one-sided matches for loser" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-          'a' => { :name => '', :amount => 0, :odds => ''},
-          'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
@@ -1981,15 +1837,14 @@ describe 'Main App' do
 
     expect(Bet.count).to eq(1)
 
-    # End match - admin client data needs to updated to
-    # include bid amounts & odds
+    # End match
     put '/api/current_match', {
       :status => 'payout',
       :winner => 'b',
       :participants => match_data_after_close['participants'],
     }.to_json
 
-    ## Payout is async, but in this case, it' an expensive no-op
+    ## Payout is async, but in this case, it's an expensive no-op
     sleep(1)
 
     # Check match data
@@ -2004,23 +1859,7 @@ describe 'Main App' do
   end
 
   it "does not allow non-positive integer bet amounts" do
-    # Reset match data
-    Persistence::MatchStatusPersistence.save_file({
-      :status => 'closed',
-      :winner => '',
-      :participants => {
-        'a' => { :name => '', :amount => 0, :odds => ''},
-        'b' => { :name => '', :amount => 0, :odds => ''}
-      },
-      :message => '',
-      :bettors => {
-          :a => [],
-          :b => [] 
-      }
-    })
-
-    Persistence::MatchStatusPersistence.close_bids
-
+    reset_match_data
     expect(Bet.count).to eq(0)
 
     # Create users
