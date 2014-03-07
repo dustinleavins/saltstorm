@@ -1,4 +1,5 @@
-# Copyright (c) 2013 Dustin Leavins
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (c) 2013, 2014 Dustin Leavins
 # See the file 'LICENSE.txt' for copying permission
 require 'securerandom'
 require 'yaml'
