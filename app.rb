@@ -436,7 +436,7 @@ class RootApp < Sinatra::Base
   
     request.body.rewind
     submitted_bid = JSON.parse(request.body.read)
-    bid_amount = submitted_bid['amount']
+    bid_amount = submitted_bid['amount'] || 0
 
     participant_keys = Persistence::MatchStatusPersistence
       .get_from_file['participants'].keys

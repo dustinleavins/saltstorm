@@ -29,7 +29,7 @@ var PaymentsController = ['$scope', '$window', function($scope, $window) {
     };
 }];
 
-var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q) {
+var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
     $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds
     $scope.betAmount = 0;
@@ -40,6 +40,8 @@ var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q
     $.ajaxSetup({
       cache: false
     });
+
+    $http.defaults.cache = null;
     
     $scope.winnerName = function() {
         if (!$scope.match || !$scope.match.winner) {
@@ -69,36 +71,29 @@ var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q
             return;
         }
 
-        $.post('api/bet', JSON.stringify({
+        $http.post('/api/bet', {
             forParticipant: participantCode,
             amount: $scope.betAmount
-        }))
-        .done(function() {
-            $scope.$apply(function() {
-                $scope.bettingThisRound = true;
-                $scope.betUpdateFailed = false;
-            });
         })
-        .fail(function() {
-            $scope.$apply(function() {
-                $scope.betUpdateFailed = true;
-            });
-
+        .success(function(data, status, headers, config) {
+            $scope.bettingThisRound = true;
+            $scope.betUpdateFailed = false;
+        })
+        .error(function(data, status, headers, config) {
+            $window.console.log(data);
+            $scope.betUpdateFailed = true;
         });
     };
 
     var updateAccountDataBody = function() {
         var deferred = $q.defer();
 
-        $.getJSON('/api/account')
-        .done(function(data) {
-            $scope.$apply(function() {
-                $scope.account = data;
-                
-                deferred.resolve();
-            });
+        $http.get('/api/account', { cache: false })
+        .success(function(data, status, headers, config) {
+            $scope.account = data;
+            deferred.resolve();
         })
-        .fail(function() {
+        .error(function(data, status, headers, config) {
             deferred.reject('Error');
         });
 
@@ -113,42 +108,40 @@ var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q
         var deferred = $q.defer();
         
         $window.setTimeout(function() {
-            $.getJSON('/api/current_match')
-            .done(function(data) {
-                $scope.$apply(function() {
-                    var previous_match_data = $scope.match;
-                    $scope.match = data;
+            $http.get('/api/current_match')
+            .success(function(data, status, headers, config) {
+                var previous_match_data = $scope.match;
+                $scope.match = data;
 
-                    if (previous_match_data == null)
-                    {
-                        $scope.betAmount = 0;
-                        $scope.bettingThisRound = false;
-                        $scope.betUpdateFailed = false;
+                if (previous_match_data == null)
+                {
+                    $scope.betAmount = 0;
+                    $scope.bettingThisRound = false;
+                    $scope.betUpdateFailed = false;
 
-                    } else if (previous_match_data['status'] !== 'open' &&
-                         data['status'] === 'open') {
+                } else if (previous_match_data['status'] !== 'open' &&
+                     data['status'] === 'open') {
 
-                        $scope.betAmount = 0;
-                        $scope.bettingThisRound = false;
-                        $scope.betUpdateFailed = false;
+                    $scope.betAmount = 0;
+                    $scope.bettingThisRound = false;
+                    $scope.betUpdateFailed = false;
 
-                    } else if (previous_match_data['status'] === 'inProgress' &&
-                        data['status'] !== 'inProgress') {
+                } else if (previous_match_data['status'] === 'inProgress' &&
+                    data['status'] !== 'inProgress') {
 
-                        if ($scope.betAmount != 0 && $scope.bettingThisRound) {
-                            $scope.updateAccountData();
-                        }
-
-                        $scope.betAmount = 0;
-                        $scope.bettingThisRound = false;
-                        $scope.betUpdateFailed = false;
-
+                    if ($scope.betAmount != 0 && $scope.bettingThisRound) {
+                        $scope.updateAccountData();
                     }
 
-                    deferred.resolve();
-                });
+                    $scope.betAmount = 0;
+                    $scope.bettingThisRound = false;
+                    $scope.betUpdateFailed = false;
+
+                }
+
+                deferred.resolve();
             })
-            .fail(function() {
+            .error(function(data, status, headers, config) {
                 deferred.reject('Error');
             });
         }, delay);
