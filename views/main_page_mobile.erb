@@ -28,7 +28,7 @@
   <div class='row admin-message' ng-show='match.message'>
     <p>Message from admin: {{ match.message }}</p>
   </div>
-  <div class='row'>
+  <div class='row' ng-hide='hasManyParticipants()'>
     <div class='col-xs-4'>
       <div class='bet-a text-right'>
         <p>{{ match.participants['a'].name }}</p>
@@ -64,4 +64,48 @@
       </div>
     </div>
   </div>
+
+<div class='row' ng-show='hasManyParticipants()'>
+    <div class='col-sm-8'>
+      <div class='bet-a'>
+        <div class='row'>
+          <div class='col-xs-6 participant-a'>
+            <div ng-repeat='(key, participant) in match.participants'>
+              <input type='radio' ng-model='$parent.selectedParticipant' ng-value='key' /> {{participant['name']}}
+            </div>
+
+          </div>
+          <div class='col-xs-6'>
+            <p class='pull-right'>
+              <button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet(selectedParticipant)'>Bet</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='col-sm-4 bet-info'>
+      <form name='betForm'>
+        <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
+          <p>
+            <input type='number'
+                   class='form-control'
+                   name='amount'
+                   min='1'
+                   placeholder='Bet amount'
+                   required
+                   ng-model='betAmount' />
+          </p>
+        </div>
+        <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
+      </form>
+      <p ng-show='betUpdateFailed'>Could not update bet</p>
+      <p ng-show='bettingThisRound'>You are betting this round!</p>
+      <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
+      <p>Odds: TODO</p>
+    </div>
+  </div>
+
+
+
 </div>

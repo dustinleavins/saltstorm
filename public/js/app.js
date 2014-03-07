@@ -35,20 +35,27 @@ var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q
     $scope.betAmount = 0;
     $scope.bettingThisRound = false;
     $scope.betUpdateFailed = false;
+    $scope.selectedParticipant = 'a';
 
     $.ajaxSetup({
       cache: false
     });
     
     $scope.winnerName = function() {
-        if ($scope.match == null) {
-            return '';
-        } else if ($scope.match.winner == null) {
+        if (!$scope.match || !$scope.match.winner) {
             return '';
         } else {
-            return $scope.match.winner  === 'a' ?
-                $scope.match.participants['a'].name :
-                $scope.match.participants['b'].name;
+            return $scope.match
+                .participants[$scope.match.winner]
+                .name;
+        }
+    };
+
+    $scope.hasManyParticipants = function() {
+        if (!$scope.match) {
+            return false;
+        } else {
+            return Object.keys($scope.match.participants).length > 2;
         }
     };
 
@@ -114,7 +121,6 @@ var FakeBetController = ['$scope', '$window', '$q', function($scope, $window, $q
 
                     if (previous_match_data == null)
                     {
-
                         $scope.betAmount = 0;
                         $scope.bettingThisRound = false;
                         $scope.betUpdateFailed = false;

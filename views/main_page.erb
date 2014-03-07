@@ -33,7 +33,7 @@
   <div class='row admin-message' ng-show='match.message && !showBettors'>
     <p>Message from admin: {{ match.message }}</p>
   </div>
-  <div class='row' ng-hide='showBettors'>
+  <div class='row' ng-hide='showBettors || hasManyParticipants()'>
     <div class='col-sm-4'>
       <div class='bet-a'>
         <div class='row'>
@@ -81,24 +81,56 @@
       </div>
     </div>
   </div>
-  <div class='row' ng-show='showBettors'>
+  <div class='row' ng-hide='showBettors || !hasManyParticipants()'>
+    <div class='col-sm-8'>
+      <div class='bet-a'>
+        <div class='row'>
+          <div class='col-xs-6 participant-a'>
+            <div ng-repeat='(key, participant) in match.participants'>
+              <input type='radio' ng-model='$parent.selectedParticipant' ng-value='key' /> {{participant['name']}}
+            </div>
+
+          </div>
+          <div class='col-xs-6'>
+            <p class='pull-right'>
+              <button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet(selectedParticipant)'>Bet</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='col-sm-4 bet-info'>
+      <form name='betForm'>
+        <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
+          <p>
+            <input type='number'
+                   class='form-control'
+                   name='amount'
+                   min='1'
+                   placeholder='Bet amount'
+                   required
+                   ng-model='betAmount' />
+          </p>
+        </div>
+        <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
+      </form>
+      <p ng-show='betUpdateFailed'>Could not update bet</p>
+      <p ng-show='bettingThisRound'>You are betting this round!</p>
+      <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
+      <p>Odds: TODO</p>
+    </div>
+  </div>
+
+  <div ng-show='showBettors'>
     <% if @bettors_strategy == 'all_in' %><p class='bettors-header'>Bettors who went all-in</p>
     <% elsif @bettors_strategy == 'all_bettors' %><p class='bettors-header'>All Bettors</p>
     <% end %>
-    <div class='col-sm-6'>
-      <p class='bettors-participant-name'>{{ match.participants['a'].name }}</p>
-      <ul ng-show='match.bettors.a.length > 0' class='bettors-list'>
-        <li ng-repeat='bettor in match.bettors.a'>
-          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' width='14' height='14' alt='Rank symbol' />
-          <span class='name'>{{bettor.displayName}}</span>
-        </li>
-      </ul>
-    </div>
 
-    <div class='col-sm-6'>
-      <p class='bettors-participant-name'>{{ match.participants['b'].name }}</p>
-      <ul ng-show='match.bettors.b.length > 0' class='bettors-list'>
-        <li ng-repeat='bettor in match.bettors.b'>
+    <div ng-repeat='(key, participant) in match.participants'>
+      <p class='bettors-participant-name'>{{ participant.name }}</p>
+      <ul ng-show='$parent.match.bettors[key].length > 0' class='bettors-list'>
+        <li ng-repeat='bettor in $parent.match.bettors[key]'>
           <img ng-src='/img/rank/rank-{{bettor.rank}}.png' width='14' height='14' alt='Rank symbol' />
           <span class='name'>{{bettor.displayName}}</span>
         </li>
