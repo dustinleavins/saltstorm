@@ -4,7 +4,16 @@
  * Full license can be found in 'LICENSE.txt'
  */
 
-var PaymentsController = ['$scope', '$window', function($scope, $window) {
+var saltstorm = angular.module('saltstorm', []);
+
+saltstorm.directive('betInfo', function() {
+    return {
+        restrict: 'E',
+        templateUrl: '/angular/bet-info.html'
+    };
+});
+
+saltstorm.controller('PaymentsController', ['$scope', '$window', function($scope, $window) {
     $scope.atMaxRank = function() {
         return $scope.currentRank >= $scope.maxRank;
     };
@@ -27,9 +36,9 @@ var PaymentsController = ['$scope', '$window', function($scope, $window) {
         });
 
     };
-}];
+}]);
 
-var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
+saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
     $http.defaults.cache = false;
     $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds
@@ -167,5 +176,5 @@ var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $w
 
     $scope.updateAccountData();
     $scope.updateMatchData(0);
-}];
+}]);
 

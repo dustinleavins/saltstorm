@@ -1,0 +1,21 @@
+<form name='betForm'>
+  <div class='form-group' ng-class='{"has-error": betForm.amount.$invalid}'>
+    <p>
+    <input type='number'
+           class='form-control'
+           name='amount'
+           min='1'
+           placeholder='Bet amount'
+           required
+           ng-model='betAmount' />
+    </p>
+  </div>
+</form>
+
+<p ng-show='match.message' class='text-primary'>Message from admin: {{ match.message }}</p>
+<p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
+
+<p ng-show='betUpdateFailed' class='bg-danger text-danger'>Could not update bet</p>
+<p ng-show='bettingThisRound'><strong>You are betting this round!</strong></p>
+<p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
+<p ng-show='userOdds()'>Odds: {{ userOdds() }}</p>
