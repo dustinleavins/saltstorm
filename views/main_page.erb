@@ -5,7 +5,7 @@
 # Full license can be found in 'LICENSE.txt'
 %>
 <div ng-controller='FakeBetController' class='main-content'>
-  <nav class='navbar navbar-default navbar-static-top' role='navigation'>
+  <nav class='navbar navbar-default' role='navigation'>
     <div class='navbar-header'>
       <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-ex1-collapse'>
         <span class='sr-only'>Toggle navigation</span>
@@ -30,9 +30,7 @@
   <div class='main-video' ng-hide='showBettors'>
     <%= @video_link %>
   </div>
-  <div class='row admin-message' ng-show='match.message && !showBettors'>
-    <p>Message from admin: {{ match.message }}</p>
-  </div>
+  
   <div class='row' ng-hide='showBettors || hasManyParticipants()'>
     <div class='col-sm-4'>
       <div class='bet-a'>
@@ -60,12 +58,15 @@
                  ng-model='betAmount' />
           </p>
         </div>
-        <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
       </form>
-      <p ng-show='betUpdateFailed'>Could not update bet</p>
-      <p ng-show='bettingThisRound'>You are betting this round!</p>
+
+      <p ng-show='match.message' class='text-primary'>Message from admin: {{ match.message }}</p>
+      <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
+
+      <p ng-show='betUpdateFailed' class='text-danger bg-danger'>Could not update bet</p>
+      <p ng-show='bettingThisRound'><strong>You are betting this round!</strong></p>
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
-      <p>Odds: {{ match.participants['a'].odds }}</p>
+      <p ng-show='userOdds()'>Odds: {{ userOdds() }}</p>
     </div>
     <div class='col-sm-4'>
       <div class='bet-b'>
@@ -111,14 +112,16 @@
                    placeholder='Bet amount'
                    required
                    ng-model='betAmount' />
-          </p>
+           </p>
         </div>
-        <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
       </form>
-      <p ng-show='betUpdateFailed'>Could not update bet</p>
-      <p ng-show='bettingThisRound'>You are betting this round!</p>
+      <p ng-show='match.message' class='text-primary'>Message from admin: {{ match.message }}</p>
+      <p>Your Current Balance: {{ account.balance | currency: "☺"  }}</p>
+
+      <p ng-show='betUpdateFailed' class='text-danger bg-danger'>Could not update bet</p>
+      <p ng-show='bettingThisRound'><strong>You are betting this round!</strong></p>
       <p ng-show='winnerName()'>Winner: {{ winnerName() }}</p>
-      <p>Odds: TODO</p>
+      <p ng-show='userOdds()'>Odds: {{ userOdds() }}</p>
     </div>
   </div>
 

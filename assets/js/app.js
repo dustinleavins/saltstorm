@@ -48,6 +48,19 @@ var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $w
         }
     };
 
+    $scope.userOdds = function() {
+        var doNotShow = !$scope.bettingThisRound ||
+            !$scope.match ||
+            !$scope.match.participants;
+
+        if (doNotShow) {
+            return null;
+        }
+        var bettingOn = $scope.bettingThisRound;
+
+        return $scope.match.participants[bettingOn].odds;
+    }
+
     $scope.hasManyParticipants = function() {
         if (!$scope.match) {
             return false;
@@ -71,7 +84,7 @@ var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $w
             amount: $scope.betAmount
         })
         .success(function(data, status, headers, config) {
-            $scope.bettingThisRound = true;
+            $scope.bettingThisRound = participantCode;
             $scope.betUpdateFailed = false;
         })
         .error(function(data, status, headers, config) {
