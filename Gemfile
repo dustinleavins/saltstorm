@@ -2,6 +2,7 @@ source "https://rubygems.org"
 gem "rake"
 gem "sinatra"
 gem "sinatra-flash"
+gem "sinatra-asset-pipeline", :require => false
 gem "sass"
 gem "highline"
 gem "sequel"

@@ -8,6 +8,7 @@ require 'json'
 require 'rubygems'
 require 'bundler'
 Bundler.require
+require 'sinatra/asset_pipeline'
 require './models.rb'
 require './persistence.rb'
 require './settings.rb'
@@ -21,6 +22,8 @@ class RootApp < Sinatra::Base
   enable :sessions
   register Sinatra::Flash
   set :session_secret, Settings::secret_token
+
+  register Sinatra::AssetPipeline
 
   configure :development, :production do
     enable :logging
@@ -65,7 +68,6 @@ class RootApp < Sinatra::Base
       return [status_code, hash.to_json]
     end
   end
-
   
   before do
       cache_control :private
@@ -76,11 +78,7 @@ class RootApp < Sinatra::Base
   get '/' do
     return erb :index
   end
-
-  get '/css/app.css' do
-    return scss :app
-  end
-
+ 
   get '/login' do
     return erb :login
   end
