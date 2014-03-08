@@ -69,10 +69,18 @@ class RootApp < Sinatra::Base
     end
   end
   
+  
+  before '/api/*' do
+    cache_control :no_cache
+    @api = true
+  end
+
   before do
-      cache_control :private
-      @site_name = app_settings['site_name']
-      @site_description = app_settings['site_description']
+      if !@api
+        cache_control :private
+        @site_name = app_settings['site_name']
+        @site_description = app_settings['site_description']
+      end
   end
 
   get '/' do

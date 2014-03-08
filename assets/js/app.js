@@ -30,18 +30,13 @@ var PaymentsController = ['$scope', '$window', function($scope, $window) {
 }];
 
 var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
+    $http.defaults.cache = false;
     $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds
     $scope.betAmount = 0;
     $scope.bettingThisRound = false;
     $scope.betUpdateFailed = false;
     $scope.selectedParticipant = 'a';
-
-    $.ajaxSetup({
-      cache: false
-    });
-
-    $http.defaults.cache = null;
     
     $scope.winnerName = function() {
         if (!$scope.match || !$scope.match.winner) {
@@ -88,7 +83,7 @@ var FakeBetController = ['$scope', '$window', '$q', '$http', function($scope, $w
     var updateAccountDataBody = function() {
         var deferred = $q.defer();
 
-        $http.get('/api/account', { cache: false })
+        $http.get('/api/account')
         .success(function(data, status, headers, config) {
             $scope.account = data;
             deferred.resolve();
