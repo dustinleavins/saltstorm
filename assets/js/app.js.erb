@@ -13,6 +13,13 @@ saltstorm.directive('betInfo', function() {
     };
 });
 
+saltstorm.directive('navbar', function() {
+    return {
+        restrict: 'E',
+        templateUrl: '/angular/navbar.html',
+    };
+});
+
 saltstorm.controller('PaymentsController', ['$scope', '$window', function($scope, $window) {
     $scope.atMaxRank = function() {
         return $scope.currentRank >= $scope.maxRank;
@@ -46,6 +53,8 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
     $scope.bettingThisRound = false;
     $scope.betUpdateFailed = false;
     $scope.selectedParticipant = 'a';
+    $scope.mobile = $('.main-video').length === 0;
+    $scope.title = "<%= Settings::site(ENV['RACK_ENV'])['site_name'] %>";
     
     $scope.winnerName = function() {
         if (!$scope.match || !$scope.match.winner) {
