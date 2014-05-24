@@ -492,7 +492,7 @@ class RootApp < Sinatra::Base
     )
 
     if (!payment.valid?)
-      return json_response(500, { :error => 'Invalid payment details'})
+      return json_response(500, { :error => 'Invalid payment details\n' + payment.errors.to_json})
     end
 
     payment.save
