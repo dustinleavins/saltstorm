@@ -20,28 +20,23 @@ saltstorm.directive('navbar', function() {
     };
 });
 
-saltstorm.controller('PaymentsController', ['$scope', '$window', function($scope, $window) {
+saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', function($scope, $http, $window) {
     $scope.atMaxRank = function() {
         return $scope.currentRank >= $scope.maxRank;
     };
+
     $scope.rankup = function() {
-       $.post('/api/payment', JSON.stringify({
+       $http.post('/api/payment', {
             payment_type: 'rankup',
             amount: $scope.amount
-        }))
-        .done(function() {
-            $scope.$apply(function() {
-                $scope.insufficientFunds = false;
-            });
-
+        })
+        .success(function() {
+            $scope.insufficientFunds = false;
             $window.alert('Gratz on your new rank');
         })
-        .fail(function() {
-            $scope.$apply(function() {
-                $scope.insufficientFunds = true;
-            });
+        .error(function() {
+            $scope.insufficientFunds = true;
         });
-
     };
 }]);
 
@@ -59,11 +54,11 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
     $scope.winnerName = function() {
         if (!$scope.match || !$scope.match.winner) {
             return '';
-        } else {
-            return $scope.match
-                .participants[$scope.match.winner]
-                .name;
         }
+
+        return $scope.match
+            .participants[$scope.match.winner]
+            .name;
     };
 
     $scope.userOdds = function() {
@@ -74,17 +69,17 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
         if (doNotShow) {
             return null;
         }
-        var bettingOn = $scope.bettingThisRound;
 
+        var bettingOn = $scope.bettingThisRound;
         return $scope.match.participants[bettingOn].odds;
     }
 
     $scope.hasManyParticipants = function() {
         if (!$scope.match) {
             return false;
-        } else {
-            return Object.keys($scope.match.participants).length > 2;
         }
+
+        return Object.keys($scope.match.participants).length > 2;
     };
 
     $scope.submitBet = function(participantCode) {
@@ -111,28 +106,19 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
         });
     };
 
-    var updateAccountDataBody = function() {
-        var deferred = $q.defer();
-
+    $scope.updateAccountData = function() {
         $http.get('/api/account')
         .success(function(data, status, headers, config) {
             $scope.account = data;
-            deferred.resolve();
         })
-        .error(function(data, status, headers, config) {
-            deferred.reject('Error');
-        });
-
-        return deferred.promise;
-    }
-
-    $scope.updateAccountData = function() {
-        updateAccountDataBody();
     };
 
     var updateMatchDataBody = function(delay) {
         var deferred = $q.defer();
         
+        // setInterval would be dangerous to use here because this update
+        // can take longer than the delay.
+        // https://developer.mozilla.org/en-US/docs/Web/API/window.setInterval#Dangerous_usage
         $window.setTimeout(function() {
             $http.get('/api/current_match')
             .success(function(data, status, headers, config) {
