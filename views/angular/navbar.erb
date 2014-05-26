@@ -13,11 +13,11 @@
     <ul class='nav navbar-nav navbar-right'>
       <li ng-show='!mobile && !showBettors'><a ng-click='showBettors = true'>Show Bettors</a></li>
       <li ng-show='!mobile && showBettors'><a ng-click='showBettors = false'>Show Main</a></li>
-      <li ng-show='!mobile'><a href='/main_mobile'>Switch to Mobile</a></li>
-      <li ng-show='mobile'><a href='/main'>Switch to Full</a></li>
-      <li><a href='/payments'>Buy Stuff</a></li>
-      <li><a href='/account/'>Account</a></li>
-      <li><a href='/logout'>Logout</a></li>
+      <li ng-show='!mobile'><a href='<%= base_url('/main_mobile') %>'>Switch to Mobile</a></li>
+      <li ng-show='mobile'><a href='<%= base_url('/main') %>'>Switch to Full</a></li>
+      <li><a href='<%= base_url('/payments') %>'>Buy Stuff</a></li>
+      <li><a href='<%= base_url('/account/') %>'>Account</a></li>
+      <li><a href='<%= base_url('/logout') %>'>Logout</a></li>
     </ul>
   </div>
 </nav>
