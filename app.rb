@@ -128,16 +128,16 @@ class RootApp < Sinatra::Base
     user.save()
 
     # Send the introductory e-mail at a later time
-    domain = app_settings['domain']
+    site_url = app_settings['site_url']
     template_locals = {
-      :domain => domain,
+      :site_url => site_url,
       :display_name => user.display_name,
       :email => user.email,
       :balance => user.balance 
     }
 
     EmailJob.create(:to => @email,
-                    :subject => "Welcome to #{domain}!",
+                    :subject => "Welcome to #{site_url}!",
                     :body => erb(:'email/intro', :locals => template_locals))
 
     session[:uid] = user.id 
@@ -167,19 +167,19 @@ class RootApp < Sinatra::Base
 
     reset_request = PasswordResetRequest.create(:email => @email)
 
-    @reset_url = "http://#{app_settings['domain']}/reset_password?" +
-      ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
+    @reset_url = ::URI.join(app_settings['site_url'], '/reset_password').to_s +
+        ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
 
-    @domain = app_settings['domain']
+    @site_url = app_settings['site_url']
 
     template_locals = {
-      :domain => @domain,
+      :site_url => @site_url,
       :reset_url => @reset_url,
       :display_name => user.display_name
     }
 
     EmailJob.create(:to => @email,
-                    :subject => "#{@domain} - Password Reset",
+                    :subject => "#{@site_url} - Password Reset",
                     :body => erb(:'email/reset_request', :locals => template_locals))
 
     return erb :request_password_reset_success
@@ -230,15 +230,15 @@ class RootApp < Sinatra::Base
     user.save()
 
     # Send e-mail notification later
-    @domain = app_settings['domain']
+    @site_url = app_settings['site_url']
 
     template_locals = {
       :display_name => user.display_name,
-      :domain => @domain
+      :site_url => @site_url
     }
 
     EmailJob.create(:to => @email,
-                    :subject => "#{@domain} - Password Reset Successful",
+                    :subject => "#{@site_url} - Password Reset Successful",
                     :body => erb(:'email/password_changed', :locals => template_locals))
 
     # Delete requests for reset

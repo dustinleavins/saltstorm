@@ -12,7 +12,7 @@ common:
   base_bailout_balance: 10
   bettors_show: 'all_in'
   main_video_html: "<a href='#'>Video Link</a>"
-  domain: Fill Me In
+  site_url: 'http://www.example.com'
   site_name: 'Saltstorm'
   site_description: >
       Saltstorm is an open-source 'play money' betting site
