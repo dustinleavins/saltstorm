@@ -6,20 +6,16 @@ require 'uri'
 require 'rubygems'
 require 'bundler'
 Bundler.require
+require './helpers.rb'
 
 # Serves Angular templates
 class AngularTemplateApp < Sinatra::Base
   app_settings = Settings::site(settings.environment.to_s)
   set :views, settings.root + '/views/angular' 
+  helpers Helpers
 
   configure :development, :production do
     enable :logging
-  end
-
-  helpers do
-    def base_url(url='')
-      URI.join(request.base_url, url).to_s
-    end
   end
 
   get '/bet-info.html' do

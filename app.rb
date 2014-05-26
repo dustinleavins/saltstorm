@@ -9,6 +9,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.require
 require 'sinatra/asset_pipeline'
+require './helpers.rb'
 require './models.rb'
 require './persistence.rb'
 require './settings.rb'
@@ -24,20 +25,13 @@ class RootApp < Sinatra::Base
   set :session_secret, Settings::secret_token
 
   register Sinatra::AssetPipeline
+  helpers Helpers
 
   configure :development, :production do
     enable :logging
   end
 
   helpers do
-    def titleize(page_title='')
-      if page_title.nil? or page_title.empty?
-        return @site_name
-      else
-        return "#{@site_name} - #{page_title}"
-      end
-    end
-
     def authenticate(email, password)
       if (email.nil? || password.nil?)
         return nil
@@ -61,11 +55,6 @@ class RootApp < Sinatra::Base
 
     def is_authenticated?
       return !(session[:uid].nil?)
-    end
-
-    def json_response(status_code, hash)
-      content_type :json
-      return [status_code, hash.to_json]
     end
   end
   
