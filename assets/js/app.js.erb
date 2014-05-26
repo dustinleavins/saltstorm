@@ -49,7 +49,6 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
     $scope.betUpdateFailed = false;
     $scope.selectedParticipant = 'a';
     $scope.mobile = $('.main-video').length === 0;
-    $scope.title = <%= Settings::site(ENV['RACK_ENV'])['site_name'].to_json %>;
     
     $scope.winnerName = function() {
         if (!$scope.match || !$scope.match.winner) {
