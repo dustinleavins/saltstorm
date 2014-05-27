@@ -13,7 +13,7 @@ Saltstorm:
 These deployment instructions assume that you have prior experience with deploying Ruby web applications.
 
 ### Requirements
-Web server with shell access and Ruby (1.9.3 is used for development). Right now, *this web app only supports SQLite and PostgreSQL*. For production, *you need access to a PostgreSQL server*.
+Web server with shell access and Ruby (2.1.2 is used for development). Right now, *this web app only supports SQLite and PostgreSQL*. For production, *you need access to a PostgreSQL server*.
 
 ### Deployment Instructions
 1. Pull this repo and  run `bundle install`
@@ -38,7 +38,7 @@ Saltstorm is unstable and has no version number. I hope that nothing breaks, but
 AGPL3.
 
 ## Saltstorm Uses Cool Technologies
-I built Saltstorm with Sinatra (with sinatra-flash) and Sequel. The Rakefile uses Highline for user input. whenever makes the cron job for sending e-mails. mail sends e-mails. RestClient POSTs data to web users. 
+I built Saltstorm with Sinatra (with sinatra-flash and sinatra-asset-pipeline) and Sequel. The Rakefile uses Highline for user input. whenever makes the cron job for sending e-mails. mail sends e-mails. RestClient POSTs data to web users. 
 
 The front-end uses Sass, jQuery, AngularJS, and  Bootstrap 3.0. Javascript & CSS are pulled from CDNs provided by Google and [Bootstrap CDN](http://bootstrapcdn.com).
 
