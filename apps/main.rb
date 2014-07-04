@@ -590,7 +590,11 @@ class MainApp < Sinatra::Base
   end
 
   get '/api/current_match' do
-    send_file Persistence::MatchStatusPersistence::MATCH_DATA_FILE
+    content_type :json
+    return [
+      200,
+      Persistence::MatchStatusPersistence.get_json
+    ]
   end
 
   put '/api/current_match' do

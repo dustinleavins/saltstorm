@@ -6,6 +6,7 @@
 require 'securerandom'
 require 'json'
 require 'fileutils'
+require 'pstore'
 
 # Module containing 'static' classes for non-database persistence.
 module Persistence
@@ -53,23 +54,36 @@ module Persistence
   class MatchStatusPersistence
 
     # Name of file containing match data.
-    MATCH_DATA_FILE = "tmp/#{ENV['RACK_ENV']}/match_data.json"
+    MATCH_DATA_FILE = "tmp/#{ENV['RACK_ENV']}/match_data.pstore"
 
     # Name of the file used as the bet lock
     BET_FILE = "tmp/#{ENV['RACK_ENV']}/match_open"
 
     # Retrieves match data from match_data_file.
-    # If match_data_file does not exist, this throws an exception.
     def self.get_from_file
-      return File.open(MATCH_DATA_FILE) do |f|
-        JSON.parse(f.readlines.join)
+      return JSON.parse(self.get_json)
+    end
+
+    # Retrieves match data in JSON format
+    def self.get_json
+      store = PStore.new(MATCH_DATA_FILE)
+      return store.transaction do
+        store[:match_data]
       end
+
+      #return File.open(MATCH_DATA_FILE) do |f|
+      #  f.readlines.join
+      #end
     end
 
     # Saves match_data to the file.
     def self.save_file(new_match_data)
-      File.open(MATCH_DATA_FILE, 'w') do |f|
-        f.write new_match_data.to_json
+      #File.open(MATCH_DATA_FILE, 'w') do |f|
+      #  f.write new_match_data.to_json
+      #end
+      store = PStore.new(MATCH_DATA_FILE)
+      store.transaction do
+        store[:match_data] = new_match_data.to_json
       end
     end
 

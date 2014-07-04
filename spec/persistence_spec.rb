@@ -17,7 +17,7 @@ describe 'Persistence' do
 
     expect(File.exist?('tmp/test/')).to be_truthy
     expect(File.directory?('tmp/test/')).to be_truthy
-    expect(File.exist?('tmp/test/match_data.json')).to be_truthy
+    expect(File.exist?('tmp/test/match_data.pstore')).to be_truthy
   end
 end
 
@@ -25,7 +25,7 @@ describe 'Persistence::MatchStatusPersistence' do
   it 'allows access to match data' do
     reset_match_data
 
-    expect(Persistence::MatchStatusPersistence::MATCH_DATA_FILE).to eq('tmp/test/match_data.json')
+    expect(Persistence::MatchStatusPersistence::MATCH_DATA_FILE).to eq('tmp/test/match_data.pstore')
 
     match_data = Persistence::MatchStatusPersistence.get_from_file
     expect(match_data).to_not be_nil
