@@ -16,9 +16,11 @@ require './settings.rb'
 include Models
 
 class RootApp < Sinatra::Base
+  set :views, 'views/' 
 
   app_settings = Settings::site(settings.environment.to_s)
   set :static_cache_control, [:private]
+  set :public_folder, './public/'
 
   enable :sessions
   register Sinatra::Flash

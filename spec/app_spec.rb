@@ -6,7 +6,7 @@ require 'json'
 require 'uri'
 require 'rspec'
 require 'rack/test'
-require './app.rb'
+require './apps/app.rb'
 require './models.rb'
 require './persistence.rb'
 

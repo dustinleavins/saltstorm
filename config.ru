@@ -5,8 +5,8 @@ end
 require 'bundler'
 Bundler.require
 
-require './app.rb'
-require './angular.rb'
+require './apps/app.rb'
+require './apps/angular.rb'
 
 Thread.abort_on_exception=true
 
