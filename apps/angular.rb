@@ -10,8 +10,6 @@ require './apps/helpers.rb'
 
 # Serves Angular templates
 class AngularTemplateApp < Sinatra::Base
-  app_settings = Settings::site(settings.environment.to_s)
-  
   configure do
     set :views,  'views/angular' 
     helpers Helpers

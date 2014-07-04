@@ -80,7 +80,7 @@ task :initial_setup => [:generate_secret_token] do
     end
 
     # Create user
-    admin_user = Models::User.create(:display_name => 'admin',
+    Models::User.create(:display_name => 'admin',
         :email => email,
         :password => password, 
         :permission_entry => 'admin',

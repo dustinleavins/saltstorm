@@ -204,7 +204,7 @@ class MainApp < Sinatra::Base
     else
       erb :reset_password
     end
- end
+  end
 
   post '/reset_password' do
     @email = params[:email].to_s.downcase
@@ -654,7 +654,7 @@ class MainApp < Sinatra::Base
           sum + p['amount'].to_i # might be nil
         end
 
-        new_match_data['participants'].each do |k, v|
+        new_match_data['participants'].each do |_k, v|
           if v['amount'] == nil
             v['odds'] = '0:0'
           else
@@ -668,8 +668,8 @@ class MainApp < Sinatra::Base
       new_match_data['bettors'] = {}
       new_match_data['participants'].keys.each do |participant_key|
         betting_users = User.get_bettors(participant_key, app_settings['bettors_show'])
-        new_match_data['bettors'][participant_key] = betting_users.map do |user|
-          { 'displayName' => user.display_name, 'rank' => user.rank }
+        new_match_data['bettors'][participant_key] = betting_users.map do |bettor|
+          { 'displayName' => bettor.display_name, 'rank' => bettor.rank }
         end
       end
 
@@ -726,8 +726,6 @@ class MainApp < Sinatra::Base
         amount_loser = 0
 
         if (winner != 'tie')
-          odds_winner = winner
- 
           # amount for winner might be nil
           amount_winner = (match_data['participants'][winner]['amount']).to_i
 
