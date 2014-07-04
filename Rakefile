@@ -36,10 +36,6 @@ task :reset_match_data do
     File.delete Persistence::MatchStatusPersistence::MATCH_DATA_FILE
   end
 
-  if (File.exist? Persistence::MatchStatusPersistence::BET_FILE)
-    File.delete Persistence::MatchStatusPersistence::BET_FILE
-  end
-
   say('Initializing non-db persistence')
   Persistence.init_persistence()
 end

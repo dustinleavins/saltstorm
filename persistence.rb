@@ -56,9 +56,6 @@ module Persistence
     # Name of file containing match data.
     MATCH_DATA_FILE = "tmp/#{ENV['RACK_ENV']}/match_data.pstore"
 
-    # Name of the file used as the bet lock
-    BET_FILE = "tmp/#{ENV['RACK_ENV']}/match_open"
-
     # Retrieves match data from match_data_file.
     def self.get_from_file
       return JSON.parse(self.get_json)
@@ -89,17 +86,26 @@ module Persistence
 
     # Test to see if bids are currently open.
     def self.bids_open?
-      return File.exist?(BET_FILE)
+      store = PStore.new(MATCH_DATA_FILE)
+      return store.transaction do
+        !store[:bets_open].nil? && store[:bets_open]
+      end
     end
 
     # Open bids.
     def self.open_bids
-      FileUtils.touch BET_FILE
+      store = PStore.new(MATCH_DATA_FILE)
+      store.transaction do
+        store[:bets_open] = true
+      end
     end
 
     # Close bids.
     def self.close_bids
-      FileUtils.rm BET_FILE, force: true
+      store = PStore.new(MATCH_DATA_FILE)
+      store.transaction do
+        store[:bets_open] = false
+      end
     end
   end
 
