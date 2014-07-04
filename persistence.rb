@@ -33,9 +33,20 @@ module Persistence
 
     # Initialize match_data
     if (!File.exist?(MatchStatusPersistence::MATCH_DATA_FILE))
-      MatchStatusPersistence.get_from_file()
+      MatchStatusPersistence.save_file({
+        :status => 'closed',
+        :winner => '',
+        :participants => {
+          'a' => { :name => '', :amount => 0, :odds => ''},
+          'b' => { :name => '', :amount => 0, :odds => ''}
+        },
+        :message => '',
+        :bettors => {
+          :a => [],
+          :b => [] 
+        }
+      })
     end
-
   end
 
   # Persists current match status.
@@ -48,33 +59,11 @@ module Persistence
     BET_FILE = "tmp/#{ENV['RACK_ENV']}/match_open"
 
     # Retrieves match data from match_data_file.
-    # If match_data_file does not exist, this automatically
-    # initializes that file before returning its contents.
+    # If match_data_file does not exist, this throws an exception.
     def self.get_from_file
-      match_data = nil
-
-      if (!File.exist?(MATCH_DATA_FILE))
-        self.save_file({
-          :status => 'closed',
-          :winner => '',
-          :participants => {
-              'a' => { :name => '', :amount => 0, :odds => ''},
-              'b' => { :name => '', :amount => 0, :odds => ''}
-          },
-          :message => '',
-          :bettors => {
-              :a => [],
-              :b => [] 
-          }
-        })
-
+      return File.open(MATCH_DATA_FILE) do |f|
+        JSON.parse(f.readlines.join)
       end
-
-      File.open(MATCH_DATA_FILE) do |f|
-        match_data = JSON.parse(f.readlines.join)
-      end
-
-      return match_data
     end
 
     # Saves match_data to the file.

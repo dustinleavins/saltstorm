@@ -23,6 +23,8 @@ end
 
 describe 'Persistence::MatchStatusPersistence' do
   it 'allows access to match data' do
+    reset_match_data
+
     expect(Persistence::MatchStatusPersistence::MATCH_DATA_FILE).to eq('tmp/test/match_data.json')
 
     match_data = Persistence::MatchStatusPersistence.get_from_file
@@ -36,6 +38,8 @@ describe 'Persistence::MatchStatusPersistence' do
   end
 
   it 'allows bidding to open & close' do
+    reset_match_data
+
     Persistence::MatchStatusPersistence.open_bids
     expect(Persistence::MatchStatusPersistence.bids_open?).to be_truthy
 
