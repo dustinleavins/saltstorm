@@ -5,13 +5,13 @@ end
 require 'bundler'
 Bundler.require
 
-require './apps/app.rb'
+require './apps/main.rb'
 require './apps/angular.rb'
 
 Thread.abort_on_exception=true
 
 map "/" do
- run RootApp
+ run MainApp
 end 
 
 map "/angular/" do

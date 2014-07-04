@@ -6,7 +6,7 @@ require 'json'
 require 'uri'
 require 'rspec'
 require 'rack/test'
-require './apps/app.rb'
+require './apps/main.rb'
 require './models.rb'
 require './persistence.rb'
 
@@ -15,7 +15,7 @@ describe 'Main App' do
   include Models
 
   def app
-    RootApp
+    MainApp
   end
 
   it "has a working index page" do

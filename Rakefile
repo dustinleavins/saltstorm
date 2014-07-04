@@ -9,9 +9,9 @@ require 'highline/import'
 require 'sequel'
 require './persistence.rb'
 require 'sinatra/asset_pipeline/task.rb'
-require './apps/app.rb'
+require './apps/main.rb'
 
-Sinatra::AssetPipeline::Task.define! RootApp
+Sinatra::AssetPipeline::Task.define! MainApp
 
 if ENV['RACK_ENV'].nil?
   ENV['RACK_ENV'] = 'development'

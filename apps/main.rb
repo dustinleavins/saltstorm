@@ -15,7 +15,7 @@ require './persistence.rb'
 require './settings.rb'
 include Models
 
-class RootApp < Sinatra::Base
+class MainApp < Sinatra::Base
   set :views, 'views/' 
 
   app_settings = Settings::site(settings.environment.to_s)
