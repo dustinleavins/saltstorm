@@ -6,7 +6,7 @@ require 'uri'
 require 'rubygems'
 require 'bundler'
 Bundler.require
-require './helpers.rb'
+require './apps/helpers.rb'
 
 # Serves Angular templates
 class AngularTemplateApp < Sinatra::Base

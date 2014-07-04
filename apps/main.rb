@@ -9,7 +9,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.require
 require 'sinatra/asset_pipeline'
-require './helpers.rb'
+require './apps/helpers.rb'
 require './models.rb'
 require './persistence.rb'
 require './settings.rb'
