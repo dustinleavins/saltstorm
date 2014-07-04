@@ -43,7 +43,7 @@ describe 'Settings Module' do
 
   it "successfully loads db config" do
     settings = Settings::db('normal', :path => 'spec/settings_spec/database.yml')
-    expect(settings.nil?).to be_false
+    expect(settings.nil?).to be_falsy
     expect(settings.count).to be > 0
   end
 

@@ -15,9 +15,9 @@ describe 'Persistence' do
     # Initialize
     Persistence.init_persistence()
 
-    expect(File.exist?('tmp/test/')).to be_true
-    expect(File.directory?('tmp/test/')).to be_true
-    expect(File.exist?('tmp/test/match_data.json')).to be_true
+    expect(File.exist?('tmp/test/')).to be_truthy
+    expect(File.directory?('tmp/test/')).to be_truthy
+    expect(File.exist?('tmp/test/match_data.json')).to be_truthy
   end
 end
 
@@ -37,10 +37,10 @@ describe 'Persistence::MatchStatusPersistence' do
 
   it 'allows bidding to open & close' do
     Persistence::MatchStatusPersistence.open_bids
-    expect(Persistence::MatchStatusPersistence.bids_open?).to be_true
+    expect(Persistence::MatchStatusPersistence.bids_open?).to be_truthy
 
     Persistence::MatchStatusPersistence.close_bids
-    expect(Persistence::MatchStatusPersistence.bids_open?).to be_false
+    expect(Persistence::MatchStatusPersistence.bids_open?).to be_falsy
 
   end
 end
@@ -50,7 +50,7 @@ describe 'Persistence::ClientNotifications' do
     # The current notification should not exist because Persistence testing
     # removes it.
     expect(Persistence::ClientNotifications.current_notification).to be_nil
-    expect(File.exist? Persistence::ClientNotifications::NOTIFY_FILENAME).to be_false
+    expect(File.exist? Persistence::ClientNotifications::NOTIFY_FILENAME).to be_falsy
 
     Persistence::ClientNotifications.current_notification = {
       'data' => 54321

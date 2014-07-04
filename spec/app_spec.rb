@@ -763,7 +763,7 @@ describe 'Main App' do
   it "should not allow /api/account access to anon users" do
     get '/api/account'
     expect(last_response.status).to eq(500)
-    expect(last_response.content_type.include?('application/json')).to be_true
+    expect(last_response.content_type.include?('application/json')).to be_truthy
   end
 
   it 'should not allow /api/send_client_notifications access to anon users' do
