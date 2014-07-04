@@ -15,6 +15,7 @@ group :test do
   gem "rack-test", :require => false
   gem "factory_girl", :require => false
   gem "simplecov", :require => false
+  gem "rubocop", :require => false
 end
 
 group :sqlite3 do
