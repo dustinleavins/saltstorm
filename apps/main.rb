@@ -16,18 +16,21 @@ require './settings.rb'
 include Models
 
 class MainApp < Sinatra::Base
-  set :views, 'views/' 
-
   app_settings = Settings::site(settings.environment.to_s)
-  set :static_cache_control, [:private]
-  set :public_folder, './public/'
+  
+  configure do
+    set :views, 'views/' 
+    set :static_cache_control, [:private]
+    set :public_folder, './public/'
 
-  enable :sessions
-  register Sinatra::Flash
-  set :session_secret, Settings::secret_token
+    enable :sessions
+    register Sinatra::Flash
+    set :session_secret, Settings::secret_token
 
-  register Sinatra::AssetPipeline
-  helpers Helpers
+    register Sinatra::AssetPipeline
+
+    helpers Helpers
+  end
 
   configure :development, :production do
     enable :logging
