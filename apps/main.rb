@@ -36,34 +36,6 @@ class MainApp < Sinatra::Base
     enable :logging
   end
 
-  helpers do
-    def authenticate(email, password)
-      if (email.nil? || password.nil?)
-        return nil
-      end
-
-      user = User.first(:email => email.downcase)
-
-      if user.nil?
-        return nil
-      end
-
-      password_hash = User.generate_password_digest(password, user.password_salt)
-
-      if (password_hash != user.password_hash)
-        return nil
-      end
-
-      session[:uid] = user.id
-      return 'ok'
-    end
-
-    def is_authenticated?
-      return !(session[:uid].nil?)
-    end
-  end
-  
-  
   before '/api/*' do
     cache_control :no_cache
     @api = true
