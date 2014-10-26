@@ -18,7 +18,7 @@ describe 'Api App' do
     ApiApp
   end
 
-  it "allows api users to login" do
+  it "allows api users to login and logout" do
     user = FactoryGirl.create(:user)
 
     # Sign-in
@@ -32,6 +32,392 @@ describe 'Api App' do
     # Try a route requiring login
     get '/account'
     expect(last_response).to be_ok
+
+    # Logout
+    post '/logout'
+    expect(last_response).to be_ok
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "allows users to register" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      :confirmPassword => user_info[:password],
+      :displayName => user_info[:display_name]
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(1)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(1)
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to be_ok
+
+    # Check to see if starting balance == 400
+    new_user = User.first(:email => user_info[:email].downcase)
+    expect(new_user).to_not be_nil
+    expect(new_user.balance).to eq(400)
+  end
+
+  it "does not allows user to register with incorrect confirm password" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      :confirmPassword => user_info[:password].reverse,
+      :displayName => user_info[:display_name]
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to register with empty password" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => user_info[:email],
+      :password => '',
+      :confirmPassword => '',
+      :displayName => user_info[:display_name]
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to register with empty email" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => '',
+      :password => user_info[:password],
+      :confirmPassword => user_info[:password],
+      :displayName => user_info[:display_name]
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/main'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to register with empty name" do
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      :confirmPassword => user_info[:password],
+      :displayName => ''
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.where(:email =>user_info[:email].downcase).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to register with duplicate e-mail" do
+    existing_user_email = FactoryGirl.create(:user).email
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => existing_user_email,
+      :password => user_info[:password],
+      :confirmPassword => user_info[:password],
+      :displayName => user_info[:display_name]
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.where(:display_name =>user_info[:display_name]).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "does not allows user to register with duplicate name" do
+    existing_user_name = FactoryGirl.create(:user).display_name
+    user_info = FactoryGirl.attributes_for(:user)
+    post '/register', {
+      :email => user_info[:email],
+      :password => user_info[:password],
+      :confirmPassword => user_info[:password],
+      :displayName => existing_user_name 
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    expect(User.where(:email =>user_info[:email]).count).to eq(0)
+    expect(EmailJob.where(:to => user_info[:email].downcase).count).to eq(0)
+
+    # Try a route requiring login
+    get '/account'
+    expect(last_response).to_not be_ok
+  end
+
+  it "allows user to update password" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/password', {
+      :password => 'password10',
+      :confirmPassword => 'password10'
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    updated_user = User.first(:email => user.email.downcase)
+    expected_pw_hash = User.generate_password_digest('password10',
+                                                     updated_user.password_salt)
+
+    expect(updated_user.password_hash).to eq(expected_pw_hash)
+  end
+
+  it "prevents anonymous user from updating password" do
+    post '/account/password', {
+      :password => 'password10',
+      :confirmPassword => 'password10'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+  end
+
+  it "prevents user from updating password with invalid password" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/password', {
+      :password => '',
+      :confirmPassword => ''
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    updated_user = User.first(:email => user.email.downcase)
+    unexpected_pw_hash = User.generate_password_digest('',
+                                                       updated_user.password_salt)
+
+    expect(updated_user.password_hash).to_not eq(unexpected_pw_hash)
+  end
+
+
+  it "allows user to update info" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/info', {
+      :displayName => user.display_name.reverse,
+      :email => 'changed_email@example.com',
+      :password => user.password
+    }.to_json
+
+    expect(last_response).to be_ok
+
+    updated_user = User.first(:email => 'changed_email@example.com')
+    expect(updated_user).to_not be_nil
+
+    expect(updated_user.display_name).to eq(user.display_name.reverse)
+  end
+
+  it "prevents anonymous users from updating info" do
+    post '/account/info', {
+      :displayName => 'n/a',
+      :email => 'n/a',
+      :password => 'n/a'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+  end
+
+  it "prevents user from updating info with incorrect password" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/info', {
+      :displayName => user.display_name.reverse,
+      :email => 'changed_email@example.com',
+      :password => user.password.reverse
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+    expect(User.first(:display_name => user.display_name.reverse)).to be_nil
+  end
+
+  it "prevents user from updating info with invalid name" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/info', {
+      :displayName => '',
+      :email => 'changed_email@example.com',
+      :password => user.password
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    # Ensure that the display name wasn't updated
+    expect(User.first(:email => user.email).display_name).to_not be_nil
+    expect(User.first(:email => user.email).display_name).to_not eq('')
+  end
+
+  it "prevents user from updating info with invalid email" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/info', {
+      :displayName => user.display_name.reverse,
+      :email => '',
+      :password => user.password
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    # Ensure that the display name wasn't updated
+    expect(User.first(:email => user.email)).to_not be_nil
+    expect(User.first(:email => user.email).display_name).to_not eq(user.display_name.reverse)
+  end
+
+  it "prevents user from updating info with invalid email" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/info', {
+      :display_name => user.display_name.reverse,
+      :email => '',
+      :password => user.password
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    # Ensure that the display name wasn't updated
+    expect(User.first(:email => user.email)).to_not be_nil
+    expect(User.first(:email => user.email).display_name).to_not eq(user.display_name.reverse)
+  end
+
+  it "prevents user from updating info with invalid post_url" do
+    user = FactoryGirl.create(:user)
+
+    # Login
+    post '/login', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    post '/account/info', {
+      :displayName => user.display_name,
+      :email => user.email,
+      :password => user.password,
+      :postUrl => 'invalid'
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+
+    # Ensure that the post_url wasn't updated
+    expect(User.first(:email => user.email)).to_not be_nil
+    expect(User.first(:email => user.email).post_url).to_not eq('invalid')
+  end
+
+  it "handles /request_password_reset errors" do
+    invalid_email = FactoryGirl.attributes_for(:user)[:email]
+
+    # Illegal - empty email field
+    post '/request_password_reset', {
+      :email => nil
+    }.to_json
+
+    expect(last_response.status).to eq(500)
+    expect(EmailJob.where(:to => '').count).to eq(0)
+    expect(PasswordResetRequest.where(:email => '').count).to eq(0)
+
+    # Accepted but does nothing: non-registered user
+    post '/request_password_reset', {
+      :email => invalid_email
+    }.to_json
+
+    expect(last_response).to be_ok
+    expect(EmailJob.where(:to => invalid_email.downcase).count).to eq(0)
+    expect(PasswordResetRequest.where(:email => invalid_email.downcase).count).to eq(0)
+  end
+
+  it "allows users to request password reset" do
+    user = FactoryGirl.create(:user)
+    new_password = "password5"
+    expect(user.password).to_not be_nil
+    expect(new_password).to_not eq(user.password)
+
+    # Request Reset
+    post '/request_password_reset', {
+      :email => user.email
+    }.to_json
+
+    expect(last_response).to be_ok
+    expect(EmailJob.where(:to => user.email.downcase).count).to eq(1)
+    expect(PasswordResetRequest.count(:email => user.email.downcase)).to eq(1)
+
+    reset_request = PasswordResetRequest.first(:email => user.email.downcase)
+    expect(reset_request.code.to_s.length).to be > 1
   end
 
   it "doesn't explode for failed api login attempts" do

@@ -1,0 +1,84 @@
+<%
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (C) 2013, 2014  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+<div class='main-content'>
+  <navbar></navbar>
+
+  <div class='main-video' ng-hide='showBettors'>
+    <%= @video_link %>
+  </div>
+  
+  <div class='row' ng-hide='showBettors || hasManyParticipants()'>
+    <div class='col-sm-4'>
+      <div class='bet-a'>
+        <div class='row'>
+          <div class='col-xs-6 participant-a'>
+            <p>{{ match.participants['a'].name }}</p>
+            <p>{{ match.participants['a'].amount | currency: "☺" }}</p>
+          </div>
+          <div class='col-xs-6'>
+            <p class='pull-right'><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-sm-4 bet-info'>
+      <bet-info></bet-info>
+    </div>
+    <div class='col-sm-4'>
+      <div class='bet-b'>
+        <div class='row'>
+          <div class='col-xs-6'>
+            <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+          </div>
+          <div class='col-xs-6 participant-b'>
+            <p>{{ match.participants['b'].name }}</p>
+            <p>{{ match.participants['b'].amount | currency: "☺" }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row' ng-hide='showBettors || !hasManyParticipants()'>
+    <div class='col-sm-8'>
+      <div class='bet-a'>
+        <div class='row'>
+          <div class='col-xs-6 participant-a'>
+            <div ng-repeat='(key, participant) in match.participants'>
+              <input type='radio' ng-model='$parent.selectedParticipant' ng-value='key' /> {{participant['name']}}
+            </div>
+
+          </div>
+          <div class='col-xs-6'>
+            <p class='pull-right'>
+              <button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet(selectedParticipant)'>Bet</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='col-sm-4 bet-info'>
+      <bet-info></bet-info>
+    </div>
+  </div>
+
+  <div ng-show='showBettors'>
+    <% if @bettors_strategy == 'all_in' %><p class='bettors-header'>Bettors who went all-in</p>
+    <% elsif @bettors_strategy == 'all_bettors' %><p class='bettors-header'>All Bettors</p>
+    <% end %>
+
+    <div ng-repeat='(key, participant) in match.participants'>
+      <p class='bettors-participant-name'>{{ participant.name }}</p>
+      <ul ng-show='$parent.match.bettors[key].length > 0' class='bettors-list'>
+        <li ng-repeat='bettor in $parent.match.bettors[key]'>
+          <img ng-src='/img/rank/rank-{{bettor.rank}}.png' width='14' height='14' alt='Rank symbol' />
+          <span class='name'>{{bettor.displayName}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

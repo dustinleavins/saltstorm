@@ -4,12 +4,71 @@
  * Full license can be found in 'LICENSE.txt'
  */
 
-var saltstorm = angular.module('saltstorm', []);
+var saltstorm = angular.module('saltstorm', ['ngRoute']);
+
+saltstorm.factory('authService', ['$http', function($http) {
+    var service = {
+        isRegistered: false,
+        login: function(email, password) {
+            var instance = this;
+            return $http.post('/api/login', {
+                email: email,
+                password: password
+            }).success(function(data) {
+                // TODO: Set api key
+                this.isRegistered = true;
+            }).error(function() {
+                // TODO: Unset API key
+                this.isRegistered = false;
+            });
+        }
+    };
+
+    return service;
+}]);
+
+saltstorm.config(['$routeProvider', function($routeProvider) {
+    $routeProvider
+    .when('/', {
+        templateUrl: '/angular/index.html',
+    }).when('/register', {
+        templateUrl: '/angular/register.html',
+        controller: 'RegisterController'
+    }).when('/login', {
+        templateUrl: '/angular/login.html',
+        controller: 'LoginController'
+    }).when('/logout', {
+        templateUrl: '/angular/logout.html',
+        controller: 'LogoutController'
+    }).when('/request_password_reset', {
+        templateUrl: '/angular/request_password_reset.html',
+        controller: 'RequestPasswordResetController'
+    }).when('/main', {
+        templateUrl: function(params) {
+            // TODO: This should be handled w/o using params so other pages
+            // can go back here
+            if (params && params.mobile) {
+                return '/angular/main_mobile.html';
+            } else {
+                return '/angular/main.html';
+            }
+        },
+        controller: 'MainController'
+    }).when('/payments', {
+        templateUrl: '/angular/payments.html',
+        controller: 'PaymentsController'
+    }).when('/manage_account', {
+        templateUrl: '/angular/manage_account.html',
+        controller: 'ManageAccountController'
+    }).otherwise({
+        redirectTo: '/'
+    });
+}]);
 
 saltstorm.directive('betInfo', function() {
     return {
         restrict: 'E',
-        templateUrl: '/angular/bet-info.html'
+        templateUrl: '/angular/bet_info.html'
     };
 });
 
@@ -19,6 +78,69 @@ saltstorm.directive('navbar', function() {
         templateUrl: '/angular/navbar.html',
     };
 });
+
+saltstorm.controller('RegisterController', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    // TODO: Go to selectable main page after successful registration
+
+    $scope.register = function() {
+      $http.post('/api/register', {
+          email: $scope.email,
+          password: $scope.password,
+          confirmPassword: $scope.confirmPassword,
+          displayName: $scope.displayName
+      }) .success(function() {
+           $scope.errorMsg = null;
+          $location.url('/main');
+      }).error(function(data) {
+          $scope.errorMsg = data.error;
+      });
+    };
+}]);
+
+
+saltstorm.controller('LoginController', ['$scope', '$location', 'authService', function($scope, $location, authService) {
+    $scope.login = function() {
+        authService.login($scope.email, $scope.password)
+        .success(function() {
+            $scope.errorMsg = null;
+
+            var destination = '/main';
+
+            if ($scope.goToMobile) {
+              destination += '?mobile=true';
+            }
+
+            $location.url(destination);
+        }).error(function(data) {
+            $scope.errorMsg = data.error;
+        });
+    };
+}]);
+
+saltstorm.controller('LogoutController', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    $http.post('/api/logout', {})
+    .success(function(data, status, headers, config) {
+        $location.url('/');
+    })
+    .error(function(data, status, headers, config) {
+        alert('Failure - not logged-out');
+    });
+}]);
+
+saltstorm.controller('RequestPasswordResetController', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    $scope.requestReset = function() {
+        $http.post('/api/request_password_reset', {
+            email: $scope.email
+        }).success(function() {
+            alert('Password reset request has been sent to ' + $scope.email);
+            $scope.errorMsg = null;
+            $location.url('/');
+        }).error(function(data) {
+            $scope.errorMsg = data.error;
+            alert('Failure');
+        });
+    };
+}]);
 
 saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', function($scope, $http, $window) {
     $scope.atMaxRank = function() {
@@ -38,9 +160,35 @@ saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', functi
             $scope.insufficientFunds = true;
         });
     };
+
+    var lock = {
+        account: false,
+        siteConfig: false
+    };
+
+    $http.get('/api/account')
+    .success(function(data) {
+        $scope.currentRank = data.currentRank;
+        $scope.amount = data.amountToNextRank;
+        lock.account = true;
+    }).error(function() {
+        console.error('Error retrieving account info.');
+    });
+
+    $http.get('/api/site_config')
+    .success(function(data) {
+        $scope.maxRank = data.maxRank;
+        lock.siteConfig = true;
+    }).error(function() {
+        console.error('Error retrieving site config.');
+    });
+
+    $scope.ready = function() {
+        return lock.account && lock.siteConfig;
+    };
 }]);
 
-saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
+saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
     $http.defaults.cache = false;
     $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds
@@ -71,7 +219,7 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
 
         var bettingOn = $scope.bettingThisRound;
         return $scope.match.participants[bettingOn].odds;
-    }
+    };
 
     $scope.hasManyParticipants = function() {
         if (!$scope.match) {
@@ -109,8 +257,10 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
         $http.get('/api/account')
         .success(function(data, status, headers, config) {
             $scope.account = data;
-        })
+        });
     };
+
+    var stopUpdating = false;
 
     var updateMatchDataBody = function(delay) {
         var deferred = $q.defer();
@@ -124,7 +274,7 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
                 var previous_match_data = $scope.match;
                 $scope.match = data;
 
-                if (previous_match_data == null)
+                if (!previous_match_data)
                 {
                     $scope.betAmount = 0;
                     $scope.bettingThisRound = false;
@@ -140,7 +290,7 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
                 } else if (previous_match_data['status'] === 'inProgress' &&
                     data['status'] !== 'inProgress') {
 
-                    if ($scope.betAmount != 0 && $scope.bettingThisRound) {
+                    if ($scope.betAmount !== 0 && $scope.bettingThisRound) {
                         $scope.updateAccountData();
                     }
 
@@ -162,13 +312,70 @@ saltstorm.controller('FakeBetController', ['$scope', '$window', '$q', '$http', f
 
     $scope.updateMatchData = function(delay) {
         updateMatchDataBody(delay).then(function() {
-            $scope.updateMatchData($scope.updateDelay);
+            if (!stopUpdating) {
+                $scope.updateMatchData($scope.updateDelay);
+            }
         }, function() {
             alert('Error - no longer updating match data');
         });
     };
 
+    $scope.$on('$routeChangeStart', function() {
+        stopUpdating = true;
+    });
+
     $scope.updateAccountData();
     $scope.updateMatchData(0);
 }]);
 
+saltstorm.controller('ManageAccountController', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    $scope.changePassword = function() {
+        $http.post('/api/account/password', {
+            password: $scope.newPassword,
+            confirmPassword: $scope.confirmPassword
+        }).success(function() {
+            $scope.changePasswordErrorMsg = null;
+            alert('Successfully changed password.');
+        }).error(function(data) {
+            $scope.changePasswordErrorMsg = data.error;
+        });
+    };
+
+    $scope.changeInfo = function() {
+        $http.post('/api/account/info', {
+            password: $scope.currentPassword,
+            email: $scope.email,
+            displayName: $scope.displayName,
+            postUrl: $scope.postUrl
+        }).success(function() {
+            $scope.changeInfoErrorMsg = null;
+            alert('Successfully changed account info.');
+        }).error(function() {
+            $scope.changeInfoErrorMsg = data.error;
+        });
+    };
+
+    var lock = {
+      account: false
+    };
+
+    $http.get('/api/account')
+    .success(function(data) {
+        $scope.email = data.email;
+        $scope.displayName = data.displayName;
+        $scope.postUrl = data.postUrl;
+
+        $scope.original = {
+            email: data.email,
+            displayName: data.displayName,
+            postUrl: data.postUrl
+        };
+        lock.account = true;
+    }).error(function() {
+        $location.url('/');
+    });
+
+    $scope.ready = function() {
+        return lock.account;
+    };
+}]);

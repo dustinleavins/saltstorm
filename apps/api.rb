@@ -19,6 +19,7 @@ class ApiApp < Sinatra::Base
   app_settings = Settings::site(settings.environment.to_s)
 
   configure do
+    set :views, 'views/'  #email functionality
     enable :sessions
     register Sinatra::Flash
     set :session_secret, Settings::secret_token
@@ -34,6 +35,12 @@ class ApiApp < Sinatra::Base
     cache_control :no_cache
   end
 
+  get '/site_config' do
+    return json_response(200, {
+      :maxRank => app_settings['rankup']['max_rank']
+    })
+  end
+
   post '/login' do
     request.body.rewind
     auth_info = JSON.parse(request.body.read)
@@ -43,6 +50,58 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'invalid login' })
     end
   end
+
+  post '/logout' do
+    session[:uid] = nil
+    return json_response(200, { :message => 'logged out' })
+  end
+
+  post '/register' do
+    request.body.rewind
+    register_req = JSON.parse(request.body.read)
+
+    @email = CGI::escapeHTML(register_req['email'].downcase)
+    password = register_req['password']
+    confirm_password = register_req['confirmPassword']
+    @display_name = CGI::escapeHTML(register_req['displayName'])
+    balance = app_settings['user_signup_balance']
+
+    if (password != confirm_password)
+      return json_response(500, { :error => 'Passwords do not match' })
+    elsif (User.where(:email => @email).count > 0)
+      return json_response(500, { :error => 'Email is not unique' })
+    elsif (User.where(:display_name => @display_name).count > 0)
+      return json_response(500, { :error => 'Display name is not unique' })
+    end
+
+    user = User.new(:email => @email,
+                    :password => password,
+                    :display_name => @display_name,
+                    :balance => balance)
+
+    if (!user.valid?)
+      return json_response(500, { :error => user.errors.full_messages.join("\n") });
+    end
+
+    user.save()
+
+    # Send the introductory e-mail at a later time
+    site_url = app_settings['site_url']
+    template_locals = {
+      :site_url => site_url,
+      :display_name => user.display_name,
+      :email => user.email,
+      :balance => user.balance 
+    }
+
+    EmailJob.create(:to => @email,
+                    :subject => "Welcome to #{site_url}!",
+                    :body => erb(:'email/intro', :locals => template_locals, :layout => nil))
+
+    session[:uid] = user.id 
+    return json_response(200, { :message => 'ok' })
+  end
+
 
   get '/account' do
     if (!is_authenticated?)
@@ -54,12 +113,125 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'Somehow logged-in as fake user' })
     end
 
+    max_rank = app_settings['rankup']['max_rank']
+
+    if (user.rank == max_rank)
+      next_rank_amount = nil # should be unused
+    elsif (app_settings['rankup']['amounts'].length < (user.rank + 1))
+      next_rank_amount = app_settings['rankup']['amounts'].last
+    else
+      next_rank_amount = app_settings['rankup']['amounts'][user.rank]
+    end
+
     return json_response(200, {
       :email => user.email,
       :balance => user.balance,
-      :displayName => user.display_name
+      :displayName => user.display_name,
+      :rank => user.rank,
+      :amountToNextRank => next_rank_amount
     })
   end
+
+  post '/account/password' do
+    if (!is_authenticated?)
+      return json_response(500, { :error => 'Must be logged-in' })
+    end
+
+    request.body.rewind
+    edit_req = JSON.parse(request.body.read)
+
+    user = User.first(:id => session[:uid])
+    if (user.nil?)
+      return json_response(500, { :error => 'Must be logged-in' })
+    end
+
+    password = edit_req['password'].to_s
+    confirm_password = edit_req['confirmPassword'].to_s
+
+    if (password.empty? || password != confirm_password)
+      return json_response(500, { :error => 'Password error' })
+    end
+
+    user.password = password
+    user.save()
+
+    return json_response(200, { :message => 'ok' })
+  end
+
+  post '/account/info' do
+    if (!is_authenticated?)
+      return json_response(500, { :error => 'Must be logged-in' })
+    end
+
+    user = User.first(:id => session[:uid])
+    if (user.nil?)
+      return json_response(500, { :error => 'Must be logged-in' })
+    end
+
+    request.body.rewind
+    edit_req = JSON.parse(request.body.read)
+
+    # Check password
+    password = edit_req['password'].to_s
+    password_hash = User.generate_password_digest(password, user.password_salt)
+
+    if (user.password_hash != password_hash)
+      return json_response(500, { :error => 'Current password does not match.' })
+    end
+
+    user.display_name = edit_req['displayName']
+    user.email = edit_req['email']
+    user.post_url = edit_req['postUrl']
+
+    if (!user.valid?)
+      return json_response(500, { :error => user.errors.full_messages.join("\n") })
+    end
+
+    user.save()
+
+    return json_response(200, { :message => 'ok' })
+  end
+
+  post '/request_password_reset' do
+    request.body.rewind
+    reset_req = JSON.parse(request.body.read)
+
+    @email = reset_req['email']
+
+    if (@email.nil?)
+      return json_response(500, { :error => 'bad request' })
+    end
+
+    @email.downcase!
+
+    user = User.first(:email => @email)
+
+    if user.nil?
+      # This behavior might change in the future.
+      # For now, just act like invalid requests went through.
+      return json_response(200, { :msg => 'ok' })
+    end
+
+    reset_request = PasswordResetRequest.create(:email => @email)
+
+    @reset_url = ::URI.join(app_settings['site_url'], '/reset_password').to_s +
+        ::URI::encode_www_form([["email", user.email], ["code", reset_request.code]])
+
+    @site_url = app_settings['site_url']
+
+    template_locals = {
+      :site_url => @site_url,
+      :reset_url => @reset_url,
+      :display_name => user.display_name
+    }
+
+    EmailJob.create(:to => @email,
+                    :subject => "#{@site_url} - Password Reset",
+                    :body => erb(:'email/reset_request', :locals => template_locals, :layout => nil))
+
+    return json_response(200, { :msg => 'ok' })
+  end
+
 
   post '/bet' do
     if !Persistence::MatchStatusPersistence.bids_open?
@@ -418,5 +590,4 @@ class ApiApp < Sinatra::Base
 
     return json_response(200, { :message => 'OK' })
   end
-
 end

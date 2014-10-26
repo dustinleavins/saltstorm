@@ -1,3 +1,9 @@
+<%
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (C) 2013, 2014  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
 <nav class='navbar navbar-default' role='navigation'>
   <div class='navbar-header'>
     <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-ex1-collapse'>
@@ -13,11 +19,11 @@
     <ul class='nav navbar-nav navbar-right'>
       <li ng-show='!mobile && !showBettors'><a ng-click='showBettors = true'>Show Bettors</a></li>
       <li ng-show='!mobile && showBettors'><a ng-click='showBettors = false'>Show Main</a></li>
-      <li ng-show='!mobile'><a href='<%= base_url('/main_mobile') %>'>Switch to Mobile</a></li>
-      <li ng-show='mobile'><a href='<%= base_url('/main') %>'>Switch to Full</a></li>
-      <li><a href='<%= base_url('/payments') %>'>Buy Stuff</a></li>
-      <li><a href='<%= base_url('/account/') %>'>Account</a></li>
-      <li><a href='<%= base_url('/logout') %>'>Logout</a></li>
+      <li ng-show='!mobile'><a href='#/main?mobile=true'>Switch to Mobile</a></li>
+      <li ng-show='mobile'><a href='#/main'>Switch to Full</a></li>
+      <li><a href='#/payments'>Buy Stuff</a></li>
+      <li><a href='#/manage_account'>Account</a></li>
+      <li><a href='#/logout'>Logout</a></li>
     </ul>
   </div>
 </nav>

@@ -1,0 +1,54 @@
+<%
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (C) 2013, 2014 Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+<div class='main-content'>
+  <navbar></navbar>
+
+  <div class='row' ng-hide='hasManyParticipants()'>
+    <div class='col-xs-4'>
+      <div class='bet-a text-right'>
+        <p>{{ match.participants['a'].name }}</p>
+        <p>{{ match.participants['a'].amount | currency: "☺" }}</p>
+        <p><button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet("a")'>Bet</button></p>
+      </div>
+    </div>
+    <div class='col-xs-4 bet-info'>
+      <bet-info>
+      </bet-info>
+    </div>
+    <div class='col-xs-4'>
+      <div class='bet-b'>
+        <p>{{ match.participants['b'].name }}</p>
+        <p>{{ match.participants['b'].amount | currency: "☺" }}</p>
+        <p><button type='button' class='btn btn-lg btn-bet-b' ng-click='submitBet("b")'>Bet</button></p>
+      </div>
+    </div>
+  </div>
+
+<div class='row' ng-show='hasManyParticipants()'>
+    <div class='col-sm-8'>
+      <div class='bet-a'>
+        <div class='row'>
+          <div class='col-xs-6 participant-a'>
+            <div ng-repeat='(key, participant) in match.participants'>
+              <input type='radio' ng-model='$parent.selectedParticipant' ng-value='key' /> {{participant['name']}}
+            </div>
+
+          </div>
+          <div class='col-xs-6'>
+            <p class='pull-right'>
+              <button type='button' class='btn btn-lg btn-bet-a' ng-click='submitBet(selectedParticipant)'>Bet</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='col-sm-4 bet-info'>
+      <bet-info></bet-info>
+    </div>
+  </div>
+</div>
