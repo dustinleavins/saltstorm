@@ -44,8 +44,11 @@ class ApiApp < Sinatra::Base
   post '/login' do
     request.body.rewind
     auth_info = JSON.parse(request.body.read)
-    if (authenticate(auth_info['email'], auth_info['password']))
-      return json_response(200, { :message => 'ok' })
+
+    user = authenticate(auth_info['email'], auth_info['password'])
+
+    if user
+      return json_response(200, { :permissions => user.permissions.to_a })
     else
       return json_response(500, { :error => 'invalid login' })
     end
@@ -422,13 +425,33 @@ class ApiApp < Sinatra::Base
     # crash the server (at least for now)
     request.body.rewind
     new_match_data = JSON.parse(request.body.read)
-
     payout = nil
+
+    # Check for unrecoverable, general errors
+    if new_match_data['participants'].length < 2
+      return json_response(500, { :error => 'Matches require at least two participants.' })
+    end
+
+    # Sanitize new data
+    if new_match_data['winner'].nil?
+      new_match_data['winner'] = ''
+    end
+
+    new_match_data['participants'].values.each do |p|
+      if p['name'].nil?
+          p['name'] = ''
+      end
+    end
 
     # Normal match status transitions:
     # closed -> open -> inProgress -> payout
     if (old_match_data['status'] == 'closed' &&
         new_match_data['status'] == 'open')
+
+      if !new_match_data['winner'].empty?
+        return json_response(500, { :error => 'Cannot start a match with a winner already selected.' })
+      end
+
       Persistence::MatchStatusPersistence.open_bids
 
       # Reset bettors lists
@@ -444,6 +467,11 @@ class ApiApp < Sinatra::Base
       end
     elsif (old_match_data['status'] == 'open' &&
            new_match_data['status'] == 'inProgress')
+
+      if !new_match_data['winner'].empty?
+        return json_response(500, { :error => 'Cannot start a match with a winner already selected.' })
+      end
+
       Persistence::MatchStatusPersistence.close_bids
         
       # Calculate amounts & odds
@@ -488,6 +516,16 @@ class ApiApp < Sinatra::Base
 
     elsif (old_match_data['status'] == 'inProgress' &&
            new_match_data['status'] == 'payout')
+
+      winner = new_match_data['winner']
+
+      is_winner_valid = new_match_data['participants'].keys.include?(winner.downcase) ||
+        winner.downcase == 'tie'
+
+      if !is_winner_valid
+        return json_response(500, { :error => 'Payout requires selecting a valid winner.'})
+      end
+
       payout = true
 
     elsif (old_match_data['status'] == 'payout' &&

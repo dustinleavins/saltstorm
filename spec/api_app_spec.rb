@@ -813,6 +813,8 @@ describe 'Api App' do
       :participants => match_data_after_close['participants'],
     }.to_json
 
+    expect(last_response).to be_ok
+
     # Payout is async
     sleep_count = 0
     while Bet.count > 0
@@ -970,6 +972,8 @@ describe 'Api App' do
       :winner => 'b',
       :participants => match_data_after_close['participants'],
     }.to_json
+
+    expect(last_response).to be_ok
 
     # Payout is async
     sleep_count = 0
@@ -1186,6 +1190,8 @@ describe 'Api App' do
       :participants => match_data_after_close['participants'],
     }.to_json
 
+    expect(last_response).to be_ok
+
     # Payout is async
     sleep_count = 0
     while Bet.count > 0
@@ -1344,6 +1350,8 @@ describe 'Api App' do
       :participants => match_data_after_close['participants'],
     }.to_json
 
+    expect(last_response).to be_ok
+
     # Payout is async, but in this case, it' an expensive no-op
     sleep(1)
     
@@ -1429,6 +1437,8 @@ describe 'Api App' do
       :winner => 'a',
       :participants => match_data_after_close['participants'],
     }.to_json
+
+    expect(last_response).to be_ok
 
     ## Payout is async, but in this case, it' an expensive no-op
     sleep(1)
@@ -1519,6 +1529,8 @@ describe 'Api App' do
       :winner => 'b',
       :participants => match_data_after_close['participants'],
     }.to_json
+
+    expect(last_response).to be_ok
 
     ## Payout is async, but in this case, it's an expensive no-op
     sleep(1)

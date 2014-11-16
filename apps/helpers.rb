@@ -37,7 +37,7 @@ module Helpers
     end
 
     session[:uid] = user.id
-    return 'ok'
+    return user
   end
 
   def is_authenticated?

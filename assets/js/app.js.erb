@@ -6,20 +6,25 @@
 
 var saltstorm = angular.module('saltstorm', ['ngRoute']);
 
-saltstorm.factory('authService', ['$http', function($http) {
+saltstorm.factory('authService', ['$http', '$q', function($http, $q) {
     var service = {
         isRegistered: false,
         login: function(email, password) {
             var instance = this;
-            return $http.post('/api/login', {
-                email: email,
-                password: password
-            }).success(function(data) {
-                // TODO: Set api key
-                this.isRegistered = true;
-            }).error(function() {
-                // TODO: Unset API key
-                this.isRegistered = false;
+
+            return $q(function(resolve, reject) {
+                $http.post('/api/login', {
+                    email: email,
+                    password: password
+                }).success(function(data) {
+                    // TODO: Set api key
+                    this.isRegistered = true;
+                    resolve(data);
+                }).error(function(data) {
+                    // TODO: Unset API key
+                    this.isRegistered = false;
+                    reject();
+                });
             });
         }
     };
@@ -54,6 +59,18 @@ saltstorm.config(['$routeProvider', function($routeProvider) {
             }
         },
         controller: 'MainController'
+    }).when('/admin', {
+        templateUrl: function(params) {
+            // TODO: This should be handled w/o using params so other pages
+            // can go back here
+            if (params && params.mobile) {
+                return '/angular/admin_mobile.html';
+            } else {
+                return '/angular/admin.html';
+            }
+        },
+        controller: 'AdminController'
+
     }).when('/payments', {
         templateUrl: '/angular/payments.html',
         controller: 'PaymentsController'
@@ -79,6 +96,13 @@ saltstorm.directive('navbar', function() {
     };
 });
 
+saltstorm.directive('adminControl', function() {
+   return {
+        restrict: 'E',
+        templateUrl: '/angular/admin_control.html'
+    };
+});
+
 saltstorm.controller('RegisterController', ['$scope', '$http', '$location', function($scope, $http, $location) {
     // TODO: Go to selectable main page after successful registration
 
@@ -101,17 +125,23 @@ saltstorm.controller('RegisterController', ['$scope', '$http', '$location', func
 saltstorm.controller('LoginController', ['$scope', '$location', 'authService', function($scope, $location, authService) {
     $scope.login = function() {
         authService.login($scope.email, $scope.password)
-        .success(function() {
+        .then(function(data) {
             $scope.errorMsg = null;
 
-            var destination = '/main';
+            var destination;
+
+            if (data.permissions.indexOf('admin') === -1 ) {
+                destination = '/main';
+            } else {
+                destination = '/admin';
+            }
 
             if ($scope.goToMobile) {
               destination += '?mobile=true';
             }
 
             $location.url(destination);
-        }).error(function(data) {
+        },function(data) {
             $scope.errorMsg = data.error;
         });
     };
@@ -186,6 +216,100 @@ saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', functi
     $scope.ready = function() {
         return lock.account && lock.siteConfig;
     };
+}]);
+
+saltstorm.controller('AdminController', ['$scope', '$http', '$q', '$window', function($scope, $http, $q, $window) {
+    $http.defaults.cache = false;
+    var updateDelay = 5000;
+    var stopUpdating = false;
+
+    var updateBody = function(delay) {
+        return $q(function(resolve, reject) {
+            $window.setTimeout(function() {
+                $http.get('/api/current_match')
+                .success(function(data, status, headers, config) {
+                    // Do not update info while admin is changing it
+                    if (!stopUpdating) {
+                        $scope.matchData = data;
+                    }
+                    resolve();
+                }).error(function(data) {
+                    reject(data);
+                });
+            }, delay);
+        });
+    };
+
+    var updateMatchInfo = function(delay) {
+        if (stopUpdating) {
+            return;
+        }
+
+        updateBody(delay).then(function() {
+            updateMatchInfo(updateDelay);
+        }, function() {
+            stopUpdating = true;
+            alert('Error - no longer updating match data');
+        });
+    };
+
+    $scope.pushMatchInfo = function() {
+      // TODO: Check presence of winner on payout transition
+      console.log($scope);
+      if ($scope.matchData.status === 'open') {
+          $scope.matchData.winner = null;
+      }
+
+      $http.put('/api/current_match', $scope.matchData)
+          .success(function() {
+              $scope.stopEditing();
+              $scope.error = null;
+          }).error(function(data) {
+              if (data) {
+                  $scope.error = data.error;
+              } else {
+                  $window.alert('There was an error while updating match data. Please try again.');
+              }
+          });
+
+    };
+
+    $scope.$on('$routeChangeStart', function() {
+        stopUpdating = true;
+    });
+
+    $scope.editMode = false;
+
+    $scope.startEditing = function() {
+        stopUpdating = true;
+        $scope.editMode = true;
+
+        $scope.originalStatus = $scope.matchData.status;
+
+        var nextDict = {
+            closed: 'open',
+            open: 'inProgress',
+            inProgress: 'payout'
+        };
+
+        $scope.nextStatus = nextDict[$scope.originalStatus];
+    };
+
+    $scope.stopEditing = function() {
+        stopUpdating = false;
+        updateMatchInfo(0);
+        $scope.editMode = false;
+    };
+
+    $scope.editModeDisabled = function() {
+        if (!$scope.matchData) {
+            return false;
+        }
+
+        return $scope.matchData.status === 'payout';
+    };
+
+    updateMatchInfo(0);
 }]);
 
 saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {

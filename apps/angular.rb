@@ -31,7 +31,8 @@ class AngularTemplateApp < Sinatra::Base
 
   routes = ['index', 'bet_info', 'navbar', 'login',
             'request_password_reset', 'main', 'main_mobile',
-            'logout', 'payments', 'register', 'manage_account']
+            'logout', 'payments', 'register', 'manage_account',
+            'admin', 'admin_mobile', 'admin_control']
 
   routes.each do |route|
     get '/' + route + '.html' do

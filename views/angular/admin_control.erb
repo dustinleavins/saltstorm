@@ -1,0 +1,71 @@
+<%
+# Saltstorm - Fun-Money Betting on the Web
+# Copyright (C) 2013, 2014  Dustin Leavins
+#
+# Full license can be found in 'LICENSE.txt'
+%>
+<div ng-show='!editMode'>
+  <div class='row'>
+    <div class='col-sm-4'>
+      <div class='bet-a'>
+        <div class='participant-a'>
+          <p>{{ matchData.participants['a'].name }}</p>
+          <p>{{ matchData.participants['a'].amount | currency: "☺" }}</p>
+        </div>
+      </div>
+    </div>
+    <div class='col-sm-4 bet-info'>
+      <p>Status: {{ matchData.status }}</p>
+      <p>
+        <button ng-click='startEditing()' ng-disabled='editModeDisabled()' class='btn btn-default'>Edit</button>
+      </p>
+    </div>
+    <div class='col-sm-4'>
+      <div class='bet-b'>
+        <div class='participant-b'>
+          <p>{{ matchData.participants['b'].name }}</p>
+          <p>{{ matchData.participants['b'].amount | currency: "☺" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form ng-show='editMode' name='editDataForm' role='form'>
+  <div ng-show='error'>
+      <p class='text-danger text-center'>{{error}}</p>
+  </div>
+  <div class='col-sm-4'>
+    <div class='form-group' ng-class='{"has-error": editDataForm.aName.$invalid}'>
+      <label for='aName' >A's Name</label>
+      <input type='text' name='aName' autocapitalize='off' class='form-control'
+             required
+             ng-model='matchData.participants["a"].name' />
+      <div ng-show='matchData.status === "payout"'>
+        <input type="radio" name="winner" autocomplete="off" ng-model='matchData.winner' value='a'> Winner
+      </div>
+    </div>
+  </div>
+    <div class='col-sm-4 bet-info'>
+      <p>
+            <input type="radio" name="status" autocomplete="off" ng-model='matchData.status' ng-value='originalStatus' selected> {{ originalStatus }}
+            <input type="radio" name="status" autocomplete="off" ng-model='matchData.status' ng-value='nextStatus'> {{ nextStatus }}
+      </p>
+      <p>
+        <button ng-click='pushMatchInfo()' class='btn btn-primary'>Submit</button>
+        <button ng-click='stopEditing()' class='btn btn-default'>Cancel</button>
+      </p>
+    </div>
+  <div class='col-sm-4'>
+    <div class='form-group' ng-class='{"has-error": editDataForm.bName.$invalid}'>
+      <label for='bName' >B's Name</label>
+      <input type='text' name='bName' autocapitalize='off' class='form-control'
+             required
+             ng-model='matchData.participants["b"].name' />
+      <div ng-show='matchData.status === "payout"'>
+        <input type="radio" name="winner" autocomplete="off" ng-model='matchData.winner' value='b'> Winner
+      </div>
+
+    </div>
+  </div>
+</form>
