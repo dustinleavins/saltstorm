@@ -27,10 +27,21 @@ module Models
     /\A\S+@\S+\Z/
   end
 
+  # Generates a digest
+  def self.generate_digest(contents, salt)
+    return (Digest::SHA256.new << contents << salt ).to_s
+  end
+
+  # Generates a random salt value
+  def self.generate_salt
+    return SecureRandom.base64(8)
+  end
+
   # Represents a user
   class User < Sequel::Model
     plugin :validation_helpers
     one_to_many :payments
+    one_to_many :api_keys
 
     # Hash of lambdas that return arrays of betting Users.
     GetBettorsStrategies = {
@@ -212,6 +223,50 @@ module Models
         errors.add(:payment_type,
                    'Unsupported payment type')
       end
+    end
+  end
+
+  # Represents an API key
+  class ApiKey < Sequel::Model
+    plugin :validation_helpers
+    many_to_one :user
+
+    # Plain-text representation of key
+    attr_accessor :key
+
+    def before_save
+      self.date_modified = DateTime.now
+      super
+    end
+
+    def before_validation
+      if(!self.key.nil? && !self.key.empty?)
+        self.key_salt = Models.generate_salt()
+        self.key_hash = Models.generate_digest(@key, self.key_salt)
+      end
+    end
+
+    def validate
+      super
+      validates_presence [:user_id, :key_salt, :key_hash]
+    end
+
+    def full_key
+      if self.key.nil? || self.key.empty? || self.user_id.nil?
+        return nil
+      end
+
+      return "#{self.user_id}#{Models::ApiKey.key_separator}#{self.key}"
+    end
+
+    def self.new_with_random_key(args)
+      args[:key] = SecureRandom.base64(12)
+      return self.new(args)
+    end
+
+    # Character separating user id and key in an ApiKey's full key.
+    def self.key_separator
+      return '+'
     end
   end
 end

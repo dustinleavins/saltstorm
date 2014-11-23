@@ -59,6 +59,51 @@ class ApiApp < Sinatra::Base
     return json_response(200, { :message => 'logged out' })
   end
 
+  put '/session' do
+    request.body.rewind
+    auth_info = JSON.parse(request.body.read)
+    email = auth_info['email']
+    password = auth_info['password']
+
+    if (email.nil? || password.nil?)
+      return json_response(500, { :error => 'invalid login' })
+    end
+
+    user = User.first(:email => email.downcase)
+
+    if user.nil?
+      return json_response(500, { :error => 'invalid login' })
+    end
+
+    password_hash = User.generate_password_digest(password, user.password_salt)
+
+    if (password_hash != user.password_hash)
+      return json_response(500, { :error => 'invalid login' })
+    end
+
+    api_key = ApiKey.new_with_random_key(:user => user)
+
+    if (!api_key.valid?)
+      return json_response(500, { :error => api_key.errors.full_messages.join("\n") });
+    end
+
+    api_key.save()
+    return json_response(200, {
+        :key => api_key.full_key,
+        :permissions => user.permissions.to_a
+    })
+  end
+
+  delete '/session' do
+    api_key = authentication_api_key
+    if api_key.nil?
+      return json_response(500, { :error => 'Must be logged-in' })
+    end
+
+    api_key.delete
+    return json_response(200, :message => 'ok')
+  end
+
   post '/register' do
     request.body.rewind
     register_req = JSON.parse(request.body.read)
@@ -111,7 +156,7 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'Must be logged-in' })
     end
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id)
     if user.nil?
       return json_response(500, { :error => 'Somehow logged-in as fake user' })
     end
@@ -143,7 +188,7 @@ class ApiApp < Sinatra::Base
     request.body.rewind
     edit_req = JSON.parse(request.body.read)
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id)
     if (user.nil?)
       return json_response(500, { :error => 'Must be logged-in' })
     end
@@ -166,7 +211,7 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'Must be logged-in' })
     end
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id)
     if (user.nil?)
       return json_response(500, { :error => 'Must be logged-in' })
     end
@@ -258,7 +303,7 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'invalid request' })
     end
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id) 
 
     if bid_amount > user.balance
       return json_response(500, { :error => 'insufficient funds' })
@@ -281,14 +326,14 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'Must be logged-in' })
     end
 
-    if (Bet.where(:user_id => session[:uid]).count > 0)
+    if (Bet.where(:user_id => authentication_user_id).count > 0)
       return json_response(500, { :error => 'Cannot make payment while betting'})
     end
 
     request.body.rewind
     user_payment_info = JSON.parse(request.body.read)
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id)
    
     payment = Payment.new(
       :user => user,
@@ -351,7 +396,7 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'Must be logged-in' })
     end
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id)
     if (!user.permissions.include? 'admin')
       return json_response(500, { :error => 'invalid request' })
     end
@@ -414,7 +459,7 @@ class ApiApp < Sinatra::Base
       return json_response(500, { :error => 'Must be logged-in' })
     end
 
-    user = User.first(:id => session[:uid])
+    user = User.first(:id => authentication_user_id)
     unless user.permissions.include? 'admin'
       return json_response(500, { :error => 'invalid request' })
     end

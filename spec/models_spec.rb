@@ -300,3 +300,23 @@ describe 'Models::Payment' do
 
   end
 end
+
+describe 'Models::ApiKey' do
+  it 'allows access to properties' do
+    user = FactoryGirl.create(:user)
+    api_key = Models::ApiKey.create(:user => user,
+                                    :key => 'AABBCCDD')
+
+    expect(api_key.user).to eq(user)
+    expect(api_key.key).to eq('AABBCCDD')
+    expect(api_key.full_key).to eq("#{user.id}+AABBCCDD")
+    expect(api_key.key_salt).to_not be_nil
+    expect(api_key.key_hash).to_not be_nil
+    expect(api_key.date_modified).to_not be_nil
+  end
+
+  it 'allows use of the new_with_random_key method' do
+    api_key = Models::ApiKey.new_with_random_key(:user => FactoryGirl.create(:user))
+    expect(api_key.valid?).to be_truthy
+  end
+end

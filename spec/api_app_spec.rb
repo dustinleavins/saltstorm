@@ -42,6 +42,36 @@ describe 'Api App' do
     expect(last_response).to_not be_ok
   end
 
+  it "allows authentication via api key" do
+    user = FactoryGirl.create(:user)
+
+    put '/session', {
+      :email => user.email,
+      :password => user.password
+    }.to_json
+
+    expect(last_response).to be_ok
+    actual_key = JSON.parse(last_response.body)['key']
+    expect(actual_key).to_not be_nil
+
+    expect(ApiKey.where(:user => user).count).to eq(1)
+    api_key_record = ApiKey.first(:user => user)
+
+    actual_hash = Models.generate_digest(actual_key.split('+', 2)[1], api_key_record.key_salt)
+    expect(actual_hash).to eq(api_key_record.key_hash)
+
+    # TODO - Test authentication with a real route
+  end
+
+  it "allows deletion of api keys" do
+    api_key = FactoryGirl.create(:api_key)
+    expect(api_key.user.exists?).to be_truthy
+    header('AUTHENTICATION', api_key.full_key)
+    delete('/session')
+    expect(last_response).to be_ok
+    expect(ApiKey.where(:user => api_key.user).count).to eq(0)
+  end
+
   it "allows users to register" do
     user_info = FactoryGirl.attributes_for(:user)
     post '/register', {

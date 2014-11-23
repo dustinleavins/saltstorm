@@ -1,4 +1,5 @@
 require 'set'
+require 'securerandom'
 require './models.rb'
 
 FactoryGirl.define do
@@ -34,5 +35,10 @@ FactoryGirl.define do
     payment_type 'rankup'
     amount 10
     status 'pending'
+  end
+
+  factory :api_key, class:Models::ApiKey do
+    association :user, :factory => :user
+    sequence(:key) { SecureRandom.base64(12) }
   end
 end

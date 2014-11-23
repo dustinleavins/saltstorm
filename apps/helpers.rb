@@ -41,6 +41,45 @@ module Helpers
   end
 
   def is_authenticated?
-    return !(session[:uid].nil?)
+    return !(authentication_api_key.nil? and session[:uid].nil?)
+  end
+
+  def authentication_user_id
+    api_key = authentication_api_key
+
+    if api_key
+      return api_key.user_id
+    else
+      return session[:uid]
+    end
+  end
+
+  def authentication_api_key
+    # The AUTHENTICATION header is the current 'real' one.
+    # But for some reason, setting the AUTHENTICATION header using Rack::Test
+    # actually sets the HTTP_AUTHENTICATION header.
+    if request.env['AUTHENTICATION'] and !request.env['AUTHENTICATION'].empty?
+      full_key = request.env['AUTHENTICATION']
+    elsif request.env['HTTP_AUTHENTICATION'] and !request.env['HTTP_AUTHENTICATION'].empty?
+      full_key = request.env['HTTP_AUTHENTICATION']
+    else
+      return nil
+    end
+
+    parts = full_key.sub('key=', '').split(ApiKey.key_separator, 2)
+    if parts.length != 2
+      return nil
+    end
+
+    user_id = parts[0].to_i
+    api_key_identifier = parts[1]
+
+    results = ApiKey.where(:user_id => user_id)
+    results.each do |user_api_key|
+      api_hash = Models.generate_digest(api_key_identifier, user_api_key.key_salt)
+      return user_api_key if api_hash == user_api_key.key_hash
+    end
+
+    return nil
   end
 end
