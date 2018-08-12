@@ -29,7 +29,7 @@ describe 'Main App' do
   end
 
   it "allows users to reset password" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     new_password = "password5"
     expect(user.password).to_not be_nil
     expect(new_password).to_not eq(user.password)
@@ -67,7 +67,7 @@ describe 'Main App' do
   end
 
   it "handles /request_password_reset errors" do
-    invalid_email = FactoryGirl.attributes_for(:user)[:email]
+    invalid_email = FactoryBot.attributes_for(:user)[:email]
 
     # Illegal - empty email field
     post '/request_password_reset', {
@@ -89,7 +89,7 @@ describe 'Main App' do
   end
 
   it "handles /reset_password errors" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Request Reset
     post '/request_password_reset', {

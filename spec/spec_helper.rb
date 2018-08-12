@@ -2,7 +2,7 @@ require 'simplecov'
 SimpleCov.start
 require 'fileutils'
 require 'rspec'
-require 'factory_girl'
+require 'factory_bot'
 require './models.rb'
 
 module Helpers
@@ -29,17 +29,18 @@ RSpec.configure do |c|
   c.include Helpers
 
   cleanup = -> do
-    Models::User.where().delete()
-    Models::Bet.where().delete()
-    Models::EmailJob.where().delete()
-    Models::PasswordResetRequest.where().delete()
+    Models::User.dataset.delete()
+    Models::Bet.dataset.delete()
+    Models::EmailJob.dataset.delete()
+    Models::PasswordResetRequest.dataset.delete()
     FileUtils.rm(['tmp/test/match_data.json', 'tmp/test/match_open'],
                  force: true)
   end
 
-  FactoryGirl.find_definitions
+  c.include FactoryBot::Syntax::Methods
 
   c.before(:suite) do
+    FactoryBot.find_definitions
     cleanup.call()
   end
    

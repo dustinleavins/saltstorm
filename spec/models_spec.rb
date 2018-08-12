@@ -3,7 +3,7 @@ ENV['RACK_ENV'] = 'test'
 require 'spec_helper'
 require 'set'
 require 'rspec'
-require 'factory_girl'
+require 'factory_bot'
 require './models.rb'
 
 describe 'Models::User' do
@@ -35,45 +35,45 @@ describe 'Models::User' do
   end
 
   it 'rejects users with invalid e-mail addresses' do
-    expect{FactoryGirl.create(:user, :email => '')}.to raise_error
-    expect{FactoryGirl.create(:user, :email => 'test')}.to raise_error
+    expect{FactoryBot.create(:user, :email => '')}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:user, :email => 'test')}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects users with invalid display_name' do
-    expect{FactoryGirl.create(:user, :display_name => nil)}.to raise_error
-    expect{FactoryGirl.create(:user, :display_name => '')}.to raise_error
-    expect{FactoryGirl.create(:user, :display_name => 'twenty one character')}.to raise_error
+    expect{FactoryBot.create(:user, :display_name => nil)}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:user, :display_name => '')}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:user, :display_name => 'twenty one character')}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects users with invalid balance' do
-    expect{FactoryGirl.create(:user, :balance => nil)}.to raise_error
+    expect{FactoryBot.create(:user, :balance => nil)}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects users with invalid password' do
-    expect{FactoryGirl.create(:user, :password => nil)}.to raise_error
-    expect{FactoryGirl.create(:user, :password => '')}.to raise_error
+    expect{FactoryBot.create(:user, :password => nil)}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:user, :password => '')}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects user with invalid post_url' do
     expect do
-      FactoryGirl.create(:user, :post_url => 'non-valid URI')
-    end.to raise_error
+      FactoryBot.create(:user, :post_url => 'non-valid URI')
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects user with invalid rank' do
     expect do
-      FactoryGirl.create(:user, :rank => 'invalid')
-    end.to raise_error
+      FactoryBot.create(:user, :rank => 'invalid')
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects user with invalid balance' do
     expect do
-      FactoryGirl.create(:user, :balance => 'invalid')
-    end.to raise_error
+      FactoryBot.create(:user, :balance => 'invalid')
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
-      FactoryGirl.create(:user, :balance => -1)
-    end.to raise_error
+      FactoryBot.create(:user, :balance => -1)
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
 
@@ -92,11 +92,11 @@ describe 'Models::User' do
     # A previous test creates a user with non-empty post_url
     
     # These user's URLs should not be included
-    FactoryGirl.create(:user, :post_url => '')
-    FactoryGirl.create(:user, :post_url => nil)
+    FactoryBot.create(:user, :post_url => '')
+    FactoryBot.create(:user, :post_url => nil)
 
     # This user's URL should be included
-    FactoryGirl.create(:user, :post_url => 'http://www.example.com/test')
+    FactoryBot.create(:user, :post_url => 'http://www.example.com/test')
 
     post_urls = Models::User.all_post_urls
     expect(post_urls).to_not be_nil
@@ -108,7 +108,7 @@ end
 
 describe 'Models::Bet' do
   it 'allows access to properties' do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     bet = Models::Bet.create(:user_id => user.id,
                              :for_participant => 'a',
                              :amount => 10)
@@ -121,30 +121,31 @@ describe 'Models::Bet' do
   it 'rejects bets without user_ids' do
     expect do
       Models::Bet.create(:for_participant => 'a', :amount => 10)
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects bets with invalid for_participant' do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     expect do
       Models::Bet.create(:user_id => user.id,
                          :for_participant => nil,
                          :amount => 10)
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
       Models::Bet.create(:user_id => user.id,
                          :for_participant => '',
                          :amount => 10)
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects bets with invalid amounts' do
+    user = FactoryBot.create(:user)
     expect do
       Models::Bet.create(:user_id => user.id,
                          :for_participant => 'c',
                          :amount => nil)
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 end
 
@@ -164,20 +165,20 @@ describe 'Models::EmailJob' do
       Models::EmailJob.create(:to => nil,
                               :subject => 'subject',
                               :body => 'body')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
       Models::EmailJob.create(:to => '',
                               :subject => 'subject',
                               :body => 'body')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
 
     expect do
       Models::EmailJob.create(:to => 'test',
                               :subject => 'subject',
                               :body => 'body')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects jobs with invalid subject' do
@@ -185,13 +186,13 @@ describe 'Models::EmailJob' do
       Models::EmailJob.create(:to => 'test@example.com',
                               :subject => nil,
                               :body => 'body')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
       Models::EmailJob.create(:to => 'test@example.com',
                               :subject => '',
                               :body => 'body')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects jobs with invalid body' do
@@ -199,13 +200,13 @@ describe 'Models::EmailJob' do
       Models::EmailJob.create(:to => 'test@example.com',
                               :subject => 'subject',
                               :body => nil)
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
       Models::EmailJob.create(:to => 'test@example.com',
                               :subject => 'subject',
                               :body => '')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
   end
 end
@@ -223,24 +224,24 @@ describe 'Models::PasswordResetRequest' do
     expect do
       Models::PasswordResetRequest.create(:email => nil,
                                           :code => 'code')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
       Models::PasswordResetRequest.create(:email => '',
                                           :code => 'code')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
 
     expect do
       Models::PasswordResetRequest.create(:email => 'test',
                                           :code => 'code')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects requests with invalid code' do
     expect do
       Models::PasswordResetRequest.create(:email => 'test@example.com',
                                           :code => '')
-    end.to raise_error
+    end.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'accepts requests with nil code' do
@@ -253,7 +254,7 @@ end
 
 describe 'Models::Payment' do
   it 'allows access to properties' do
-    user = FactoryGirl.create(:user, :balance => 100)
+    user = FactoryBot.create(:user, :balance => 100)
     payment = Models::Payment.create(
       :user => user,
       :payment_type => 'rankup',
@@ -273,37 +274,37 @@ describe 'Models::Payment' do
   end
 
   it 'rejects payments with invalid payment_type' do
-    expect{FactoryGirl.create(:payment, :payment_type => nil)}.to raise_error
-    expect{FactoryGirl.create(:payment, :payment_type => '')}.to raise_error
-    expect{FactoryGirl.create(:payment, :payment_type => 'unsupported')}.to raise_error
+    expect{FactoryBot.create(:payment, :payment_type => nil)}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:payment, :payment_type => '')}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:payment, :payment_type => 'unsupported')}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects payments with invalid status' do
-    expect{FactoryGirl.create(:payment, :status => nil)}.to raise_error
-    expect{FactoryGirl.create(:payment, :status => '')}.to raise_error
-    expect{FactoryGirl.create(:payment, :status => 'not allowed')}.to raise_error
+    expect{FactoryBot.create(:payment, :status => nil)}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:payment, :status => '')}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:payment, :status => 'not allowed')}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects payments with invalid user_id' do
-    expect{FactoryGirl.create(:payment, :user => nil)}.to raise_error
+    expect{FactoryBot.create(:payment, :user => nil)}.to raise_error(Sequel::ValidationFailed)
   end
 
   it 'rejects payments with invalid amount' do
-    user_with_low_balance = FactoryGirl.create(:user, :balance => 5)
+    user_with_low_balance = FactoryBot.create(:user, :balance => 5)
     
-    expect{FactoryGirl.create(:payment, :amount => 0)}.to raise_error
-    expect{FactoryGirl.create(:payment, :amount => nil)}.to raise_error
+    expect{FactoryBot.create(:payment, :amount => 0)}.to raise_error(Sequel::ValidationFailed)
+    expect{FactoryBot.create(:payment, :amount => nil)}.to raise_error(Sequel::ValidationFailed)
     
     expect do
-      FactoryGirl.create(:payment, :user => user_with_low_balance, :amount => 6)
-    end.to raise_error
+      FactoryBot.create(:payment, :user => user_with_low_balance, :amount => 6)
+    end.to raise_error(Sequel::ValidationFailed)
 
   end
 end
 
 describe 'Models::ApiKey' do
   it 'allows access to properties' do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     api_key = Models::ApiKey.create(:user => user,
                                     :key => 'AABBCCDD')
 
@@ -316,7 +317,7 @@ describe 'Models::ApiKey' do
   end
 
   it 'allows use of the new_with_random_key method' do
-    api_key = Models::ApiKey.new_with_random_key(:user => FactoryGirl.create(:user))
+    api_key = Models::ApiKey.new_with_random_key(:user => FactoryBot.create(:user))
     expect(api_key.valid?).to be_truthy
   end
 end

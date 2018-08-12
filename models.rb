@@ -1,5 +1,5 @@
 # Saltstorm - Fun-Money Betting on the Web
-# Copyright (C) 2013, 2014  Dustin Leavins
+# Copyright (C) 2013, 2014, 2018  Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
 
@@ -46,14 +46,14 @@ module Models
     # Hash of lambdas that return arrays of betting Users.
     GetBettorsStrategies = {
       'all_in' => lambda do |for_participant|
-        User.join(Bet, :user_id => :id)
+        User.join(Bet.dataset, :user_id => :id)
           .where(:for_participant => for_participant)
           .where(:amount => :balance)
           .all
       end,
 
       'all_bettors' => lambda do |for_participant|
-        User.join(Bet, :user_id => :id)
+        User.join(Bet.dataset, :user_id => :id)
           .where(:for_participant => for_participant)
           .all
       end
@@ -84,7 +84,7 @@ module Models
       validates_integer :balance
       validates_integer :rank unless rank.nil? # rank can be nil during validation
 
-      if (balance < 0)
+      if (balance && balance.to_i < 0)
         errors.add(:balance,
                    'Balance cannot be below 0 for any user')
       end
@@ -213,10 +213,15 @@ module Models
         errors.add(:status, 'invalid status')
       end
 
-      if (new? && amount > user.balance)
+      if (new? && !user.nil? && amount.to_i > user.balance)
         errors.add(:amount,
                    'Amount cannot be higher than user\'s balance for new Payment ' +
                    "amount: #{amount} balance: #{user.balance}")
+      end
+
+      if (amount && amount.to_i <= 0)
+        errors.add(:amount,
+                   "Amount cannot be 0 or negative.")
       end
 
       if (!(valid_types.member? payment_type))

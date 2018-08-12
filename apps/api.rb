@@ -1,5 +1,5 @@
 # Saltstorm - Fun-Money Betting on the Web
-# Copyright (C) 2013, 2014  Dustin Leavins
+# Copyright (C) 2013, 2014, 2018  Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
 
@@ -583,7 +583,7 @@ class ApiApp < Sinatra::Base
     elsif (old_match_data['status'] == 'inProgress' &&
            new_match_data['status'] == 'closed')
       # Clear bets
-      Bet.where().destroy
+      Bet.dataset.destroy
 
       # Reset bettors lists
       new_match_data[:bettors] = {
@@ -596,7 +596,7 @@ class ApiApp < Sinatra::Base
     elsif (old_match_data['status'] == 'open' &&
            new_match_data['status'] == 'closed')
       Persistence::MatchStatusPersistence.close_bids
-      Bet.where().destroy
+      Bet.dataset.destroy
 
       # Reset bettors lists
       new_match_data['bettors'] = {
@@ -663,7 +663,7 @@ class ApiApp < Sinatra::Base
           end
         end
 
-        Bet.where().destroy
+        Bet.dataset.destroy
 
         match_data['status'] = 'closed'
 

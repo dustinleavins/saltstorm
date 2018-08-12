@@ -13,7 +13,7 @@ gem "rest-client"
 group :test do
   gem "rspec", :require => false
   gem "rack-test", :require => false
-  gem "factory_girl", :require => false
+  gem "factory_bot", :require => false
   gem "simplecov", :require => false
   gem "rubocop", :require => false
 end
@@ -23,10 +23,10 @@ group :sqlite3 do
   gem "jdbc-sqlite3", :require => false, :platforms => :jruby
 end
 
-group :pg do
-  gem "pg", :require => false, :platforms => :ruby
-  gem "jdbc-postgres", :require => false, :platforms => :jruby
-end
+#group :pg do
+#  gem "pg", :require => false, :platforms => :ruby
+#  gem "jdbc-postgres", :require => false, :platforms => :jruby
+#end
 
 #group :mysql do
 #  gem "mysql2", :require => false, :platforms => :ruby

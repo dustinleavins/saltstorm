@@ -2,7 +2,7 @@ ENV['RACK_ENV'] = 'test'
 
 require 'rspec'
 require 'mail'
-require 'factory_girl'
+require 'factory_bot'
 require './models.rb'
 require 'spec_helper'
 
@@ -11,7 +11,7 @@ describe 'email_job' do
     expect(Models::EmailJob.count).to eq(0)
 
     20.times do
-      FactoryGirl.create(:email_job)
+      FactoryBot.create(:email_job)
     end
 
     expect(Models::EmailJob.count).to eq(20)

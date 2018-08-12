@@ -19,7 +19,7 @@ describe 'Api App' do
   end
 
   it "allows api users to login and logout" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Sign-in
     post '/login', {
@@ -43,7 +43,7 @@ describe 'Api App' do
   end
 
   it "allows authentication via api key" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     put '/session', {
       :email => user.email,
@@ -64,7 +64,7 @@ describe 'Api App' do
   end
 
   it "allows deletion of api keys" do
-    api_key = FactoryGirl.create(:api_key)
+    api_key = FactoryBot.create(:api_key)
     expect(api_key.user.exists?).to be_truthy
     header('AUTHENTICATION', api_key.full_key)
     delete('/session')
@@ -73,7 +73,7 @@ describe 'Api App' do
   end
 
   it "allows users to register" do
-    user_info = FactoryGirl.attributes_for(:user)
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => user_info[:email],
       :password => user_info[:password],
@@ -97,7 +97,7 @@ describe 'Api App' do
   end
 
   it "does not allows user to register with incorrect confirm password" do
-    user_info = FactoryGirl.attributes_for(:user)
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => user_info[:email],
       :password => user_info[:password],
@@ -116,7 +116,7 @@ describe 'Api App' do
   end
 
   it "does not allows user to register with empty password" do
-    user_info = FactoryGirl.attributes_for(:user)
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => user_info[:email],
       :password => '',
@@ -135,7 +135,7 @@ describe 'Api App' do
   end
 
   it "does not allows user to register with empty email" do
-    user_info = FactoryGirl.attributes_for(:user)
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => '',
       :password => user_info[:password],
@@ -154,7 +154,7 @@ describe 'Api App' do
   end
 
   it "does not allows user to register with empty name" do
-    user_info = FactoryGirl.attributes_for(:user)
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => user_info[:email],
       :password => user_info[:password],
@@ -173,8 +173,8 @@ describe 'Api App' do
   end
 
   it "does not allows user to register with duplicate e-mail" do
-    existing_user_email = FactoryGirl.create(:user).email
-    user_info = FactoryGirl.attributes_for(:user)
+    existing_user_email = FactoryBot.create(:user).email
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => existing_user_email,
       :password => user_info[:password],
@@ -193,8 +193,8 @@ describe 'Api App' do
   end
 
   it "does not allows user to register with duplicate name" do
-    existing_user_name = FactoryGirl.create(:user).display_name
-    user_info = FactoryGirl.attributes_for(:user)
+    existing_user_name = FactoryBot.create(:user).display_name
+    user_info = FactoryBot.attributes_for(:user)
     post '/register', {
       :email => user_info[:email],
       :password => user_info[:password],
@@ -213,7 +213,7 @@ describe 'Api App' do
   end
 
   it "allows user to update password" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -245,7 +245,7 @@ describe 'Api App' do
   end
 
   it "prevents user from updating password with invalid password" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -269,7 +269,7 @@ describe 'Api App' do
 
 
   it "allows user to update info" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -302,7 +302,7 @@ describe 'Api App' do
   end
 
   it "prevents user from updating info with incorrect password" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -321,7 +321,7 @@ describe 'Api App' do
   end
 
   it "prevents user from updating info with invalid name" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -343,7 +343,7 @@ describe 'Api App' do
   end
 
   it "prevents user from updating info with invalid email" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -365,7 +365,7 @@ describe 'Api App' do
   end
 
   it "prevents user from updating info with invalid email" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -387,7 +387,7 @@ describe 'Api App' do
   end
 
   it "prevents user from updating info with invalid post_url" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
 
     # Login
     post '/login', {
@@ -410,7 +410,7 @@ describe 'Api App' do
   end
 
   it "handles /request_password_reset errors" do
-    invalid_email = FactoryGirl.attributes_for(:user)[:email]
+    invalid_email = FactoryBot.attributes_for(:user)[:email]
 
     # Illegal - empty email field
     post '/request_password_reset', {
@@ -432,7 +432,7 @@ describe 'Api App' do
   end
 
   it "allows users to request password reset" do
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     new_password = "password5"
     expect(user.password).to_not be_nil
     expect(new_password).to_not eq(user.password)
@@ -451,7 +451,7 @@ describe 'Api App' do
   end
 
   it "doesn't explode for failed api login attempts" do
-    user = FactoryGirl.build(:user) # Do not save
+    user = FactoryBot.build(:user) # Do not save
 
     # Sign-in
     post '/login', {
@@ -482,7 +482,7 @@ describe 'Api App' do
 
   it 'should not allow /send_client_notifications access to non-admin users' do
     # Create User
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     
     # Sign-in
     post '/login', {
@@ -503,7 +503,7 @@ describe 'Api App' do
     # This test should never, ever send real notifications
     expect(User.all_post_urls).to be_empty
 
-    admin = FactoryGirl.create(:admin)
+    admin = FactoryBot.create(:admin)
 
     # Sign-in
     post '/login', {
@@ -600,7 +600,7 @@ describe 'Api App' do
 
   it "should not allow /current_match PUT access to non-admin users" do
     # Create User
-    user = FactoryGirl.create(:user)
+    user = FactoryBot.create(:user)
     
     # Sign-in
     post '/login', {
@@ -627,7 +627,7 @@ describe 'Api App' do
   end
 
   it 'allows users to rankup with /payment' do
-    user = FactoryGirl.create(:user, :balance => 20000)
+    user = FactoryBot.create(:user, :balance => 20000)
 
     # Sign-in
     post '/login', {
@@ -658,7 +658,7 @@ describe 'Api App' do
   end
 
   it 'refuses to rankup users with max rank in /payment' do
-    user = FactoryGirl.create(:user, :balance => 20000, :rank => 5)
+    user = FactoryBot.create(:user, :balance => 20000, :rank => 5)
 
     # Sign-in
     post '/login', {
@@ -683,7 +683,7 @@ describe 'Api App' do
 
 
   it 'bails out users who spend everything with /payment' do
-    user = FactoryGirl.create(:user, :balance => 10000)
+    user = FactoryBot.create(:user, :balance => 10000)
 
     # Sign-in
     post '/login', {
@@ -715,7 +715,7 @@ describe 'Api App' do
 
 
   it 'prevents invalid amount on /payment' do
-    user = FactoryGirl.create(:user, :balance => 10)
+    user = FactoryBot.create(:user, :balance => 10)
 
     # Sign-in
     post '/login', {
@@ -735,7 +735,7 @@ describe 'Api App' do
 
 
   it 'prevents invalid payment_type on /payment' do
-    user = FactoryGirl.create(:user, :balance => 1000)
+    user = FactoryBot.create(:user, :balance => 1000)
 
     # Sign-in
     post '/login', {
@@ -758,9 +758,9 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, :balance => 21)
-    winner = FactoryGirl.create(:user, :balance => 10)
+    admin = FactoryBot.create(:admin)
+    loser = FactoryBot.create(:user, :balance => 21)
+    winner = FactoryBot.create(:user, :balance => 10)
  
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
@@ -876,9 +876,9 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, :balance => 5)
-    winner = FactoryGirl.create(:user, :balance => 500)
+    admin = FactoryBot.create(:admin)
+    loser = FactoryBot.create(:user, :balance => 5)
+    winner = FactoryBot.create(:user, :balance => 500)
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
@@ -1030,9 +1030,9 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, :balance => 5)
-    winner = FactoryGirl.create(:user, :balance => 500)
+    admin = FactoryBot.create(:admin)
+    loser = FactoryBot.create(:user, :balance => 5)
+    winner = FactoryBot.create(:user, :balance => 500)
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
@@ -1136,9 +1136,9 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    bettor_a = FactoryGirl.create(:user, :balance => 21)
-    bettor_b = FactoryGirl.create(:user, :balance => 10)
+    admin = FactoryBot.create(:admin)
+    bettor_a = FactoryBot.create(:user, :balance => 21)
+    bettor_b = FactoryBot.create(:user, :balance => 10)
  
     browser_a = Rack::Test::Session.new(Rack::MockSession.new(app))
     browser_b = Rack::Test::Session.new(Rack::MockSession.new(app))
@@ -1248,9 +1248,9 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    loser = FactoryGirl.create(:user, :balance => 5)
-    winner = FactoryGirl.create(:user,:balance => 500)
+    admin = FactoryBot.create(:admin)
+    loser = FactoryBot.create(:user, :balance => 5)
+    winner = FactoryBot.create(:user,:balance => 500)
 
     loser_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
     winner_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
@@ -1327,7 +1327,7 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
+    admin = FactoryBot.create(:admin)
     
     # User login
     post '/login', {
@@ -1399,8 +1399,8 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    user = FactoryGirl.create(:user, balance: 2525)
+    admin = FactoryBot.create(:admin)
+    user = FactoryBot.create(:user, balance: 2525)
     
     user_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
@@ -1491,8 +1491,8 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    user = FactoryGirl.create(:user, balance: 2525)
+    admin = FactoryBot.create(:admin)
+    user = FactoryBot.create(:user, balance: 2525)
     
     user_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 
@@ -1581,8 +1581,8 @@ describe 'Api App' do
     expect(Bet.count).to eq(0)
 
     # Create users
-    admin = FactoryGirl.create(:admin)
-    user = FactoryGirl.create(:user, balance: 50)
+    admin = FactoryBot.create(:admin)
+    user = FactoryBot.create(:user, balance: 50)
 
     user_browser = Rack::Test::Session.new(Rack::MockSession.new(app))
 

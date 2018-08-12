@@ -1,5 +1,5 @@
 # Saltstorm - Fun-Money Betting on the Web
-# Copyright (c) 2013, 2014 Dustin Leavins
+# Copyright (c) 2013, 2014, 2018 Dustin Leavins
 # See the file 'LICENSE.txt' for copying permission
 require 'securerandom'
 require 'yaml'
@@ -9,12 +9,17 @@ require 'highline/import'
 require 'sequel'
 require './persistence.rb'
 require 'sinatra/asset_pipeline/task.rb'
-require './apps/main.rb'
-
-Sinatra::AssetPipeline::Task.define! MainApp
 
 if ENV['RACK_ENV'].nil?
   ENV['RACK_ENV'] = 'development'
+end
+
+# HACK - requiring ./apps/main.rb requires models.rb;
+# this causes initial_setup to crash on first load
+if Persistence.has_initialized_persistence?
+    require 'sinatra/asset_pipeline/task.rb'
+    require './apps/main.rb'
+    Sinatra::AssetPipeline::Task.define! MainApp
 end
 
 task :default do
@@ -23,6 +28,7 @@ end
 
 task :generate_secret_token do
   if (!File.exist?('config/secret_token.yml'))
+    say 'Creating secret token file'
     token = SecureRandom.base64(30)
     File.open('config/secret_token.yml', 'w') do |f|
       f.write("token: #{token}\n")
@@ -40,7 +46,14 @@ task :reset_match_data do
   Persistence.init_persistence()
 end
 
-task :initial_setup => [:generate_secret_token] do
+task :initial_setup do
+  if Persistence.has_initialized_persistence?
+    say('Initial setup has already been run.')
+    next
+  end
+
+  Rake::Task['generate_secret_token'].invoke
+
   if (!File.exist?('config/site.yml'))
     say("Creating 'config/site.yml'")
     FileUtils.cp('config/site.yml.example', 'config/site.yml')

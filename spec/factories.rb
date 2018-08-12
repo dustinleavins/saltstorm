@@ -2,7 +2,7 @@ require 'set'
 require 'securerandom'
 require './models.rb'
 
-FactoryGirl.define do
+FactoryBot.define do
   to_create { |i| i.save }
   sequence :display_name do |n|
     "User-#{n}"
@@ -31,7 +31,7 @@ FactoryGirl.define do
   end
 
   factory :payment, class:Models::Payment do
-    association :user, :factory => :user, :amount => 100
+    association :user, :factory => :user, :balance => 100
     payment_type 'rankup'
     amount 10
     status 'pending'

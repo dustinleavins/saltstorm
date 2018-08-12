@@ -42,5 +42,5 @@ I built Saltstorm with Sinatra (with sinatra-flash and sinatra-asset-pipeline) a
 
 The front-end uses Sass, jQuery, AngularJS, and  Bootstrap 3.0. Javascript & CSS are pulled from CDNs provided by Google and [Bootstrap CDN](http://bootstrapcdn.com).
 
-Tests use rspec, rack-test, factory\_girl, and simplecov.
+Tests use rspec, rack-test, factory\_bot, and simplecov.
 

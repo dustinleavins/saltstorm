@@ -1,5 +1,5 @@
 # Saltstorm - Fun-Money Betting on the Web
-# Copyright (C) 2013, 2014  Dustin Leavins
+# Copyright (C) 2013, 2014, 2018  Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
 
@@ -10,7 +10,9 @@ require 'pstore'
 
 # Module containing 'static' classes for non-database persistence.
 module Persistence
-  
+  # File whose existence marks initialization
+  INIT_MARKER_FILE = "tmp/#{ENV['RACK_ENV']}/match_data.pstore"
+ 
   # Initializes non-database persistence.
   # This initialization only needs to occur once as part of initial
   # app setup, so users of the Persistence module probably do not
@@ -48,6 +50,14 @@ module Persistence
         }
       })
     end
+
+    FileUtils.touch INIT_MARKER_FILE
+  end
+
+  # Has non-database persistence been initialized?
+  def self.has_initialized_persistence?
+    return File.exist? INIT_MARKER_FILE
+
   end
 
   # Persists current match status.
