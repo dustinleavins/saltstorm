@@ -8,18 +8,9 @@ require 'bundler/setup'
 require 'highline/import'
 require 'sequel'
 require './persistence.rb'
-require 'sinatra/asset_pipeline/task.rb'
 
 if ENV['RACK_ENV'].nil?
   ENV['RACK_ENV'] = 'development'
-end
-
-# HACK - requiring ./apps/main.rb requires models.rb;
-# this causes initial_setup to crash on first load
-if Persistence.has_initialized_persistence?
-    require 'sinatra/asset_pipeline/task.rb'
-    require './apps/main.rb'
-    Sinatra::AssetPipeline::Task.define! MainApp
 end
 
 task :default do

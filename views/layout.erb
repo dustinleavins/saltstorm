@@ -1,6 +1,6 @@
 <%
 # Saltstorm - Fun-Money Betting on the Web
-# Copyright (C) 2013, 2014 Dustin Leavins
+# Copyright (C) 2013, 2014, 2021 Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
 %>
@@ -11,19 +11,13 @@
     <meta charset="utf-8">
     <title><%= titleize() %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="<%= stylesheet_path 'app' %>">
-
-    <% if settings.production? %>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script>
-    <% else %>
-    <script src="<%= javascript_path 'jquery' %>"></script>
+    <link rel="stylesheet" href="<%= asset_path 'css/bootstrap.css' %>">
+    <link rel="stylesheet" href="<%= asset_path 'css/app.css' %>">
+    <script src='<%= javascript_path 'jquery' %>'></script>
     <script src="<%= javascript_path 'angular' %>"></script>
-    <% end %>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="<%= javascript_path 'js/bootstrap.min.js'%>"></script>
     <script src="<%= javascript_path 'angular-route' %>"></script>
-    <script src="<%= javascript_path 'app' %>"></script>
+    <script src="<%= javascript_path 'js/app' %>"></script>
   </head>
   <body>
     <div class='container'>
@@ -31,7 +25,7 @@
       <footer>
         <div class='row'>
           <div class='col-sm-6'>
-            <p>Powered by Saltstorm &copy; 2013, 2014 Dustin Leavins</p>
+            <p>Powered by Saltstorm &copy; 2013, 2014, 2021 Dustin Leavins</p>
             <p>Uses <a href='http://glyphicons.com/'>Glyphicons</a></p>
           </div>
           <div class='col-sm-6 text-right'>

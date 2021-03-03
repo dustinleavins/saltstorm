@@ -2,8 +2,6 @@ source "https://rubygems.org"
 gem "rake"
 gem "sinatra"
 gem "sinatra-flash"
-gem "sinatra-asset-pipeline", :require => false
-gem "sass"
 gem "highline"
 gem "sequel"
 gem "mail"
@@ -33,7 +31,7 @@ end
 #  gem "jdbc-mysql", :require => false, :platforms => :jruby
 #end
 
-group :thin do
-  gem "thin", :require => false, :platforms => :ruby
+group :puma do
+  gem "puma", :require => false, :platforms => :ruby
 end
 

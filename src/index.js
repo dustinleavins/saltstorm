@@ -1,30 +1,33 @@
 /* Saltstorm - 'Fun-Money' Betting on the Web
- * Copyright (C) 2013, 2014  Dustin Leavins
+ * Copyright (C) 2013, 2014, 2021  Dustin Leavins
  *
  * Full license can be found in 'LICENSE.txt'
  */
 
+import 'angular';
+import 'angular-route';
+import 'bootstrap/dist/css/bootstrap.css';
+import './app.scss';
+
 var saltstorm = angular.module('saltstorm', ['ngRoute']);
 
-saltstorm.factory('authService', ['$http', '$q', function($http, $q) {
+saltstorm.factory('authService', ['$http', function($http) {
     var service = {
         isRegistered: false,
         login: function(email, password) {
             var instance = this;
 
-            return $q(function(resolve, reject) {
-                $http.post('/api/login', {
-                    email: email,
-                    password: password
-                }).success(function(data) {
-                    // TODO: Set api key
-                    this.isRegistered = true;
-                    resolve(data);
-                }).error(function(data) {
-                    // TODO: Unset API key
-                    this.isRegistered = false;
-                    reject();
-                });
+            return $http.post('/api/login', {
+                email: email,
+                password: password
+            }).then(function(response) {
+                // TODO: Set api key
+                instance.isRegistered = true;
+                return response.data;
+            }, function(response) {
+                // TODO: Unset api key
+                instance.isRegistered = false;
+                throw response.data;
             });
         }
     };
@@ -32,7 +35,7 @@ saltstorm.factory('authService', ['$http', '$q', function($http, $q) {
     return service;
 }]);
 
-saltstorm.config(['$routeProvider', function($routeProvider) {
+saltstorm.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider
     .when('/', {
         templateUrl: '/angular/index.html',
@@ -80,6 +83,8 @@ saltstorm.config(['$routeProvider', function($routeProvider) {
     }).otherwise({
         redirectTo: '/'
     });
+
+    $locationProvider.hashPrefix("");
 }]);
 
 saltstorm.directive('betInfo', function() {
@@ -112,11 +117,10 @@ saltstorm.controller('RegisterController', ['$scope', '$http', '$location', func
           password: $scope.password,
           confirmPassword: $scope.confirmPassword,
           displayName: $scope.displayName
-      }) .success(function() {
-           $scope.errorMsg = null;
-          $location.url('/main');
-      }).error(function(data) {
-          $scope.errorMsg = data.error;
+      }).then(function () {
+        $scope.errorMsg = null;
+      }, function(response) {
+          $scope.errorMsg = response.data.error;
       });
     };
 }]);
@@ -127,8 +131,8 @@ saltstorm.controller('LoginController', ['$scope', '$location', 'authService', f
         authService.login($scope.email, $scope.password)
         .then(function(data) {
             $scope.errorMsg = null;
-
             var destination;
+
 
             if (data.permissions.indexOf('admin') === -1 ) {
                 destination = '/main';
@@ -149,10 +153,9 @@ saltstorm.controller('LoginController', ['$scope', '$location', 'authService', f
 
 saltstorm.controller('LogoutController', ['$scope', '$http', '$location', function($scope, $http, $location) {
     $http.post('/api/logout', {})
-    .success(function(data, status, headers, config) {
+    .then(function() {
         $location.url('/');
-    })
-    .error(function(data, status, headers, config) {
+    }, function() {
         alert('Failure - not logged-out');
     });
 }]);
@@ -161,12 +164,12 @@ saltstorm.controller('RequestPasswordResetController', ['$scope', '$http', '$loc
     $scope.requestReset = function() {
         $http.post('/api/request_password_reset', {
             email: $scope.email
-        }).success(function() {
+        }).then(function() {
             alert('Password reset request has been sent to ' + $scope.email);
             $scope.errorMsg = null;
             $location.url('/');
-        }).error(function(data) {
-            $scope.errorMsg = data.error;
+        }, function(response) {
+            $scope.errorMsg = response.data.error;
             alert('Failure');
         });
     };
@@ -181,12 +184,11 @@ saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', functi
        $http.post('/api/payment', {
             payment_type: 'rankup',
             amount: $scope.amount
-        })
-        .success(function() {
+        }).then(function () {
             $scope.insufficientFunds = false;
             $window.alert('Gratz on your new rank');
-        })
-        .error(function() {
+        }, function() {
+            // TODO: Ensure that the error indicates insufficient funds.
             $scope.insufficientFunds = true;
         });
     };
@@ -197,19 +199,21 @@ saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', functi
     };
 
     $http.get('/api/account')
-    .success(function(data) {
+    .then(function(response) {
+        const data = response.data;
         $scope.currentRank = data.currentRank;
         $scope.amount = data.amountToNextRank;
         lock.account = true;
-    }).error(function() {
+    }, function() {
         console.error('Error retrieving account info.');
     });
 
     $http.get('/api/site_config')
-    .success(function(data) {
+    .then(function(response) {
+        const data = response.data;
         $scope.maxRank = data.maxRank;
         lock.siteConfig = true;
-    }).error(function() {
+    }, function() {
         console.error('Error retrieving site config.');
     });
 
@@ -218,26 +222,24 @@ saltstorm.controller('PaymentsController', ['$scope', '$http', '$window', functi
     };
 }]);
 
-saltstorm.controller('AdminController', ['$scope', '$http', '$q', '$window', function($scope, $http, $q, $window) {
+saltstorm.controller('AdminController', ['$scope', '$http', '$window', '$timeout', function($scope, $http, $window, $timeout) {
     $http.defaults.cache = false;
     var updateDelay = 5000;
     var stopUpdating = false;
 
     var updateBody = function(delay) {
-        return $q(function(resolve, reject) {
-            $window.setTimeout(function() {
-                $http.get('/api/current_match')
-                .success(function(data, status, headers, config) {
-                    // Do not update info while admin is changing it
-                    if (!stopUpdating) {
-                        $scope.matchData = data;
-                    }
-                    resolve();
-                }).error(function(data) {
-                    reject(data);
-                });
-            }, delay);
-        });
+        return $timeout(function() {
+            $http.get('/api/current_match')
+            .then(function(response) {
+                const data = response.data;
+                //Do not update info while admin is changing it
+                if (!stopUpdating) {
+                    $scope.matchData = data;
+                }
+            }, function(response) {
+                throw response.data;
+            });
+        }, delay);
     };
 
     var updateMatchInfo = function(delay) {
@@ -261,17 +263,17 @@ saltstorm.controller('AdminController', ['$scope', '$http', '$q', '$window', fun
       }
 
       $http.put('/api/current_match', $scope.matchData)
-          .success(function() {
-              $scope.stopEditing();
-              $scope.error = null;
-          }).error(function(data) {
-              if (data) {
-                  $scope.error = data.error;
-              } else {
-                  $window.alert('There was an error while updating match data. Please try again.');
-              }
-          });
-
+      .then(function() {
+          $scope.stopEditing();
+          $scope.error = null;
+      }, function(response) {
+          const data = response.data;
+          if (data) {
+              $scope.error = data.error;
+            } else {
+                $window.alert('There was an error while updating match data. Please try again.');
+            }
+      });
     };
 
     $scope.$on('$routeChangeStart', function() {
@@ -312,7 +314,7 @@ saltstorm.controller('AdminController', ['$scope', '$http', '$q', '$window', fun
     updateMatchInfo(0);
 }]);
 
-saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', function($scope, $window, $q, $http) {
+saltstorm.controller('MainController', ['$scope', '$window', '$http', '$timeout', '$document', function($scope, $window, $http, $timeout, $document) {
     $http.defaults.cache = false;
     $scope.showBettors = false;
     $scope.updateDelay = 5000; // 5 seconds
@@ -320,7 +322,7 @@ saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', func
     $scope.bettingThisRound = false;
     $scope.betUpdateFailed = false;
     $scope.selectedParticipant = 'a';
-    $scope.mobile = $('.main-video').length === 0;
+    $scope.mobile = $document.find('.main-video').length === 0;
     
     $scope.winnerName = function() {
         if (!$scope.match || !$scope.match.winner) {
@@ -366,12 +368,11 @@ saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', func
         $http.post('/api/bet', {
             forParticipant: participantCode,
             amount: $scope.betAmount
-        })
-        .success(function(data, status, headers, config) {
+        }).then(function() {
             $scope.bettingThisRound = participantCode;
             $scope.betUpdateFailed = false;
-        })
-        .error(function(data, status, headers, config) {
+        }, function(response) {
+            const data = response.data;
             $window.console.log(data);
             $scope.betUpdateFailed = true;
         });
@@ -379,22 +380,23 @@ saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', func
 
     $scope.updateAccountData = function() {
         $http.get('/api/account')
-        .success(function(data, status, headers, config) {
-            $scope.account = data;
+        .then(function(response) {
+            $scope.account = response.data;
         });
     };
 
     var stopUpdating = false;
 
     var updateMatchDataBody = function(delay) {
-        var deferred = $q.defer();
-        
         // setInterval would be dangerous to use here because this update
         // can take longer than the delay.
-        // https://developer.mozilla.org/en-US/docs/Web/API/window.setInterval#Dangerous_usage
-        $window.setTimeout(function() {
-            $http.get('/api/current_match')
-            .success(function(data, status, headers, config) {
+        // There was a link to MDN here, but they removed the relevant section
+        // concerning 'dangerous usage' of setInterval.
+        return $timeout(function() {
+            return $http.get('/api/current_match')
+            .then(function(response) {
+                const data = response.data;
+
                 var previous_match_data = $scope.match;
                 $scope.match = data;
 
@@ -423,15 +425,11 @@ saltstorm.controller('MainController', ['$scope', '$window', '$q', '$http', func
                     $scope.betUpdateFailed = false;
 
                 }
-
-                deferred.resolve();
-            })
-            .error(function(data, status, headers, config) {
-                deferred.reject('Error');
+            }, function(response) {
+                const data = response.data;
+                throw response.data;
             });
         }, delay);
-
-        return deferred.promise;
     };
 
     $scope.updateMatchData = function(delay) {
@@ -457,11 +455,11 @@ saltstorm.controller('ManageAccountController', ['$scope', '$http', '$location',
         $http.post('/api/account/password', {
             password: $scope.newPassword,
             confirmPassword: $scope.confirmPassword
-        }).success(function() {
+        }).then(function() {
             $scope.changePasswordErrorMsg = null;
             alert('Successfully changed password.');
-        }).error(function(data) {
-            $scope.changePasswordErrorMsg = data.error;
+        }, function(response) {
+            $scope.changePasswordErrorMsg = response.data.error;
         });
     };
 
@@ -471,11 +469,11 @@ saltstorm.controller('ManageAccountController', ['$scope', '$http', '$location',
             email: $scope.email,
             displayName: $scope.displayName,
             postUrl: $scope.postUrl
-        }).success(function() {
+        }).then(function() {
             $scope.changeInfoErrorMsg = null;
             alert('Successfully changed account info.');
-        }).error(function() {
-            $scope.changeInfoErrorMsg = data.error;
+        }, function() {
+            $scope.changeInfoErrorMsg = response.data.error;
         });
     };
 
@@ -484,7 +482,9 @@ saltstorm.controller('ManageAccountController', ['$scope', '$http', '$location',
     };
 
     $http.get('/api/account')
-    .success(function(data) {
+    .then(function(response) {
+        const data = response.data;
+
         $scope.email = data.email;
         $scope.displayName = data.displayName;
         $scope.postUrl = data.postUrl;
@@ -495,7 +495,7 @@ saltstorm.controller('ManageAccountController', ['$scope', '$http', '$location',
             postUrl: data.postUrl
         };
         lock.account = true;
-    }).error(function() {
+    }, function() {
         $location.url('/');
     });
 

@@ -1,5 +1,5 @@
 # Saltstorm - Fun-Money Betting on the Web
-# Copyright (C) 2013, 2014  Dustin Leavins
+# Copyright (C) 2013, 2014, 2021  Dustin Leavins
 #
 # Full license can be found in 'LICENSE.txt'
 require 'uri'
@@ -8,7 +8,6 @@ require 'json'
 require 'rubygems'
 require 'bundler'
 Bundler.require
-require 'sinatra/asset_pipeline'
 require './apps/helpers.rb'
 require './models.rb'
 require './persistence.rb'
@@ -16,19 +15,16 @@ require './settings.rb'
 include Models
 
 class MainApp < Sinatra::Base
-  app_settings = Settings::site(settings.environment.to_s)
-  
+  app_settings = ::Settings::site(settings.environment.to_s)
+
   configure do
     set :views, 'views/' 
     set :static_cache_control, [:private]
-    set :public_folder, './public/'
+    set :public_folder, './dist/'
 
     enable :sessions
     register Sinatra::Flash
-    set :session_secret, Settings::secret_token
-
-    register Sinatra::AssetPipeline
-
+    set :session_secret, ::Settings::secret_token
     helpers Helpers
   end
 
@@ -43,7 +39,7 @@ class MainApp < Sinatra::Base
   end
 
   get '/' do
-    return erb :index
+    return send_file File.join(settings.public_folder, 'index.html')
   end
 
   # TODO: Remove once /reset_password route gets moved
