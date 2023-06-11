@@ -18,12 +18,16 @@ task :default do
 end
 
 task :generate_secret_token do
-  if (!File.exist?('config/secret_token.yml'))
-    say 'Creating secret token file'
-    token = SecureRandom.base64(30)
-    File.open('config/secret_token.yml', 'w') do |f|
-      f.write("token: #{token}\n")
-    end
+  token_file = 'config/secret_token.yml'
+  if (File.exist?(token_file))
+    say 'Deleting existing secret token file'
+    File.delete(token_file)
+  end
+
+  say 'Creating secret token file'
+  token = SecureRandom.hex(32)
+  File.open(token_file, 'w') do |f|
+    f.write("token: #{token}\n")
   end
 end
 
